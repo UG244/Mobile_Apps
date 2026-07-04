@@ -61,6 +61,13 @@ class CartProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  void clearCart() {
+    _items.clear();
+    _discount = 0;
+    _appliedPromo = null;
+    notifyListeners();
+  }
+
   // Dummy promo support: BLUEMART10 => 10% off subtotal, FLAT50 => 50000 off
   bool applyPromo(String code) {
     final c = code.trim().toUpperCase();

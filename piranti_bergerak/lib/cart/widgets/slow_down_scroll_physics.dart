@@ -8,8 +8,8 @@ class SlowDownScrollPhysics extends ClampingScrollPhysics {
   const SlowDownScrollPhysics({
     this.velocityFactor = 0.6,
     this.dragFactor = 0.7,
-    ScrollPhysics? parent,
-  }) : super(parent: parent);
+    super.parent,
+  });
 
   @override
   SlowDownScrollPhysics applyTo(ScrollPhysics? ancestor) {
@@ -27,7 +27,10 @@ class SlowDownScrollPhysics extends ClampingScrollPhysics {
   }
 
   @override
-  Simulation? createBallisticSimulation(ScrollMetrics position, double velocity) {
+  Simulation? createBallisticSimulation(
+    ScrollMetrics position,
+    double velocity,
+  ) {
     // Reduce the initial fling velocity so inertia scroll is slower
     final reduced = velocity * velocityFactor;
     return super.createBallisticSimulation(position, reduced);
