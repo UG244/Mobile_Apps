@@ -5,11 +5,15 @@ import 'cart/providers/cart_provider.dart';
 import 'cart/screens/cart_screen.dart';
 import 'cart/widgets/no_overscroll_behavior.dart';
 import 'checkout/screens/checkout_screen.dart';
-import 'checkout/screens/order_history_screen.dart';
 import 'checkout/screens/order_success_screen.dart';
+<<<<<<< Updated upstream
 import 'product/providers/favorite_provider.dart';
 import 'product/providers/product_provider.dart';
 import 'product/screens/home_screen.dart';
+=======
+import 'history/screens/order_detail_page.dart';
+import 'history/screens/order_history_page.dart';
+>>>>>>> Stashed changes
 
 void main() {
   runApp(const MyApp());
@@ -56,7 +60,11 @@ class MyApp extends StatelessWidget {
           '/cart': (context) => const CartScreen(),
           '/checkout': (context) => const CheckoutScreen(),
           '/order-success': (context) => const OrderSuccessScreen(),
-          '/orders': (context) => const OrderHistoryScreen(),
+          '/orders': (context) => const OrderHistoryPage(),
+          '/order-detail': (context) {
+            final arg = ModalRoute.of(context)?.settings.arguments;
+            return OrderDetailPage(orderId: arg is int ? arg : 0);
+          },
         },
       ),
     );

@@ -14,6 +14,7 @@ class OrderModel {
     required this.tax,
     required this.grandTotal,
     required this.date,
+    this.status = 'Diproses',
   });
 
   int? id;
@@ -30,6 +31,7 @@ class OrderModel {
   double tax;
   double grandTotal;
   DateTime date;
+  String status;
 
   Map<String, dynamic> toMap() {
     return {
@@ -47,6 +49,7 @@ class OrderModel {
       'tax': tax,
       'grandTotal': grandTotal,
       'date': date.toIso8601String(),
+      'status': status,
     };
   }
 
@@ -66,6 +69,7 @@ class OrderModel {
       tax: (m['tax'] as num).toDouble(),
       grandTotal: (m['grandTotal'] as num).toDouble(),
       date: DateTime.parse(m['date'] as String),
+      status: m['status'] as String? ?? 'Diproses',
     );
   }
 }

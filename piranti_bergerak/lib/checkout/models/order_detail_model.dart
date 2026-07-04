@@ -7,6 +7,7 @@ class OrderDetailModel {
     required this.price,
     required this.quantity,
     required this.total,
+    this.imageUrl = '',
   });
 
   int? id;
@@ -16,6 +17,7 @@ class OrderDetailModel {
   double price;
   int quantity;
   double total;
+  String imageUrl;
 
   Map<String, dynamic> toMap() {
     return {
@@ -26,6 +28,7 @@ class OrderDetailModel {
       'price': price,
       'quantity': quantity,
       'total': total,
+      'imageUrl': imageUrl,
     };
   }
 
@@ -38,6 +41,7 @@ class OrderDetailModel {
       price: (m['price'] as num).toDouble(),
       quantity: m['quantity'] as int,
       total: (m['total'] as num).toDouble(),
+      imageUrl: m['imageUrl'] as String? ?? '',
     );
   }
 }

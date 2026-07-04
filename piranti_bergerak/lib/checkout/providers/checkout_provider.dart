@@ -205,6 +205,7 @@ class CheckoutProvider extends ChangeNotifier {
             price: c.price,
             quantity: c.quantity,
             total: c.subtotal,
+            imageUrl: c.imageUrl,
           ),
         )
         .toList();

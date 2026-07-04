@@ -25,7 +25,7 @@ class OrderDb {
 
     return await openDatabase(
       path,
-      version: 3,
+      version: 4,
       onCreate: _createDB,
       onUpgrade: _upgradeDB,
     );
@@ -47,7 +47,8 @@ class OrderDb {
       discount REAL,
       tax REAL,
       grandTotal REAL,
-      date TEXT
+      date TEXT,
+      status TEXT DEFAULT 'Diproses'
     )
     ''');
 
@@ -59,7 +60,8 @@ class OrderDb {
       name TEXT,
       price REAL,
       quantity INTEGER,
-      total REAL
+      total REAL,
+      imageUrl TEXT DEFAULT ''
     )
     ''');
 
@@ -109,6 +111,14 @@ class OrderDb {
       )
       ''');
     }
+    if (oldVersion < 4) {
+      await db.execute(
+        "ALTER TABLE orders ADD COLUMN status TEXT DEFAULT 'Diproses'",
+      );
+      await db.execute(
+        "ALTER TABLE order_details ADD COLUMN imageUrl TEXT DEFAULT ''",
+      );
+    }
   }
 
   Future<int> insertOrder(
@@ -141,6 +151,28 @@ class OrderDb {
     final db = await instance.database;
     final rows = await db.query('orders', orderBy: 'id DESC');
     return rows.map(OrderModel.fromMap).toList();
+  }
+
+  Future<List<OrderDetailModel>> getOrderDetails(int orderId) async {
+    final db = await instance.database;
+    final rows = await db.query(
+      'order_details',
+      where: 'orderId = ?',
+      whereArgs: [orderId],
+      orderBy: 'id ASC',
+    );
+    return rows.map(OrderDetailModel.fromMap).toList();
+  }
+
+  Future<int> getOrderTotalItems(int orderId) async {
+    final db = await instance.database;
+    final rows = await db.rawQuery(
+      'SELECT SUM(quantity) AS totalItems FROM order_details WHERE orderId = ?',
+      [orderId],
+    );
+    final value = rows.first['totalItems'];
+    if (value == null) return 0;
+    return (value as num).toInt();
   }
 
   Future<int> insertNotification({
