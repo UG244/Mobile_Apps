@@ -1,13 +1,20 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:provider/provider.dart'; // [TAMBAH] State Management
 
-import '../models/product_model.dart';
+// [TAMBAH] Import providers
+import '../../cart/providers/cart_provider.dart';
 import '../providers/favorite_provider.dart';
 import '../providers/product_provider.dart';
-import '../widgets/category_chip_bar.dart';
+// [TAMBAH] Import screen tujuan navigasi
+import '../screens/product_detail_screen.dart';
+// [TAMBAH] Import widget ProductCard
 import '../widgets/product_card.dart';
-import 'product_detail_screen.dart';
 
+/// ProductListScreen — desain UI kamu dipertahankan, logika diinjeksi.
+///
+/// [UBAH] StatelessWidget → StatefulWidget karena:
+///   1. TextEditingController untuk search field
+///   2. Focus management pada TextField
 class ProductListScreen extends StatefulWidget {
   const ProductListScreen({super.key});
 
@@ -16,202 +23,200 @@ class ProductListScreen extends StatefulWidget {
 }
 
 class _ProductListScreenState extends State<ProductListScreen> {
-  final TextEditingController _searchCtrl = TextEditingController();
+  // [TAMBAH] Controller untuk mengelola teks pada search field
+  final TextEditingController _searchController = TextEditingController();
 
   @override
   void dispose() {
-    _searchCtrl.dispose();
+    // [LOGIKA] Buang controller saat screen di-dispose agar tidak memory leak
+    _searchController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    // [TAMBAH] Ambil data dari providers menggunakan context.watch
     final productProvider = context.watch<ProductProvider>();
     final favoriteProvider = context.watch<FavoriteProvider>();
+    final cartProvider = context.watch<CartProvider>(); // [FIJI] CartProvider Fiji
+
+    // [LOGIKA] Produk yang ditampilkan = hasil filter+search dari provider
     final products = productProvider.products;
 
-    return SafeArea(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // ── Header ────────────────────────────────────────────────────
-          _buildHeader(productProvider),
-
-          // ── Category Filter ───────────────────────────────────────────
-          Padding(
-            padding: const EdgeInsets.only(top: 12, bottom: 8),
-            child: CategoryChipBar(
-              categories: productProvider.categories,
-              selectedId: productProvider.selectedCategoryId,
-              onSelected: productProvider.filterByCategory,
-            ),
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.white, // [TETAP]
+        elevation: 0, // [TETAP]
+        title: Container(
+          height: 45, // [TETAP]
+          decoration: BoxDecoration(
+            color: Colors.grey[200], // [TETAP]
+            borderRadius: BorderRadius.circular(10), // [TETAP]
           ),
-
-          // ── Result count ──────────────────────────────────────────────
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
-            child: Text(
-              '${products.length} produk ditemukan',
-              style: const TextStyle(
-                fontSize: 12,
-                color: Color(0xFF9E9E9E),
-              ),
-            ),
-          ),
-
-          // ── Product Grid ──────────────────────────────────────────────
-          Expanded(
-            child: productProvider.isLoading
-                ? const Center(child: CircularProgressIndicator())
-                : products.isEmpty
-                    ? _buildEmpty(productProvider)
-                    : RefreshIndicator(
-                        onRefresh: productProvider.refresh,
-                        child: GridView.builder(
-                          physics: const BouncingScrollPhysics(),
-                          padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
-                          gridDelegate:
-                              const SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 2,
-                            crossAxisSpacing: 12,
-                            mainAxisSpacing: 12,
-                            childAspectRatio: 0.68,
-                          ),
-                          itemCount: products.length,
-                          itemBuilder: (context, index) {
-                            final product = products[index];
-                            return ProductCard(
-                              product: product,
-                              isFavorite:
-                                  favoriteProvider.isFavorite(product.id),
-                              onTap: () => _openDetail(context, product),
-                              onFavoriteTap: () =>
-                                  favoriteProvider.toggleFavorite(product),
-                            );
-                          },
-                        ),
-                      ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildHeader(ProductProvider provider) {
-    return Container(
-      color: Colors.white,
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            'Semua Produk',
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.w800,
-              color: Color(0xFF1A1A2E),
-            ),
-          ),
-          const SizedBox(height: 12),
-
-          // Search bar
-          TextField(
-            controller: _searchCtrl,
-            onChanged: provider.search,
-            style: const TextStyle(fontSize: 14),
+          child: TextField(
+            controller: _searchController, // [TAMBAH] hubungkan controller
+            // [TAMBAH] Event saat teks berubah → panggil search di provider
+            onChanged: (query) {
+              productProvider.search(query); // [LOGIKA] filter produk realtime
+            },
             decoration: InputDecoration(
-              hintText: 'Cari produk...',
-              hintStyle: const TextStyle(
-                color: Color(0xFFBDBDBD),
-                fontSize: 14,
-              ),
-              prefixIcon: const Icon(
-                Icons.search_rounded,
-                color: Color(0xFF90A4AE),
-                size: 20,
-              ),
-              suffixIcon: _searchCtrl.text.isNotEmpty
+              hintText: 'Cari produk...', // [TETAP]
+              prefixIcon: const Icon(Icons.search), // [TETAP]
+              border: InputBorder.none, // [TETAP]
+              contentPadding:
+                  const EdgeInsets.symmetric(vertical: 10), // [TETAP]
+              // [TAMBAH] Tombol X untuk membersihkan search
+              suffixIcon: _searchController.text.isNotEmpty
                   ? IconButton(
-                      icon: const Icon(Icons.close_rounded, size: 18),
-                      color: const Color(0xFF90A4AE),
+                      icon: const Icon(Icons.close, size: 18),
                       onPressed: () {
-                        _searchCtrl.clear();
-                        provider.clearSearch();
+                        _searchController.clear(); // [LOGIKA] bersihkan field
+                        productProvider
+                            .clearSearch(); // [LOGIKA] reset filter provider
+                        setState(() {}); // [LOGIKA] rebuild untuk hilangkan icon X
                       },
                     )
                   : null,
-              filled: true,
-              fillColor: const Color(0xFFF5F7FA),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(14),
-                borderSide: BorderSide.none,
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(14),
-                borderSide: const BorderSide(
-                  color: Color(0xFF1565C0),
-                  width: 1.5,
-                ),
-              ),
-              contentPadding: const EdgeInsets.symmetric(vertical: 12),
             ),
+          ),
+        ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.filter_list,
+                color: Colors.black), // [TETAP]
+            // [UBAH] onPressed dulu kosong → kini tampilkan bottom sheet filter
+            onPressed: () => _showFilterSheet(context, productProvider),
+          ),
+        ],
+      ),
+      body: productProvider.isLoading
+          // [TAMBAH] Loading indicator saat data dimuat
+          ? const Center(child: CircularProgressIndicator())
+          : products.isEmpty
+              // [TAMBAH] Tampilan kosong jika tidak ada hasil pencarian
+              ? _buildEmptyState(productProvider)
+              : GridView.builder(
+                  padding: const EdgeInsets.all(16), // [TETAP]
+                  gridDelegate:
+                      const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2, // [TETAP]
+                    childAspectRatio: 0.72, // [UBAH SEDIKIT] 0.7 → 0.72
+                    mainAxisSpacing: 12, // [TETAP]
+                    crossAxisSpacing: 12, // [TETAP]
+                  ),
+                  // [UBAH] itemCount dari hardcode 6 → jumlah hasil filter
+                  itemCount: products.length,
+                  itemBuilder: (context, index) {
+                    final product = products[index]; // [TAMBAH] ambil produk
+
+                    return ProductCard(
+                      product: product, // [UBAH] dari static String → ProductModel
+                      // [LOGIKA] Cek favorit dari FavoriteProvider
+                      isFavorite: favoriteProvider.isFavorite(product.id),
+                      // [TAMBAH] Navigasi ke ProductDetailScreen saat card di-tap
+                      onTap: () => Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) =>
+                              ProductDetailScreen(product: product),
+                        ),
+                      ),
+                      // [FIJI INTEGRATION] Toggle favorit via FavoriteProvider
+                      onFavoriteTap: () =>
+                          favoriteProvider.toggleFavorite(product),
+                      // [FIJI INTEGRATION] Tambah ke keranjang via CartProvider Fiji
+                      onAddToCart: () {
+                        // [FIJI] Panggil addItem() milik CartProvider Fiji
+                        cartProvider.addItem(product.toCartItem());
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                                '${product.name} ditambahkan ke keranjang'),
+                            duration: const Duration(seconds: 1),
+                            behavior: SnackBarBehavior.floating,
+                            margin: const EdgeInsets.all(12),
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10)),
+                          ),
+                        );
+                      },
+                    );
+                  },
+                ),
+    );
+  }
+
+  // ── [TAMBAH] Tampilan saat tidak ada produk ditemukan ─────────────────────
+  Widget _buildEmptyState(ProductProvider provider) {
+    return Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.search_off, size: 72, color: Colors.grey.shade300),
+          const SizedBox(height: 16),
+          Text('Produk tidak ditemukan',
+              style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.grey.shade500,
+                  fontWeight: FontWeight.w600)),
+          const SizedBox(height: 8),
+          TextButton(
+            onPressed: () {
+              // [LOGIKA] Reset semua filter & search
+              _searchController.clear();
+              provider.clearSearch();
+              provider.filterByCategory(null);
+            },
+            child: const Text('Reset pencarian'),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildEmpty(ProductProvider provider) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(32),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              Icons.search_off_rounded,
-              size: 72,
-              color: Colors.grey.shade300,
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'Produk tidak ditemukan',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w700,
-                color: Colors.grey.shade500,
+  // ── [TAMBAH] Bottom Sheet Filter Kategori ─────────────────────────────────
+  void _showFilterSheet(BuildContext context, ProductProvider provider) {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(16))),
+      builder: (_) {
+        return Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text('Filter Kategori',
+                  style: TextStyle(
+                      fontSize: 16, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 12),
+              // [LOGIKA] Tombol "Semua" untuk reset filter — ganti ListTile checkmark
+              ListTile(
+                title: const Text('Semua Produk'),
+                trailing: provider.selectedCategoryId == null
+                    ? const Icon(Icons.check, color: Color(0xFF0A5EB0))
+                    : null,
+                onTap: () {
+                  provider.filterByCategory(null); // [LOGIKA] reset filter
+                  Navigator.pop(context);
+                },
               ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Coba kata kunci lain atau\nhapus filter kategori',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 13,
-                color: Colors.grey.shade400,
-              ),
-            ),
-            const SizedBox(height: 20),
-            TextButton.icon(
-              onPressed: () {
-                _searchCtrl.clear();
-                provider.clearSearch();
-                provider.filterByCategory(null);
-              },
-              icon: const Icon(Icons.refresh_rounded),
-              label: const Text('Reset Filter'),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
+              // [LOGIKA] Tampilkan pilihan per kategori dari ProductProvider
+              ...provider.categories.map((cat) => ListTile(
+                    title: Text(cat.name),
+                    trailing: provider.selectedCategoryId == cat.id
+                        ? const Icon(Icons.check, color: Color(0xFF0A5EB0))
+                        : null,
+                    onTap: () {
+                      provider.filterByCategory(cat.id); // [LOGIKA] filter
+                      Navigator.pop(context);
+                    },
+                  )),
 
-  void _openDetail(BuildContext context, ProductModel product) {
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (_) => ProductDetailScreen(product: product),
-      ),
+            ],
+          ),
+        );
+      },
     );
   }
 }
