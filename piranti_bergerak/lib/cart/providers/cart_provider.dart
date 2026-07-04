@@ -32,6 +32,23 @@ class CartProvider extends ChangeNotifier {
 
   String? get appliedPromo => _appliedPromo;
 
+  // ── [INTEGRASI MODUL PRODUCT] ─────────────────────────────────────────────
+  // Method ini ditambahkan untuk mendukung fitur "Add to Cart" dari halaman
+  // Product Detail (lib/product/screens/product_detail_screen.dart).
+  // Jika produk sudah ada di keranjang, quantity-nya akan bertambah.
+  // ─────────────────────────────────────────────────────────────────────────
+  void addItem(CartItemModel item) {
+    final index = _items.indexWhere((existing) => existing.id == item.id);
+    if (index >= 0) {
+      // Produk sudah ada → tambah kuantitas
+      _items[index].quantity += item.quantity;
+    } else {
+      // Produk baru → tambahkan ke keranjang
+      _items.add(item);
+    }
+    notifyListeners();
+  }
+
   void increaseQuantity(String id) {
     final index = _items.indexWhere((item) => item.id == id);
     if (index < 0) return;
