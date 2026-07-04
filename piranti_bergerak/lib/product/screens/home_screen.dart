@@ -9,6 +9,7 @@ import '../providers/product_provider.dart';
 import '../screens/product_detail_screen.dart';
 import '../screens/product_list_screen.dart';
 import '../screens/favorite_screen.dart';
+import '../widgets/cart_notification_overlay.dart';
 import '../widgets/product_card.dart';
 
 /// ProductHomeScreen — Shell navigasi utama aplikasi.
@@ -88,20 +89,22 @@ class _ProductHomeScreenState extends State<ProductHomeScreen> {
               title: const Text(
                 'ShopEase',
                 style: TextStyle(
-                    color: Color(0xFF0A5EB0), fontWeight: FontWeight.bold),
+                  color: Color(0xFF0A5EB0),
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               actions: [
                 IconButton(
-                    icon: const Icon(Icons.notifications_none),
-                    onPressed: () {}),
+                  icon: const Icon(Icons.notifications_none),
+                  onPressed: () {},
+                ),
                 // [FIJI INTEGRATION] Cart icon + badge → CartScreen Fiji
                 Stack(
                   clipBehavior: Clip.none,
                   children: [
                     IconButton(
                       icon: const Icon(Icons.shopping_bag_outlined),
-                      onPressed: () =>
-                          Navigator.of(context).pushNamed('/cart'),
+                      onPressed: () => Navigator.of(context).pushNamed('/cart'),
                     ),
                     if (cartProvider.totalItems > 0)
                       Positioned(
@@ -111,14 +114,17 @@ class _ProductHomeScreenState extends State<ProductHomeScreen> {
                           width: 16,
                           height: 16,
                           decoration: const BoxDecoration(
-                              color: Colors.red, shape: BoxShape.circle),
+                            color: Colors.red,
+                            shape: BoxShape.circle,
+                          ),
                           child: Center(
                             child: Text(
                               '${cartProvider.totalItems}',
                               style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 9,
-                                  fontWeight: FontWeight.bold),
+                                color: Colors.white,
+                                fontSize: 9,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                           ),
                         ),
@@ -130,7 +136,6 @@ class _ProductHomeScreenState extends State<ProductHomeScreen> {
               elevation: 0,
             )
           : null, // tab lain handle AppBar sendiri
-
       // ── IndexedStack: render semua tab, tampilkan sesuai _navIndex ────────
       body: IndexedStack(
         index: _navIndex,
@@ -171,7 +176,9 @@ class _ProductHomeScreenState extends State<ProductHomeScreen> {
           BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
           BottomNavigationBarItem(icon: Icon(Icons.search), label: 'Search'),
           BottomNavigationBarItem(
-              icon: Icon(Icons.favorite), label: 'Favorite'),
+            icon: Icon(Icons.favorite),
+            label: 'Favorite',
+          ),
           BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
         ],
       ),
@@ -229,16 +236,22 @@ class _HomeTabBody extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Text(banner.title,
-                            style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold)),
+                        Text(
+                          banner.title,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                         const SizedBox(height: 6),
-                        Text(banner.subtitle,
-                            style: TextStyle(
-                                color: Colors.white.withAlpha(210),
-                                fontSize: 13)),
+                        Text(
+                          banner.subtitle,
+                          style: TextStyle(
+                            color: Colors.white.withAlpha(210),
+                            fontSize: 13,
+                          ),
+                        ),
                       ],
                     ),
                   ),
@@ -271,8 +284,10 @@ class _HomeTabBody extends StatelessWidget {
           // ── Kategori ───────────────────────────────────────────────────
           const Padding(
             padding: EdgeInsets.symmetric(horizontal: 16),
-            child: Text('Kategori',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            child: Text(
+              'Kategori',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
           ),
           const SizedBox(height: 12),
           SizedBox(
@@ -294,9 +309,10 @@ class _HomeTabBody extends StatelessWidget {
           // ── Rekomendasi Produk ─────────────────────────────────────────
           const Padding(
             padding: EdgeInsets.all(16),
-            child: Text('Rekomendasi',
-                style:
-                    TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            child: Text(
+              'Rekomendasi',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
           ),
 
           if (productProvider.isLoading)
@@ -306,10 +322,9 @@ class _HomeTabBody extends StatelessWidget {
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
               padding: const EdgeInsets.symmetric(horizontal: 16),
-              gridDelegate:
-                  const SliverGridDelegateWithFixedCrossAxisCount(
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 2,
-                childAspectRatio: 0.72,
+                mainAxisExtent: 292,
                 mainAxisSpacing: 12,
                 crossAxisSpacing: 12,
               ),
@@ -323,26 +338,19 @@ class _HomeTabBody extends StatelessWidget {
                   // [NAVIGASI] Tap card → ProductDetailScreen (push, bisa back)
                   onTap: () => Navigator.of(context).push(
                     MaterialPageRoute(
-                      builder: (_) =>
-                          ProductDetailScreen(product: product),
+                      builder: (_) => ProductDetailScreen(product: product),
                     ),
                   ),
                   // [FIJI INTEGRATION] Toggle favorit
-                  onFavoriteTap: () =>
-                      favoriteProvider.toggleFavorite(product),
+                  onFavoriteTap: () => favoriteProvider.toggleFavorite(product),
                   // [FIJI INTEGRATION] Tambah ke CartProvider Fiji
                   onAddToCart: () {
                     cartProvider.addItem(product.toCartItem());
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(
-                            '${product.name} ditambahkan ke keranjang'),
-                        duration: const Duration(seconds: 1),
-                        behavior: SnackBarBehavior.floating,
-                        margin: const EdgeInsets.all(12),
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10)),
-                      ),
+                    CartNotificationOverlay.show(
+                      context,
+                      message: '${product.name} ditambahkan ke keranjang',
+                      onViewCart: () =>
+                          Navigator.of(context).pushNamed('/cart'),
                     );
                   },
                 );
@@ -367,9 +375,13 @@ class _ProfileTab extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Profil',
-            style: TextStyle(
-                color: Color(0xFF0A5EB0), fontWeight: FontWeight.bold)),
+        title: const Text(
+          'Profil',
+          style: TextStyle(
+            color: Color(0xFF0A5EB0),
+            fontWeight: FontWeight.bold,
+          ),
+        ),
         backgroundColor: Colors.white,
         elevation: 0,
       ),
@@ -383,25 +395,32 @@ class _ProfileTab extends StatelessWidget {
               child: Icon(Icons.person, size: 48, color: Color(0xFF0A5EB0)),
             ),
             const SizedBox(height: 16),
-            const Text('Pengguna ShopEase',
-                style:
-                    TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            const Text(
+              'Pengguna ShopEase',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
             const SizedBox(height: 8),
-            const Text('user@shopease.com',
-                style: TextStyle(color: Colors.grey)),
+            const Text(
+              'user@shopease.com',
+              style: TextStyle(color: Colors.grey),
+            ),
             const SizedBox(height: 32),
             // [FIJI INTEGRATION] Shortcut ke Riwayat Pesanan milik Fiji
             ListTile(
-              leading: const Icon(Icons.receipt_long_outlined,
-                  color: Color(0xFF0A5EB0)),
+              leading: const Icon(
+                Icons.receipt_long_outlined,
+                color: Color(0xFF0A5EB0),
+              ),
               title: const Text('Riwayat Pesanan'),
               trailing: const Icon(Icons.chevron_right),
               onTap: () => Navigator.of(context).pushNamed('/orders'),
             ),
             // [FIJI INTEGRATION] Shortcut ke Cart milik Fiji
             ListTile(
-              leading: const Icon(Icons.shopping_bag_outlined,
-                  color: Color(0xFF0A5EB0)),
+              leading: const Icon(
+                Icons.shopping_bag_outlined,
+                color: Color(0xFF0A5EB0),
+              ),
               title: const Text('Keranjang Saya'),
               trailing: const Icon(Icons.chevron_right),
               onTap: () => Navigator.of(context).pushNamed('/cart'),
@@ -422,11 +441,7 @@ class _CategoryItem extends StatelessWidget {
   final IconData icon;
   final VoidCallback? onTap;
 
-  const _CategoryItem({
-    required this.label,
-    required this.icon,
-    this.onTap,
-  });
+  const _CategoryItem({required this.label, required this.icon, this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -455,8 +470,11 @@ class _CategoryItem extends StatelessWidget {
 // ─────────────────────────────────────────────────────────────────────────────
 
 class _BannerData {
-  const _BannerData(
-      {required this.title, required this.subtitle, required this.colors});
+  const _BannerData({
+    required this.title,
+    required this.subtitle,
+    required this.colors,
+  });
   final String title;
   final String subtitle;
   final List<Color> colors;

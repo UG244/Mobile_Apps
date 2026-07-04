@@ -6,6 +6,7 @@ import '../../cart/providers/cart_provider.dart';
 import '../../cart/utils/format_utils.dart';
 import '../models/product_model.dart';
 import '../providers/favorite_provider.dart';
+import '../widgets/cart_notification_overlay.dart';
 
 /// ProductDetailScreen — desain UI kamu dipertahankan, logika diinjeksi.
 ///
@@ -66,23 +67,10 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     context.read<CartProvider>().addItem(cartItem);
 
     // [LOGIKA] Tampilkan konfirmasi berhasil ditambahkan
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        behavior: SnackBarBehavior.floating,
-        margin: const EdgeInsets.all(16),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        backgroundColor: const Color(0xFF0A5EB0),
-        content: Text(
-          '${product.name} (x$_quantity) ditambahkan ke keranjang',
-          style: const TextStyle(color: Colors.white),
-        ),
-        action: SnackBarAction(
-          label: 'Lihat Cart',
-          textColor: Colors.white70,
-          // [FIJI INTEGRATION] Navigasi ke CartScreen milik Fiji
-          onPressed: () => Navigator.of(context).pushNamed('/cart'),
-        ),
-      ),
+    CartNotificationOverlay.show(
+      context,
+      message: '${product.name} (x$_quantity) ditambahkan ke keranjang',
+      onViewCart: () => Navigator.of(context).pushNamed('/cart'),
     );
   }
 

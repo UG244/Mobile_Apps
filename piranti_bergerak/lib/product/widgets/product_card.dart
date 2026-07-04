@@ -166,39 +166,44 @@ class ProductCard extends StatelessWidget {
                   // [LOGIKA] Harga utama — format angka dari double
                   Text(
                     'Rp ${formatNumber(product.price)}', // [UBAH] dari static String price
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
                       color: Color(0xFF0A5EB0), // [TETAP] warna biru sama
                       fontWeight: FontWeight.bold,
                       fontSize: 16,
                     ),
                   ),
-
-                  // ── Tombol "+" Add to Cart (TAMBAH) ──────────────────
-                  // [TAMBAH] Tombol cepat tambah ke keranjang dari grid
-                  if (onAddToCart != null)
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: GestureDetector(
-                        // [FIJI INTEGRATION] Panggil CartProvider.addItem()
-                        onTap: onAddToCart,
-                        child: Container(
-                          width: 30,
-                          height: 30,
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF0A5EB0),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: const Icon(
-                            Icons.add,
-                            color: Colors.white,
-                            size: 18,
-                          ),
-                        ),
-                      ),
-                    ),
                 ],
               ),
             ),
+            const Spacer(),
+            // ── Tombol "+" Add to Cart (TAMBAH) ──────────────────
+            // [TAMBAH] Tombol cepat tambah ke keranjang dari grid
+            if (onAddToCart != null)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(8, 0, 8, 8),
+                child: Align(
+                  alignment: Alignment.centerRight,
+                  child: GestureDetector(
+                    // [FIJI INTEGRATION] Panggil CartProvider.addItem()
+                    onTap: onAddToCart,
+                    child: Container(
+                      width: 30,
+                      height: 30,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF0A5EB0),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: const Icon(
+                        Icons.add,
+                        color: Colors.white,
+                        size: 18,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
           ],
         ),
       ),

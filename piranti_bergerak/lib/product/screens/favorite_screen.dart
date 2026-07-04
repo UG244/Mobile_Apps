@@ -109,7 +109,7 @@ class _FavoriteGrid extends StatelessWidget {
         crossAxisCount: 2,
         crossAxisSpacing: 12,
         mainAxisSpacing: 12,
-        childAspectRatio: 0.68,
+        mainAxisExtent: 292,
       ),
       itemCount: products.length,
       itemBuilder: (context, index) {
@@ -160,9 +160,7 @@ class _FavoriteGrid extends StatelessWidget {
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  content: Text(
-                    '${product.name} dihapus dari favorit',
-                  ),
+                  content: Text('${product.name} dihapus dari favorit'),
                   duration: const Duration(seconds: 2),
                 ),
               );
