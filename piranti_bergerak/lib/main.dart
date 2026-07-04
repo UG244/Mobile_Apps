@@ -7,6 +7,9 @@ import 'cart/widgets/no_overscroll_behavior.dart';
 import 'checkout/screens/checkout_screen.dart';
 import 'checkout/screens/order_history_screen.dart';
 import 'checkout/screens/order_success_screen.dart';
+import 'product/providers/favorite_provider.dart';
+import 'product/providers/product_provider.dart';
+import 'product/screens/home_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -17,10 +20,17 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (_) => CartProvider(),
+    return MultiProvider(
+      providers: [
+        // Provider milik Fiji (Cart & Checkout)
+        ChangeNotifierProvider(create: (_) => CartProvider()),
+
+        // Provider modul Product & Shopping (kita)
+        ChangeNotifierProvider(create: (_) => ProductProvider()),
+        ChangeNotifierProvider(create: (_) => FavoriteProvider()),
+      ],
       child: MaterialApp(
-        title: 'Piranti Bergerak',
+        title: 'BlueMart Retail',
         debugShowCheckedModeBanner: false,
         scrollBehavior: const NoOverscrollBehavior(),
         theme: ThemeData(
@@ -40,51 +50,14 @@ class MyApp extends StatelessWidget {
             ),
           ),
         ),
-        home: const HomeScreen(),
+        // Halaman utama sekarang adalah ProductHomeScreen
+        home: const ProductHomeScreen(),
         routes: {
           '/cart': (context) => const CartScreen(),
           '/checkout': (context) => const CheckoutScreen(),
           '/order-success': (context) => const OrderSuccessScreen(),
           '/orders': (context) => const OrderHistoryScreen(),
         },
-      ),
-    );
-  }
-}
-
-class HomeScreen extends StatelessWidget {
-  const HomeScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('BlueMart Retail'),
-        backgroundColor: const Color(0xFF1565C0),
-        foregroundColor: Colors.white,
-      ),
-      body: Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Text(
-              'Halaman Home',
-              style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700),
-            ),
-            const SizedBox(height: 16),
-            FilledButton.icon(
-              onPressed: () => Navigator.of(context).pushNamed('/cart'),
-              icon: const Icon(Icons.shopping_cart_outlined),
-              label: const Text('Lihat Keranjang'),
-            ),
-            const SizedBox(height: 12),
-            FilledButton.icon(
-              onPressed: () => Navigator.of(context).pushNamed('/checkout'),
-              icon: const Icon(Icons.payment_outlined),
-              label: const Text('Checkout Sekarang'),
-            ),
-          ],
-        ),
       ),
     );
   }
