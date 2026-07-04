@@ -6,14 +6,11 @@ import 'cart/screens/cart_screen.dart';
 import 'cart/widgets/no_overscroll_behavior.dart';
 import 'checkout/screens/checkout_screen.dart';
 import 'checkout/screens/order_success_screen.dart';
-<<<<<<< Updated upstream
+import 'history/screens/order_detail_page.dart';
+import 'history/screens/order_history_page.dart';
 import 'product/providers/favorite_provider.dart';
 import 'product/providers/product_provider.dart';
 import 'product/screens/home_screen.dart';
-=======
-import 'history/screens/order_detail_page.dart';
-import 'history/screens/order_history_page.dart';
->>>>>>> Stashed changes
 
 void main() {
   runApp(const MyApp());

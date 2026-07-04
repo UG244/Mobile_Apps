@@ -98,7 +98,7 @@ class _CategoryChip extends StatelessWidget {
           boxShadow: isSelected
               ? [
                   BoxShadow(
-                    color: color.withOpacity(0.30),
+                    color: color.withValues(alpha: 0.30),
                     blurRadius: 8,
                     offset: const Offset(0, 3),
                   ),
@@ -108,18 +108,13 @@ class _CategoryChip extends StatelessWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
-              icon,
-              size: 14,
-              color: isSelected ? Colors.white : color,
-            ),
+            Icon(icon, size: 14, color: isSelected ? Colors.white : color),
             const SizedBox(width: 6),
             Text(
               label,
               style: TextStyle(
                 fontSize: 12.5,
-                fontWeight:
-                    isSelected ? FontWeight.w700 : FontWeight.w500,
+                fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
                 color: isSelected ? Colors.white : const Color(0xFF424242),
               ),
             ),

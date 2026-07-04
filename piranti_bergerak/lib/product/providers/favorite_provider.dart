@@ -4,7 +4,7 @@ import '../models/product_model.dart';
 
 /// Provider untuk fitur Favorit.
 ///
-/// Saat ini menggunakan Set<String> in-memory (tidak persisten antar sesi).
+/// Saat ini menggunakan `Set<String>` in-memory (tidak persisten antar sesi).
 /// [TODO-DB] Nanti hubungkan ke ProductDb.instance.toggleFavorite() dan
 /// ProductDb.instance.getFavoriteIds() agar data bertahan setelah app restart.
 class FavoriteProvider extends ChangeNotifier {

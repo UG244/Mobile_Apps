@@ -70,8 +70,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
       SnackBar(
         behavior: SnackBarBehavior.floating,
         margin: const EdgeInsets.all(16),
-        shape:
-            RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         backgroundColor: const Color(0xFF0A5EB0),
         content: Text(
           '${product.name} (x$_quantity) ditambahkan ke keranjang',
@@ -118,8 +117,10 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                 product.name,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style:
-                    const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+                style: const TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
               background: product.imageUrl.isNotEmpty
                   // [UBAH] Tampilkan gambar produk nyata dari URL
@@ -127,17 +128,23 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                       product.imageUrl,
                       fit: BoxFit.cover,
                       // [LOGIKA] Fallback placeholder jika gambar gagal dimuat
-                      errorBuilder: (_, __, ___) => Container(
+                      errorBuilder: (_, _, _) => Container(
                         color: Colors.grey[300],
-                        child: const Icon(Icons.image,
-                            size: 100, color: Colors.grey),
+                        child: const Icon(
+                          Icons.image,
+                          size: 100,
+                          color: Colors.grey,
+                        ),
                       ),
                     )
                   // [LOGIKA] Placeholder jika imageUrl kosong (desain kamu)
                   : Container(
                       color: Colors.grey[300], // [TETAP] warna placeholder sama
-                      child: const Icon(Icons.image,
-                          size: 100, color: Colors.grey), // [TETAP]
+                      child: const Icon(
+                        Icons.image,
+                        size: 100,
+                        color: Colors.grey,
+                      ), // [TETAP]
                     ),
             ),
           ),
@@ -153,11 +160,11 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                   Text(
                     product.name,
                     style: const TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold), // [TETAP] style sama
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                    ), // [TETAP] style sama
                   ),
                   const SizedBox(height: 8), // [TETAP]
-
                   // [UBAH] Harga dengan format Rupiah (bukan hardcode)
                   Row(
                     children: [
@@ -184,12 +191,14 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                   ),
 
                   const SizedBox(height: 8), // [TETAP]
-
                   // [UBAH] Rating dari data ProductModel (bukan hardcode 4.8)
                   Row(
                     children: [
-                      const Icon(Icons.star,
-                          color: Colors.amber, size: 20), // [TETAP]
+                      const Icon(
+                        Icons.star,
+                        color: Colors.amber,
+                        size: 20,
+                      ), // [TETAP]
                       const SizedBox(width: 4), // [TETAP]
                       Text(
                         // [UBAH] Rating & review count dari ProductModel
@@ -214,8 +223,10 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                   const SizedBox(height: 16),
                   Row(
                     children: [
-                      const Text('Jumlah:',
-                          style: TextStyle(fontWeight: FontWeight.w600)),
+                      const Text(
+                        'Jumlah:',
+                        style: TextStyle(fontWeight: FontWeight.w600),
+                      ),
                       const Spacer(),
                       // [LOGIKA] Tombol kurangi quantity
                       IconButton(
@@ -224,9 +235,13 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                         color: const Color(0xFF0A5EB0),
                       ),
                       // [LOGIKA] Tampilkan quantity saat ini
-                      Text('$_quantity',
-                          style: const TextStyle(
-                              fontSize: 16, fontWeight: FontWeight.bold)),
+                      Text(
+                        '$_quantity',
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                       // [LOGIKA] Tombol tambah quantity
                       IconButton(
                         onPressed: _increment,
@@ -247,8 +262,10 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text('Total Harga',
-                            style: TextStyle(color: Colors.black54)),
+                        const Text(
+                          'Total Harga',
+                          style: TextStyle(color: Colors.black54),
+                        ),
                         // [LOGIKA] Total = harga × quantity (update realtime)
                         Text(
                           'Rp ${formatNumber(product.price * _quantity)}',
@@ -263,15 +280,15 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                   ),
 
                   const Divider(height: 32), // [TETAP]
-
                   // [TETAP] Label Deskripsi
                   const Text(
                     'Deskripsi Produk',
                     style: TextStyle(
-                        fontSize: 18, fontWeight: FontWeight.bold), // [TETAP]
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ), // [TETAP]
                   ),
                   const SizedBox(height: 12), // [TETAP]
-
                   // [UBAH] Deskripsi dari ProductModel (bukan lorem ipsum)
                   // [LOGIKA] Toggle antara teks singkat dan penuh
                   AnimatedCrossFade(
@@ -284,15 +301,18 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                       maxLines: 3, // [LOGIKA] maks 3 baris saat collapsed
                       overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
-                          fontSize: 16, height: 1.5,
-                          color: Colors.black87), // [TETAP] style sama
+                        fontSize: 16,
+                        height: 1.5,
+                        color: Colors.black87,
+                      ), // [TETAP] style sama
                     ),
                     secondChild: Text(
                       product.description,
                       style: const TextStyle(
-                          fontSize: 16,
-                          height: 1.5,
-                          color: Colors.black87), // [TETAP]
+                        fontSize: 16,
+                        height: 1.5,
+                        color: Colors.black87,
+                      ), // [TETAP]
                     ),
                   ),
 
@@ -321,9 +341,10 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
           color: Colors.white, // [TETAP]
           boxShadow: [
             BoxShadow(
-                color: Colors.black12,
-                blurRadius: 10,
-                offset: Offset(0, -5)), // [TETAP]
+              color: Colors.black12,
+              blurRadius: 10,
+              offset: Offset(0, -5),
+            ), // [TETAP]
           ],
         ),
         child: Row(
@@ -335,7 +356,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                   minimumSize: const Size(0, 50),
                   side: const BorderSide(color: Color(0xFF0A5EB0)),
                   shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10)),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
                 ),
                 // [LOGIKA] Tambah ke cart lalu langsung navigasi ke halaman cart
                 onPressed: product.stock > 0
@@ -344,8 +366,10 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                         Navigator.of(context).pushNamed('/cart');
                       }
                     : null, // [LOGIKA] Disable jika stok habis
-                child: const Text('Beli',
-                    style: TextStyle(color: Color(0xFF0A5EB0))),
+                child: const Text(
+                  'Beli',
+                  style: TextStyle(color: Color(0xFF0A5EB0)),
+                ),
               ),
             ),
             const SizedBox(width: 12),
@@ -355,22 +379,26 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
               flex: 2,
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor:
-                      const Color(0xFF0A5EB0), // [TETAP] warna biru
+                  backgroundColor: const Color(
+                    0xFF0A5EB0,
+                  ), // [TETAP] warna biru
                   minimumSize: const Size(double.infinity, 50), // [TETAP]
                   shape: RoundedRectangleBorder(
-                      borderRadius:
-                          BorderRadius.circular(10)), // [TETAP]
+                    borderRadius: BorderRadius.circular(10),
+                  ), // [TETAP]
                 ),
                 // [UBAH] onPressed dulu kosong → kini panggil _addToCart()
                 // [LOGIKA] Disable tombol jika stok produk habis
                 onPressed: product.stock > 0
-                    ? () => _addToCart(context) // [FIJI INTEGRATION]
+                    ? () =>
+                          _addToCart(context) // [FIJI INTEGRATION]
                     : null,
                 child: Text(
                   product.stock > 0 ? 'Add to Cart' : 'Stok Habis',
                   style: const TextStyle(
-                      fontSize: 18, color: Colors.white), // [TETAP]
+                    fontSize: 18,
+                    color: Colors.white,
+                  ), // [TETAP]
                 ),
               ),
             ),

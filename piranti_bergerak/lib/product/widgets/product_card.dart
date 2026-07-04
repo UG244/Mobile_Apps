@@ -14,11 +14,14 @@ import '../../cart/utils/format_utils.dart';
 ///   • [onFavoriteTap] toggle favorit via FavoriteProvider
 ///   • [onAddToCart]   mengirim produk ke CartProvider milik Fiji
 class ProductCard extends StatelessWidget {
-  final ProductModel product; // [UBAH] dari String imageUrl/title/price → ProductModel
-  final bool isFavorite; // [TETAP] state favorit dikirim dari luar (Consumer di screen)
+  final ProductModel
+  product; // [UBAH] dari String imageUrl/title/price → ProductModel
+  final bool
+  isFavorite; // [TETAP] state favorit dikirim dari luar (Consumer di screen)
   final VoidCallback? onTap; // [TAMBAH] callback navigasi ke detail
   final VoidCallback? onFavoriteTap; // [TAMBAH] callback toggle favorit
-  final VoidCallback? onAddToCart; // [TAMBAH] callback "Add to Cart" → CartProvider Fiji
+  final VoidCallback?
+  onAddToCart; // [TAMBAH] callback "Add to Cart" → CartProvider Fiji
 
   const ProductCard({
     super.key,
@@ -37,8 +40,7 @@ class ProductCard extends StatelessWidget {
       child: Card(
         // ── DESAIN DIPERTAHANKAN ─────────────────────────────────────────
         elevation: 2,
-        shape:
-            RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         // ─────────────────────────────────────────────────────────────────
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -52,13 +54,15 @@ class ProductCard extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: Colors.grey[300],
                     borderRadius: const BorderRadius.vertical(
-                        top: Radius.circular(12)),
+                      top: Radius.circular(12),
+                    ),
                   ),
                   // [LOGIKA] Tampilkan gambar produk dari URL. Jika gagal,
                   // tampilkan placeholder icon (desain fallback tetap sama).
                   child: ClipRRect(
                     borderRadius: const BorderRadius.vertical(
-                        top: Radius.circular(12)),
+                      top: Radius.circular(12),
+                    ),
                     child: product.imageUrl.isNotEmpty
                         ? Image.network(
                             product.imageUrl, // [UBAH] dari static icon
@@ -67,19 +71,21 @@ class ProductCard extends StatelessWidget {
                             loadingBuilder: (_, child, progress) {
                               if (progress == null) return child;
                               return const Center(
-                                  child: CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                      color: Color(0xFF0A5EB0)));
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: Color(0xFF0A5EB0),
+                                ),
+                              );
                             },
                             // [LOGIKA] Fallback jika URL gambar error
-                            errorBuilder: (_, __, ___) => const Icon(
-                                Icons.image,
-                                size: 50,
-                                color: Colors.grey),
+                            errorBuilder: (_, _, _) => const Icon(
+                              Icons.image,
+                              size: 50,
+                              color: Colors.grey,
+                            ),
                           )
                         // [LOGIKA] Fallback jika imageUrl kosong
-                        : const Icon(Icons.image,
-                            size: 50, color: Colors.grey),
+                        : const Icon(Icons.image, size: 50, color: Colors.grey),
                   ),
                 ),
 
@@ -91,7 +97,9 @@ class ProductCard extends StatelessWidget {
                     left: 8,
                     child: Container(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 6, vertical: 2),
+                        horizontal: 6,
+                        vertical: 2,
+                      ),
                       decoration: BoxDecoration(
                         color: Colors.red,
                         borderRadius: BorderRadius.circular(6),
@@ -99,9 +107,10 @@ class ProductCard extends StatelessWidget {
                       child: Text(
                         '-${product.discountPercent}%',
                         style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold),
+                          color: Colors.white,
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                   ),
@@ -141,8 +150,7 @@ class ProductCard extends StatelessWidget {
                     product.name, // [UBAH] dari static String title
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    style:
-                        const TextStyle(fontWeight: FontWeight.w500),
+                    style: const TextStyle(fontWeight: FontWeight.w500),
                   ),
                   const SizedBox(height: 4),
                   // [LOGIKA] Tampilkan harga coret jika ada diskon
@@ -180,8 +188,11 @@ class ProductCard extends StatelessWidget {
                             color: const Color(0xFF0A5EB0),
                             borderRadius: BorderRadius.circular(8),
                           ),
-                          child: const Icon(Icons.add,
-                              color: Colors.white, size: 18),
+                          child: const Icon(
+                            Icons.add,
+                            color: Colors.white,
+                            size: 18,
+                          ),
                         ),
                       ),
                     ),

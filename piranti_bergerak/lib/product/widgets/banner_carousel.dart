@@ -113,7 +113,7 @@ class _BannerSlide extends StatelessWidget {
             ),
             boxShadow: [
               BoxShadow(
-                color: item.gradientColors.first.withOpacity(0.35),
+                color: item.gradientColors.first.withValues(alpha: 0.35),
                 blurRadius: 16,
                 offset: const Offset(0, 6),
               ),
@@ -130,7 +130,7 @@ class _BannerSlide extends StatelessWidget {
                   height: 140,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: Colors.white.withOpacity(0.10),
+                    color: Colors.white.withValues(alpha: 0.10),
                   ),
                 ),
               ),
@@ -142,7 +142,7 @@ class _BannerSlide extends StatelessWidget {
                   height: 90,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: Colors.white.withOpacity(0.07),
+                    color: Colors.white.withValues(alpha: 0.07),
                   ),
                 ),
               ),
@@ -162,7 +162,7 @@ class _BannerSlide extends StatelessWidget {
                         ),
                         margin: const EdgeInsets.only(bottom: 8),
                         decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.25),
+                          color: Colors.white.withValues(alpha: 0.25),
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: Text(
@@ -187,7 +187,7 @@ class _BannerSlide extends StatelessWidget {
                     Text(
                       item.subtitle,
                       style: TextStyle(
-                        color: Colors.white.withOpacity(0.85),
+                        color: Colors.white.withValues(alpha: 0.85),
                         fontSize: 12.5,
                       ),
                     ),

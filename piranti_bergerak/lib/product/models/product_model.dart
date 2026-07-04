@@ -54,7 +54,7 @@ class ProductModel {
   ///
   /// Panggil method ini saat tombol "Add to Cart" ditekan:
   ///   final cartItem = product.toCartItem();
-  ///   Provider.of<CartProvider>(context, listen: false).addItem(cartItem);
+  ///   `Provider.of<CartProvider>(context, listen: false).addItem(cartItem);`
   ///                                                     ^^^^^^^^^^^^^^^^^^^
   ///   [KOORDINASI FIJI] Fiji perlu menambahkan method addItem(CartItemModel)
   ///   ke CartProvider (lib/cart/providers/cart_provider.dart).
