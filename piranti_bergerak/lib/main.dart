@@ -8,11 +8,16 @@ import 'checkout/screens/checkout_screen.dart';
 import 'checkout/screens/order_success_screen.dart';
 import 'history/screens/order_detail_page.dart';
 import 'history/screens/order_history_page.dart';
+import 'notification/providers/notification_provider.dart';
+import 'notification/screens/notification_page.dart';
+import 'notification/services/notification_service.dart';
 import 'product/providers/favorite_provider.dart';
 import 'product/providers/product_provider.dart';
 import 'product/screens/home_screen.dart';
 
-void main() {
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await NotificationService.instance.initialize();
   runApp(const MyApp());
 }
 
@@ -25,6 +30,9 @@ class MyApp extends StatelessWidget {
       providers: [
         // Provider milik Fiji (Cart & Checkout)
         ChangeNotifierProvider(create: (_) => CartProvider()),
+        ChangeNotifierProvider(
+          create: (_) => NotificationProvider()..loadNotifications(),
+        ),
 
         // Provider modul Product & Shopping (kita)
         ChangeNotifierProvider(create: (_) => ProductProvider()),
@@ -58,6 +66,7 @@ class MyApp extends StatelessWidget {
           '/checkout': (context) => const CheckoutScreen(),
           '/order-success': (context) => const OrderSuccessScreen(),
           '/orders': (context) => const OrderHistoryPage(),
+          '/notifications': (context) => const NotificationPage(),
           '/order-detail': (context) {
             final arg = ModalRoute.of(context)?.settings.arguments;
             return OrderDetailPage(orderId: arg is int ? arg : 0);

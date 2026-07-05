@@ -4,6 +4,7 @@ import 'package:path_provider/path_provider.dart';
 import '../models/checkout_address_model.dart';
 import '../models/order_model.dart';
 import '../models/order_detail_model.dart';
+import '../../notification/models/app_notification_model.dart';
 
 class OrderDb {
   static final OrderDb instance = OrderDb._init();
@@ -25,7 +26,7 @@ class OrderDb {
 
     return await openDatabase(
       path,
-      version: 4,
+      version: 5,
       onCreate: _createDB,
       onUpgrade: _upgradeDB,
     );
@@ -70,7 +71,10 @@ class OrderDb {
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       title TEXT,
       message TEXT,
+      description TEXT,
+      type TEXT DEFAULT 'Pesanan',
       date TEXT,
+      createdAt TEXT,
       isRead INTEGER DEFAULT 0
     )
     ''');
@@ -118,6 +122,15 @@ class OrderDb {
       await db.execute(
         "ALTER TABLE order_details ADD COLUMN imageUrl TEXT DEFAULT ''",
       );
+    }
+    if (oldVersion < 5) {
+      await db.execute(
+        "ALTER TABLE notifications ADD COLUMN description TEXT DEFAULT ''",
+      );
+      await db.execute(
+        "ALTER TABLE notifications ADD COLUMN type TEXT DEFAULT 'Pesanan'",
+      );
+      await db.execute("ALTER TABLE notifications ADD COLUMN createdAt TEXT");
     }
   }
 
@@ -179,14 +192,57 @@ class OrderDb {
     required String title,
     required String message,
     required DateTime date,
+    String type = 'Pesanan',
   }) async {
     final db = await instance.database;
     return db.insert('notifications', {
       'title': title,
       'message': message,
+      'description': message,
+      'type': type,
       'date': date.toIso8601String(),
+      'createdAt': date.toIso8601String(),
       'isRead': 0,
     });
+  }
+
+  Future<int> insertAppNotification(AppNotificationModel notification) async {
+    final db = await instance.database;
+    final map = notification.toMap();
+    map['message'] = notification.description;
+    map['date'] = notification.createdAt.toIso8601String();
+    return db.insert('notifications', map);
+  }
+
+  Future<List<AppNotificationModel>> getNotifications() async {
+    final db = await instance.database;
+    final rows = await db.query('notifications', orderBy: 'id DESC');
+    return rows.map(AppNotificationModel.fromMap).toList();
+  }
+
+  Future<void> markNotificationAsRead(int id) async {
+    final db = await instance.database;
+    await db.update(
+      'notifications',
+      {'isRead': 1},
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+  }
+
+  Future<void> markAllNotificationsAsRead() async {
+    final db = await instance.database;
+    await db.update('notifications', {'isRead': 1});
+  }
+
+  Future<void> deleteNotification(int id) async {
+    final db = await instance.database;
+    await db.delete('notifications', where: 'id = ?', whereArgs: [id]);
+  }
+
+  Future<void> clearAllNotifications() async {
+    final db = await instance.database;
+    await db.delete('notifications');
   }
 
   Future<List<CheckoutAddressModel>> getCheckoutAddresses() async {

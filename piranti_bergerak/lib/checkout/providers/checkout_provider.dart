@@ -4,6 +4,7 @@ import '../models/checkout_address_model.dart';
 import '../models/order_model.dart';
 import '../models/order_detail_model.dart';
 import '../db/order_db.dart';
+import '../../notification/services/notification_service.dart';
 
 class CheckoutProvider extends ChangeNotifier {
   CheckoutProvider(this.cart) {
@@ -149,12 +150,18 @@ class CheckoutProvider extends ChangeNotifier {
   Future<void> addCheckoutNotification({
     required String title,
     required String message,
+    String type = 'Pesanan',
   }) async {
     try {
       await OrderDb.instance.insertNotification(
         title: title,
         message: message,
+        type: type,
         date: DateTime.now(),
+      );
+      await NotificationService.instance.showInstantNotification(
+        title: title,
+        body: message,
       );
     } catch (_) {
       // Notification storage should not block the checkout UI.
@@ -214,8 +221,13 @@ class CheckoutProvider extends ChangeNotifier {
 
     await OrderDb.instance.insertNotification(
       title: 'Pesanan Berhasil',
-      message: 'Pesanan $invoice berhasil dibuat.',
+      message: 'Pesanan Anda sedang diproses.',
+      type: 'Pesanan',
       date: DateTime.now(),
+    );
+    await NotificationService.instance.showInstantNotification(
+      title: 'Pesanan Berhasil',
+      body: 'Pesanan Anda sedang diproses.',
     );
 
     cart.clearCart();

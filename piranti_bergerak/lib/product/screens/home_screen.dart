@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../cart/providers/cart_provider.dart';
+import '../../notification/providers/notification_provider.dart';
+import '../../notification/widgets/notification_badge.dart';
 import '../providers/favorite_provider.dart';
 import '../providers/product_provider.dart';
 import '../screens/product_detail_screen.dart';
@@ -75,6 +77,7 @@ class _ProductHomeScreenState extends State<ProductHomeScreen> {
   @override
   Widget build(BuildContext context) {
     final cartProvider = context.watch<CartProvider>();
+    final notificationProvider = context.watch<NotificationProvider>();
 
     // ─────────────────────────────────────────────────────────────────────
     // PERBAIKAN NAVIGASI: Satu Scaffold dengan BottomNav.
@@ -94,9 +97,14 @@ class _ProductHomeScreenState extends State<ProductHomeScreen> {
                 ),
               ),
               actions: [
-                IconButton(
-                  icon: const Icon(Icons.notifications_none),
-                  onPressed: () {},
+                NotificationBadge(
+                  count: notificationProvider.unreadCount,
+                  onTap: () async {
+                    await Navigator.of(context).pushNamed('/notifications');
+                    if (context.mounted) {
+                      context.read<NotificationProvider>().loadNotifications();
+                    }
+                  },
                 ),
                 // [FIJI INTEGRATION] Cart icon + badge → CartScreen Fiji
                 Stack(

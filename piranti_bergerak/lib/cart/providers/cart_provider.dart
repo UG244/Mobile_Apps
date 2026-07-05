@@ -3,11 +3,7 @@ import 'package:flutter/foundation.dart';
 import '../models/cart_item_model.dart';
 
 class CartProvider extends ChangeNotifier {
-  CartProvider() {
-    _items = _createDummyItems();
-  }
-
-  late final List<CartItemModel> _items;
+  final List<CartItemModel> _items = [];
 
   List<CartItemModel> get items => List.unmodifiable(_items);
 
@@ -72,7 +68,6 @@ class CartProvider extends ChangeNotifier {
 
   void refillCart() {
     _items.clear();
-    _items.addAll(_createDummyItems());
     _discount = 0;
     _appliedPromo = null;
     notifyListeners();
@@ -107,50 +102,5 @@ class CartProvider extends ChangeNotifier {
     _discount = 0;
     _appliedPromo = null;
     notifyListeners();
-  }
-
-  static List<CartItemModel> _createDummyItems() {
-    return [
-      CartItemModel(
-        id: 'p1',
-        name: 'Headphone Wireless',
-        category: 'Elektronik',
-        imageUrl: 'https://via.placeholder.com/120x120.png?text=Headphone',
-        price: 185000,
-        quantity: 1,
-      ),
-      CartItemModel(
-        id: 'p2',
-        name: 'Smartphone Case',
-        category: 'Aksesoris',
-        imageUrl: 'https://via.placeholder.com/120x120.png?text=Case',
-        price: 75000,
-        quantity: 2,
-      ),
-      CartItemModel(
-        id: 'p3',
-        name: 'Power Bank 20K',
-        category: 'Elektronik',
-        imageUrl: 'https://via.placeholder.com/120x120.png?text=Power+Bank',
-        price: 225000,
-        quantity: 1,
-      ),
-      CartItemModel(
-        id: 'p4',
-        name: 'Wireless Mouse',
-        category: 'Aksesoris',
-        imageUrl: 'https://via.placeholder.com/120x120.png?text=Mouse',
-        price: 98000,
-        quantity: 1,
-      ),
-      CartItemModel(
-        id: 'p5',
-        name: 'Bluetooth Speaker',
-        category: 'Elektronik',
-        imageUrl: 'https://via.placeholder.com/120x120.png?text=Speaker',
-        price: 320000,
-        quantity: 1,
-      ),
-    ];
   }
 }

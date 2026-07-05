@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../cart/providers/cart_provider.dart';
+import '../../notification/providers/notification_provider.dart';
 import '../models/checkout_address_model.dart';
 import 'address_book_screen.dart';
 import 'promo_selection_screen.dart';
@@ -267,6 +268,9 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       if (!context.mounted) return;
 
       if (id > 0) {
+        await context.read<NotificationProvider>().loadNotifications();
+        if (!context.mounted) return;
+
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Pesanan berhasil dibuat.')),
         );

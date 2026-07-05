@@ -9,6 +9,13 @@ void main() {
 
     expect(find.text('ShopEase'), findsOneWidget);
 
+    final firstAddButton = find.byIcon(Icons.add).first;
+    await tester.ensureVisible(firstAddButton);
+    await tester.pump();
+    await tester.tap(firstAddButton);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
+
     await tester.tap(find.byIcon(Icons.shopping_bag_outlined));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 400));

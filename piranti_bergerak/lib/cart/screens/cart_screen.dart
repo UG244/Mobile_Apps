@@ -105,7 +105,10 @@ class _CartScreenContent extends StatelessWidget {
   }
 
   Widget _buildEmpty(BuildContext context, CartProvider provider) {
-    return EmptyCartWidget(onShop: () => provider.refillCart());
+    return EmptyCartWidget(
+      onShop: () =>
+          Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false),
+    );
   }
 
   Future<void> _confirmDelete(
