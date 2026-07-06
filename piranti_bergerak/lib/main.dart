@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import 'admin/screens/admin_panel_screen.dart';
 import 'cart/providers/cart_provider.dart';
 import 'cart/screens/cart_screen.dart';
 import 'cart/widgets/no_overscroll_behavior.dart';
@@ -67,6 +68,7 @@ class MyApp extends StatelessWidget {
           '/order-success': (context) => const OrderSuccessScreen(),
           '/orders': (context) => const OrderHistoryPage(),
           '/notifications': (context) => const NotificationPage(),
+          '/admin': (context) => const AdminPanelScreen(),
           '/order-detail': (context) {
             final arg = ModalRoute.of(context)?.settings.arguments;
             return OrderDetailPage(orderId: arg is int ? arg : 0);

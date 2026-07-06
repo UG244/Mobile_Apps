@@ -10,6 +10,7 @@ class OrderHistoryCard extends StatelessWidget {
     required this.order,
     required this.totalItems,
     required this.formattedDate,
+    required this.status,
     required this.statusColor,
     required this.onTap,
   });
@@ -17,6 +18,7 @@ class OrderHistoryCard extends StatelessWidget {
   final OrderModel order;
   final int totalItems;
   final String formattedDate;
+  final String status;
   final Color statusColor;
   final VoidCallback onTap;
 
@@ -50,7 +52,7 @@ class OrderHistoryCard extends StatelessWidget {
                       style: const TextStyle(fontWeight: FontWeight.w800),
                     ),
                   ),
-                  OrderStatusChip(status: order.status, color: statusColor),
+                  OrderStatusChip(status: status, color: statusColor),
                 ],
               ),
               const SizedBox(height: 12),

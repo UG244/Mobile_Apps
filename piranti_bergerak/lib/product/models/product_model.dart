@@ -17,6 +17,7 @@ class ProductModel {
     this.rating = 0.0,
     this.reviewCount = 0,
     this.stock = 0,
+    this.weight = 0,
     this.isActive = true,
   });
 
@@ -38,6 +39,7 @@ class ProductModel {
   final double rating;
   final int reviewCount;
   final int stock;
+  final double weight;
   final bool isActive;
 
   /// Apakah produk sedang dalam kondisi diskon
@@ -83,6 +85,7 @@ class ProductModel {
       'rating': rating,
       'reviewCount': reviewCount,
       'stock': stock,
+      'weight': weight,
       'isActive': isActive ? 1 : 0,
     };
   }
@@ -100,6 +103,7 @@ class ProductModel {
       rating: (m['rating'] as num?)?.toDouble() ?? 0.0,
       reviewCount: m['reviewCount'] as int? ?? 0,
       stock: m['stock'] as int? ?? 0,
+      weight: (m['weight'] as num?)?.toDouble() ?? 0,
       isActive: (m['isActive'] as int? ?? 1) == 1,
     );
   }
@@ -116,6 +120,7 @@ class ProductModel {
     double? rating,
     int? reviewCount,
     int? stock,
+    double? weight,
     bool? isActive,
   }) {
     return ProductModel(
@@ -130,6 +135,7 @@ class ProductModel {
       rating: rating ?? this.rating,
       reviewCount: reviewCount ?? this.reviewCount,
       stock: stock ?? this.stock,
+      weight: weight ?? this.weight,
       isActive: isActive ?? this.isActive,
     );
   }

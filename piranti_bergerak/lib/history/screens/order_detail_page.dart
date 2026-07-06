@@ -6,6 +6,7 @@ import '../widgets/order_detail_product_item.dart';
 import '../widgets/order_payment_summary_card.dart';
 import '../widgets/order_shipping_info_card.dart';
 import '../widgets/order_status_chip.dart';
+import '../widgets/order_tracking_card.dart';
 
 class OrderDetailPage extends StatelessWidget {
   const OrderDetailPage({super.key, required this.orderId});
@@ -29,6 +30,7 @@ class _OrderDetailView extends StatelessWidget {
     return Consumer<OrderProvider>(
       builder: (context, provider, _) {
         final order = provider.selectedOrder;
+        final status = order == null ? '' : provider.getCurrentStatus(order);
 
         return Scaffold(
           backgroundColor: const Color(0xFFF5F7FA),
@@ -77,9 +79,9 @@ class _OrderDetailView extends StatelessWidget {
                                           ),
                                         ),
                                         OrderStatusChip(
-                                          status: order.status,
+                                          status: status,
                                           color: provider.getStatusColor(
-                                            order.status,
+                                            status,
                                           ),
                                         ),
                                       ],
@@ -131,6 +133,14 @@ class _OrderDetailView extends StatelessWidget {
                                   ],
                                 ),
                               ),
+                            ),
+                            const SizedBox(height: 12),
+                            OrderTrackingCard(
+                              summary: provider.getTrackingSummary(order),
+                              estimatedArrival: provider.getEstimatedArrival(
+                                order,
+                              ),
+                              steps: provider.getTrackingSteps(order),
                             ),
                             const SizedBox(height: 12),
                             OrderShippingInfoCard(order: order),

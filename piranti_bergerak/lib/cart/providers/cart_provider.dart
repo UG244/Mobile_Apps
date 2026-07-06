@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 
 import '../models/cart_item_model.dart';
+import '../../product/models/product_model.dart';
 
 class CartProvider extends ChangeNotifier {
   final List<CartItemModel> _items = [];
@@ -63,6 +64,30 @@ class CartProvider extends ChangeNotifier {
 
   void removeItem(String id) {
     _items.removeWhere((item) => item.id == id);
+    notifyListeners();
+  }
+
+  void syncWithProducts(List<ProductModel> products) {
+    final activeById = {
+      for (final product in products.where((product) => product.isActive))
+        product.id: product,
+    };
+
+    _items.removeWhere((item) => !activeById.containsKey(item.id));
+    for (var index = 0; index < _items.length; index++) {
+      final product = activeById[_items[index].id];
+      if (product == null) continue;
+      final quantity = _items[index].quantity > product.stock
+          ? product.stock
+          : _items[index].quantity;
+      if (quantity <= 0) {
+        _items.removeAt(index);
+        index--;
+        continue;
+      }
+      _items[index] = product.toCartItem(quantity: quantity);
+    }
+
     notifyListeners();
   }
 

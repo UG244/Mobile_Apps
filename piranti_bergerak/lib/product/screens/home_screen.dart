@@ -433,6 +433,15 @@ class _ProfileTab extends StatelessWidget {
               trailing: const Icon(Icons.chevron_right),
               onTap: () => Navigator.of(context).pushNamed('/cart'),
             ),
+            ListTile(
+              leading: const Icon(
+                Icons.admin_panel_settings_outlined,
+                color: Color(0xFF0A5EB0),
+              ),
+              title: const Text('Admin Panel'),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => Navigator.of(context).pushNamed('/admin'),
+            ),
           ],
         ),
       ),

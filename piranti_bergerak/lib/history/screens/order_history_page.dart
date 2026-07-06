@@ -62,6 +62,7 @@ class _OrderHistoryView extends StatelessWidget {
                       itemBuilder: (context, index) {
                         final order = provider.orders[index];
                         final orderId = order.id ?? 0;
+                        final status = provider.getCurrentStatus(order);
 
                         return Padding(
                           padding: const EdgeInsets.only(bottom: 10),
@@ -71,7 +72,8 @@ class _OrderHistoryView extends StatelessWidget {
                             formattedDate: provider.formatDateIndonesia(
                               order.date,
                             ),
-                            statusColor: provider.getStatusColor(order.status),
+                            status: status,
+                            statusColor: provider.getStatusColor(status),
                             onTap: () {
                               Navigator.of(context).push(
                                 MaterialPageRoute(

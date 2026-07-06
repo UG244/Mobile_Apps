@@ -75,7 +75,7 @@ class NotificationCard extends StatelessWidget {
                     const SizedBox(height: 4),
                     Text(
                       notification.description,
-                      maxLines: 2,
+                      maxLines: 4,
                       overflow: TextOverflow.ellipsis,
                       style: const TextStyle(color: Colors.black54),
                     ),

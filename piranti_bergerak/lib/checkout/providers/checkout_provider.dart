@@ -170,7 +170,13 @@ class CheckoutProvider extends ChangeNotifier {
 
   double get subtotal => cart.subtotal;
 
-  double get discount => promoDiscount;
+  double get discount {
+    if (appliedPromoCode == 'BLUEMART10') return subtotal * 0.10;
+    if (appliedPromoCode == 'HEMAT50') {
+      return subtotal < 50000 ? subtotal : 50000;
+    }
+    return promoDiscount;
+  }
 
   double get finalShippingCost => freeShipping ? 0 : shippingCost;
 
@@ -187,6 +193,7 @@ class CheckoutProvider extends ChangeNotifier {
 
   Future<int> placeOrder() async {
     final invoice = 'INV-${DateTime.now().millisecondsSinceEpoch}';
+    final orderDate = DateTime.now();
     final order = OrderModel(
       invoice: invoice,
       customerName: customerName,
@@ -200,7 +207,7 @@ class CheckoutProvider extends ChangeNotifier {
       discount: discount,
       tax: tax,
       grandTotal: grandTotal,
-      date: DateTime.now(),
+      date: orderDate,
     );
 
     final details = cart.items
@@ -218,16 +225,26 @@ class CheckoutProvider extends ChangeNotifier {
         .toList();
 
     final id = await OrderDb.instance.insertOrder(order, details);
+    final itemCount = cart.totalItems;
+    final shortAddress = address.length > 48
+        ? '${address.substring(0, 48)}...'
+        : address;
+    final message =
+        '$invoice berhasil dibuat. Status: Diproses. '
+        '$itemCount item sedang kami siapkan untuk dikirim via $shippingMethod '
+        '($shippingEstimate) ke $shortAddress. '
+        'Cek Riwayat Pesanan untuk melihat posisi pesanan terbaru.';
 
     await OrderDb.instance.insertNotification(
-      title: 'Pesanan Berhasil',
-      message: 'Pesanan Anda sedang diproses.',
+      title: 'Pesanan $invoice Diproses',
+      message: message,
       type: 'Pesanan',
-      date: DateTime.now(),
+      date: orderDate,
     );
     await NotificationService.instance.showInstantNotification(
-      title: 'Pesanan Berhasil',
-      body: 'Pesanan Anda sedang diproses.',
+      title: 'Pesanan $invoice Diproses',
+      body:
+          'Pesanan sedang diproses dan akan dikirim via $shippingMethod. $shippingEstimate.',
     );
 
     cart.clearCart();

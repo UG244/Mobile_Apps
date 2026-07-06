@@ -166,6 +166,16 @@ class OrderDb {
     return rows.map(OrderModel.fromMap).toList();
   }
 
+  Future<void> updateOrderStatus(int id, String status) async {
+    final db = await instance.database;
+    await db.update(
+      'orders',
+      {'status': status},
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+  }
+
   Future<List<OrderDetailModel>> getOrderDetails(int orderId) async {
     final db = await instance.database;
     final rows = await db.query(

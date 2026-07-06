@@ -2,11 +2,19 @@ import 'package:flutter/material.dart';
 
 import '../../cart/models/cart_item_model.dart';
 import '../../cart/utils/format_utils.dart';
+import '../../cart/widgets/quantity_button.dart';
 
 class CheckoutProductCard extends StatelessWidget {
-  const CheckoutProductCard({super.key, required this.item});
+  const CheckoutProductCard({
+    super.key,
+    required this.item,
+    required this.onIncrement,
+    required this.onDecrement,
+  });
 
   final CartItemModel item;
+  final VoidCallback onIncrement;
+  final VoidCallback onDecrement;
 
   @override
   Widget build(BuildContext context) {
@@ -63,11 +71,27 @@ class CheckoutProductCard extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 6),
-                  Text(
-                    'Qty ${item.quantity}',
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: Colors.black54,
-                    ),
+                  Row(
+                    children: [
+                      QuantityButton(
+                        icon: Icons.remove,
+                        onPressed: onDecrement,
+                        disabled: item.quantity <= 1,
+                      ),
+                      const SizedBox(width: 8),
+                      SizedBox(
+                        width: 28,
+                        child: Text(
+                          '${item.quantity}',
+                          textAlign: TextAlign.center,
+                          style: theme.textTheme.titleSmall?.copyWith(
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      QuantityButton(icon: Icons.add, onPressed: onIncrement),
+                    ],
                   ),
                 ],
               ),

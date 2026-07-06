@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../models/app_notification_model.dart';
 import '../providers/notification_provider.dart';
 import '../widgets/empty_notification_widget.dart';
 import '../widgets/notification_card.dart';
@@ -120,7 +121,11 @@ class _NotificationView extends StatelessWidget {
                                       formattedTime: _formatTime(
                                         item.createdAt,
                                       ),
-                                      onTap: () => provider.markAsRead(id),
+                                      onTap: () async {
+                                        await provider.markAsRead(id);
+                                        if (!context.mounted) return;
+                                        _showNotificationDetail(context, item);
+                                      },
                                     ),
                                   ),
                                 );
@@ -148,5 +153,50 @@ class _NotificationView extends StatelessWidget {
     final month = value.month.toString().padLeft(2, '0');
     final year = value.year.toString();
     return '$day/$month/$year';
+  }
+
+  void _showNotificationDetail(
+    BuildContext context,
+    AppNotificationModel item,
+  ) {
+    showDialog<void>(
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          title: Text(item.title),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(item.description),
+                const SizedBox(height: 14),
+                Text(
+                  '${item.type} • ${_formatTime(item.createdAt)}',
+                  style: const TextStyle(
+                    color: Colors.black54,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            if (item.type == 'Pesanan')
+              TextButton(
+                onPressed: () {
+                  Navigator.of(dialogContext).pop();
+                  Navigator.of(context).pushNamed('/orders');
+                },
+                child: const Text('Lihat Pesanan'),
+              ),
+            FilledButton(
+              onPressed: () => Navigator.of(dialogContext).pop(),
+              child: const Text('Tutup'),
+            ),
+          ],
+        );
+      },
+    );
   }
 }

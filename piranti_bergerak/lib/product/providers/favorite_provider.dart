@@ -47,6 +47,20 @@ class FavoriteProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  void syncWithProducts(List<ProductModel> products) {
+    final activeById = {
+      for (final product in products.where((product) => product.isActive))
+        product.id: product,
+    };
+
+    _favoriteIds.removeWhere((id) => !activeById.containsKey(id));
+    _favoriteProducts
+      ..clear()
+      ..addAll(_favoriteIds.map((id) => activeById[id]).nonNulls);
+
+    notifyListeners();
+  }
+
   /// Hapus semua favorit
   void clearAll() {
     _favoriteIds.clear();

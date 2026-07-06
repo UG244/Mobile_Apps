@@ -74,6 +74,12 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     );
   }
 
+  void _buyNow(BuildContext context) {
+    final cartItem = product.toCartItem(quantity: _quantity);
+    context.read<CartProvider>().addItem(cartItem);
+    Navigator.of(context).pushNamed('/checkout');
+  }
+
   @override
   Widget build(BuildContext context) {
     // [TAMBAH] Pantau state favorit dari FavoriteProvider
@@ -347,12 +353,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                     borderRadius: BorderRadius.circular(10),
                   ),
                 ),
-                // [LOGIKA] Tambah ke cart lalu langsung navigasi ke halaman cart
+                // [LOGIKA] Tambah ke cart lalu langsung navigasi ke pembayaran
                 onPressed: product.stock > 0
-                    ? () {
-                        _addToCart(context);
-                        Navigator.of(context).pushNamed('/cart');
-                      }
+                    ? () => _buyNow(context)
                     : null, // [LOGIKA] Disable jika stok habis
                 child: const Text(
                   'Beli',

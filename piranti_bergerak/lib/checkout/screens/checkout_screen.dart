@@ -35,7 +35,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           return Scaffold(
             backgroundColor: const Color(0xFFF5F7FA),
             appBar: AppBar(
-              title: const Text('Checkout'),
+              title: const Text('Pembayaran'),
               centerTitle: true,
               elevation: 0,
               backgroundColor: Colors.white,
@@ -84,7 +84,11 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                       '${cart.totalItems} item',
                     ),
                     ...cart.items.map(
-                      (item) => CheckoutProductCard(item: item),
+                      (item) => CheckoutProductCard(
+                        item: item,
+                        onIncrement: () => cart.increaseQuantity(item.id),
+                        onDecrement: () => cart.decreaseQuantity(item.id),
+                      ),
                     ),
                     AddressCard(
                       selectedAddress: prov.selectedAddress,
