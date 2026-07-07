@@ -6,6 +6,8 @@ import 'package:provider/provider.dart';
 import '../../cart/providers/cart_provider.dart';
 import '../../notification/providers/notification_provider.dart';
 import '../../notification/widgets/notification_badge.dart';
+import '../../sensor/services/shake_detector_service.dart';
+import '../../sensor/widgets/shake_refresh_toast.dart';
 import '../providers/favorite_provider.dart';
 import '../providers/product_provider.dart';
 import '../screens/product_detail_screen.dart';
@@ -30,6 +32,7 @@ class _ProductHomeScreenState extends State<ProductHomeScreen> {
   int _bannerIndex = 0;
   int _navIndex = 0; // tab aktif
   Timer? _bannerTimer;
+  ShakeDetectorService? _shakeDetector;
 
   static const _banners = [
     _BannerData(
@@ -53,10 +56,23 @@ class _ProductHomeScreenState extends State<ProductHomeScreen> {
   void initState() {
     super.initState();
     _startBannerAutoScroll();
+    _initShakeDetector();
+  }
+
+  void _initShakeDetector() {
+    _shakeDetector = ShakeDetectorService(
+      onShake: () {
+        if (!mounted) return;
+        context.read<ProductProvider>().refreshRandom();
+        ShakeRefreshToast.show(context);
+      },
+    );
+    _shakeDetector?.startListening();
   }
 
   @override
   void dispose() {
+    _shakeDetector?.stopListening();
     _bannerTimer?.cancel();
     _pageController.dispose();
     super.dispose();

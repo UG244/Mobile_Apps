@@ -82,6 +82,39 @@ class ProductProvider extends ChangeNotifier {
     await loadProducts();
   }
 
+  /// [FITUR SENSOR: SHAKE TO REFRESH]
+  /// Mengacak urutan produk dan memperbarui tampilan saat perangkat diguncang.
+  void refreshRandom() {
+    _allProducts.shuffle();
+    _applyFilter();
+  }
+
+  /// [FITUR SENSOR: BARCODE SCANNER]
+  /// Mencari produk berdasarkan ID, nama, atau deskripsi yang cocok dengan hasil scan barcode/QR.
+  ProductModel? findByBarcode(String barcode) {
+    final query = barcode.trim().toLowerCase();
+    if (query.isEmpty) return null;
+
+    // 1. Cari exact match pada ID
+    try {
+      return _activeProducts.firstWhere(
+        (p) => p.id.toLowerCase() == query,
+      );
+    } catch (_) {}
+
+    // 2. Cari contains pada nama atau deskripsi atau ID
+    try {
+      return _activeProducts.firstWhere(
+        (p) =>
+            p.name.toLowerCase().contains(query) ||
+            p.description.toLowerCase().contains(query) ||
+            p.id.toLowerCase().contains(query),
+      );
+    } catch (_) {
+      return null;
+    }
+  }
+
   // ── Private ───────────────────────────────────────────────────────────────
 
   void _applyFilter() {

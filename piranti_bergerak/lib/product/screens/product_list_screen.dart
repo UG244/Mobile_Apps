@@ -3,6 +3,7 @@ import 'package:provider/provider.dart'; // [TAMBAH] State Management
 
 // [TAMBAH] Import providers
 import '../../cart/providers/cart_provider.dart';
+import '../../sensor/screens/barcode_scanner_screen.dart';
 import '../providers/favorite_provider.dart';
 import '../providers/product_provider.dart';
 // [TAMBAH] Import screen tujuan navigasi
@@ -86,6 +87,18 @@ class _ProductListScreenState extends State<ProductListScreen> {
           ),
         ),
         actions: [
+          // [TAMBAH] Tombol Scan Barcode/QR via Kamera
+          IconButton(
+            icon: const Icon(Icons.qr_code_scanner, color: Color(0xFF0A5EB0)),
+            tooltip: 'Scan Barcode / QR',
+            onPressed: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) => const BarcodeScannerScreen(),
+                ),
+              );
+            },
+          ),
           IconButton(
             icon: const Icon(Icons.filter_list, color: Colors.black), // [TETAP]
             // [UBAH] onPressed dulu kosong → kini tampilkan bottom sheet filter
