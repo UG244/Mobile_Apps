@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../core/theme/app_colors.dart';
 
 class QuantityButton extends StatelessWidget {
   const QuantityButton({
@@ -17,17 +18,28 @@ class QuantityButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: 36,
-      height: 36,
-      child: OutlinedButton(
-        onPressed: disabled ? null : onPressed,
-        style: OutlinedButton.styleFrom(
-          shape: const CircleBorder(),
-          side: BorderSide(color: Theme.of(context).colorScheme.outline.withAlpha((0.6 * 255).round())),
-          padding: EdgeInsets.zero,
-          backgroundColor: color ?? Colors.transparent,
+      width: 32,
+      height: 32,
+      child: Material(
+        color: disabled ? AppColors.surfaceVariant : (color ?? AppColors.surface),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
+          side: BorderSide(
+            color: disabled ? AppColors.border : AppColors.accent,
+            width: 1.2,
+          ),
         ),
-        child: Icon(icon, size: 18, color: disabled ? Colors.grey.shade400 : null),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(8),
+          onTap: disabled ? null : onPressed,
+          child: Center(
+            child: Icon(
+              icon,
+              size: 16,
+              color: disabled ? AppColors.textHint : AppColors.accent,
+            ),
+          ),
+        ),
       ),
     );
   }

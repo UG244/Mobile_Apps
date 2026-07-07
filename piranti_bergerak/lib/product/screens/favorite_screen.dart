@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../core/theme/app_colors.dart';
 import '../models/product_model.dart';
 import '../providers/favorite_provider.dart';
 import '../widgets/product_card.dart';
@@ -14,20 +15,23 @@ class FavoriteScreen extends StatelessWidget {
     final favoriteProvider = context.watch<FavoriteProvider>();
     final favorites = favoriteProvider.favoriteProducts;
 
-    return SafeArea(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // ── Header ────────────────────────────────────────────────────
-          _FavoriteHeader(count: favoriteProvider.count),
+    return Scaffold(
+      backgroundColor: AppColors.background,
+      body: SafeArea(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // ── Header ────────────────────────────────────────────────────
+            _FavoriteHeader(count: favoriteProvider.count),
 
-          // ── Content ───────────────────────────────────────────────────
-          Expanded(
-            child: favorites.isEmpty
-                ? const _EmptyFavorite()
-                : _FavoriteGrid(products: favorites),
-          ),
-        ],
+            // ── Content ───────────────────────────────────────────────────
+            Expanded(
+              child: favorites.isEmpty
+                  ? const _EmptyFavorite()
+                  : _FavoriteGrid(products: favorites),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -41,8 +45,8 @@ class _FavoriteHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: Colors.white,
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
+      color: AppColors.surface,
+      padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
       child: Row(
         children: [
           const Expanded(
@@ -50,11 +54,12 @@ class _FavoriteHeader extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Favorit Saya',
+                  'Produk Favorit Saya',
                   style: TextStyle(
                     fontSize: 20,
-                    fontWeight: FontWeight.w800,
-                    color: Color(0xFF1A1A2E),
+                    fontWeight: FontWeight.w900,
+                    color: AppColors.textPrimary,
+                    letterSpacing: -0.5,
                   ),
                 ),
               ],
@@ -64,7 +69,7 @@ class _FavoriteHeader extends StatelessWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               decoration: BoxDecoration(
-                color: const Color(0xFFFFEBEE),
+                color: AppColors.errorLight,
                 borderRadius: BorderRadius.circular(20),
               ),
               child: Row(
@@ -72,16 +77,16 @@ class _FavoriteHeader extends StatelessWidget {
                 children: [
                   const Icon(
                     Icons.favorite_rounded,
-                    color: Color(0xFFE53935),
+                    color: AppColors.error,
                     size: 14,
                   ),
-                  const SizedBox(width: 4),
+                  const SizedBox(width: 6),
                   Text(
                     '$count item',
                     style: const TextStyle(
-                      color: Color(0xFFE53935),
+                      color: AppColors.error,
                       fontSize: 12,
-                      fontWeight: FontWeight.w700,
+                      fontWeight: FontWeight.w800,
                     ),
                   ),
                 ],
@@ -107,9 +112,9 @@ class _FavoriteGrid extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
-        crossAxisSpacing: 12,
-        mainAxisSpacing: 12,
-        mainAxisExtent: 292,
+        crossAxisSpacing: 14,
+        mainAxisSpacing: 14,
+        mainAxisExtent: 310,
       ),
       itemCount: products.length,
       itemBuilder: (context, index) {
@@ -120,24 +125,24 @@ class _FavoriteGrid extends StatelessWidget {
           onDismissed: (_) => favoriteProvider.toggleFavorite(product),
           background: Container(
             decoration: BoxDecoration(
-              color: const Color(0xFFFFEBEE),
-              borderRadius: BorderRadius.circular(16),
+              color: AppColors.errorLight,
+              borderRadius: BorderRadius.circular(20),
             ),
             child: const Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Icon(
                   Icons.delete_outline_rounded,
-                  color: Color(0xFFE53935),
-                  size: 28,
+                  color: AppColors.error,
+                  size: 30,
                 ),
                 SizedBox(height: 4),
                 Text(
                   'Hapus',
                   style: TextStyle(
-                    color: Color(0xFFE53935),
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
+                    color: AppColors.error,
+                    fontSize: 12.5,
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
               ],
@@ -156,6 +161,7 @@ class _FavoriteGrid extends StatelessWidget {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   behavior: SnackBarBehavior.floating,
+                  backgroundColor: AppColors.textPrimary,
                   margin: const EdgeInsets.all(16),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
@@ -179,57 +185,58 @@ class _EmptyFavorite extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(40),
+        padding: const EdgeInsets.all(36),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // Ilustrasi
             Container(
-              width: 120,
-              height: 120,
-              decoration: BoxDecoration(
-                color: const Color(0xFFFFEBEE),
+              padding: const EdgeInsets.all(28),
+              decoration: const BoxDecoration(
+                color: AppColors.errorLight,
                 shape: BoxShape.circle,
               ),
               child: const Icon(
                 Icons.favorite_border_rounded,
-                size: 56,
-                color: Color(0xFFEF9A9A),
+                size: 64,
+                color: AppColors.error,
               ),
             ),
             const SizedBox(height: 24),
             const Text(
-              'Belum Ada Favorit',
+              'Belum Ada Produk Favorit',
               style: TextStyle(
-                fontSize: 18,
+                fontSize: 20,
                 fontWeight: FontWeight.w800,
-                color: Color(0xFF424242),
+                color: AppColors.textPrimary,
+                letterSpacing: -0.5,
               ),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 10),
             const Text(
-              'Ketuk ikon ♡ pada produk untuk\nmenyimpannya di sini',
+              'Ketuk ikon ♡ pada produk yang Anda sukai untuk menyimpannya ke daftar wishlist ini.',
               textAlign: TextAlign.center,
               style: TextStyle(
-                fontSize: 13.5,
-                color: Color(0xFF9E9E9E),
+                fontSize: 14,
+                color: AppColors.textSecondary,
                 height: 1.5,
               ),
             ),
             const SizedBox(height: 28),
             FilledButton.icon(
               onPressed: () {
-                // Kembali ke root (Home) agar user bisa navigasi ke tab Produk
                 Navigator.of(context).popUntil((route) => route.isFirst);
               },
-              icon: const Icon(Icons.grid_view_rounded, size: 18),
-              label: const Text('Jelajahi Produk'),
+              icon: const Icon(Icons.explore_rounded, size: 18),
+              label: const Text(
+                'Jelajahi Produk',
+                style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
+              ),
               style: FilledButton.styleFrom(
-                backgroundColor: const Color(0xFF1565C0),
+                backgroundColor: AppColors.accent,
                 foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(
-                  horizontal: 24,
-                  vertical: 12,
+                  horizontal: 28,
+                  vertical: 14,
                 ),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(14),

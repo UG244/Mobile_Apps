@@ -1,6 +1,10 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:sqflite/sqflite.dart';
+import 'package:sqflite_common_ffi_web/sqflite_ffi_web.dart';
 
+import 'core/theme/app_theme.dart';
 import 'admin/screens/admin_panel_screen.dart';
 import 'cart/providers/cart_provider.dart';
 import 'cart/screens/cart_screen.dart';
@@ -18,6 +22,9 @@ import 'product/screens/home_screen.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  if (kIsWeb) {
+    databaseFactory = databaseFactoryFfiWeb;
+  }
   await NotificationService.instance.initialize();
   runApp(const MyApp());
 }
@@ -43,23 +50,7 @@ class MyApp extends StatelessWidget {
         title: 'BlueMart Retail',
         debugShowCheckedModeBanner: false,
         scrollBehavior: const NoOverscrollBehavior(),
-        theme: ThemeData(
-          useMaterial3: true,
-          scaffoldBackgroundColor: const Color(0xFFF5F7FA),
-          colorScheme: ColorScheme.fromSeed(
-            seedColor: const Color(0xFF1565C0),
-            primary: const Color(0xFF1565C0),
-            secondary: const Color(0xFF42A5F5),
-            surface: Colors.white,
-            brightness: Brightness.light,
-          ),
-          filledButtonTheme: FilledButtonThemeData(
-            style: FilledButton.styleFrom(
-              backgroundColor: const Color(0xFF1565C0),
-              foregroundColor: Colors.white,
-            ),
-          ),
-        ),
+        theme: AppTheme.lightTheme,
         // Halaman utama sekarang adalah ProductHomeScreen
         home: const ProductHomeScreen(),
         routes: {

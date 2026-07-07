@@ -18,7 +18,7 @@ class CheckoutProvider extends ChangeNotifier {
   double shippingCost = 20000;
 
   // Payment
-  String paymentMethod = 'Transfer Bank';
+  String paymentMethod = 'QRIS';
 
   // Promo
   String? appliedPromoCode;

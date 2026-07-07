@@ -3,11 +3,13 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../core/theme/app_colors.dart';
 import '../../cart/providers/cart_provider.dart';
 import '../../notification/providers/notification_provider.dart';
 import '../../notification/widgets/notification_badge.dart';
 import '../../sensor/services/shake_detector_service.dart';
 import '../../sensor/widgets/shake_refresh_toast.dart';
+import '../../profile/screens/profile_screen.dart';
 import '../providers/favorite_provider.dart';
 import '../providers/product_provider.dart';
 import '../screens/product_detail_screen.dart';
@@ -16,10 +18,10 @@ import '../screens/favorite_screen.dart';
 import '../widgets/cart_notification_overlay.dart';
 import '../widgets/product_card.dart';
 
-/// ProductHomeScreen — Shell navigasi utama aplikasi.
+/// ProductHomeScreen — Shell navigasi utama aplikasi BlueMart Retail modern.
 ///
-/// Menggunakan [IndexedStack] agar BottomNavigationBar SELALU terlihat
-/// di semua tab (Home, Search, Favorite, Profile).
+/// Menggunakan [IndexedStack] agar BottomNavigationBar selalu konsisten
+/// dan mempertahankan state di setiap tab (Home, Search, Favorite, Profile).
 class ProductHomeScreen extends StatefulWidget {
   const ProductHomeScreen({super.key});
 
@@ -30,25 +32,28 @@ class ProductHomeScreen extends StatefulWidget {
 class _ProductHomeScreenState extends State<ProductHomeScreen> {
   final PageController _pageController = PageController();
   int _bannerIndex = 0;
-  int _navIndex = 0; // tab aktif
+  int _navIndex = 0; // Tab aktif
   Timer? _bannerTimer;
   ShakeDetectorService? _shakeDetector;
 
   static const _banners = [
     _BannerData(
-      title: '🔥 Flash Sale Hari Ini',
-      subtitle: 'Diskon hingga 50% untuk produk pilihan',
-      colors: [Color(0xFF0A5EB0), Color(0xFF64B5F6)],
+      title: '🔥 Flash Sale Spesial',
+      subtitle: 'Diskon hingga 50% untuk gadget pilihan',
+      colors: [Color(0xFF1E3A8A), Color(0xFF3B82F6)],
+      badge: 'PROMO HARI INI',
     ),
     _BannerData(
-      title: '🎧 Audio Week',
-      subtitle: 'Headphone & Speaker terbaik',
-      colors: [Color(0xFF006064), Color(0xFF4DD0E1)],
+      title: '🎧 Audio & Gadget Week',
+      subtitle: 'Headphone & Speaker TWS bergaransi resmi',
+      colors: [Color(0xFF0F172A), Color(0xFF0EA5E9)],
+      badge: 'CASHBACK 20%',
     ),
     _BannerData(
-      title: '💻 Laptop Sale',
-      subtitle: 'Laptop terbaru, harga terjangkau',
-      colors: [Color(0xFF4A148C), Color(0xFFBA68C8)],
+      title: '💻 Laptop & Workstation',
+      subtitle: 'Performa tinggi untuk kerja & gaming',
+      colors: [Color(0xFF312E81), Color(0xFF8B5CF6)],
+      badge: 'GRATIS ONGKIR',
     ),
   ];
 
@@ -95,24 +100,66 @@ class _ProductHomeScreenState extends State<ProductHomeScreen> {
     final cartProvider = context.watch<CartProvider>();
     final notificationProvider = context.watch<NotificationProvider>();
 
-    // ─────────────────────────────────────────────────────────────────────
-    // PERBAIKAN NAVIGASI: Satu Scaffold dengan BottomNav.
-    // Body menggunakan IndexedStack → semua tab tersimpan di memory,
-    // hanya tab aktif yang terlihat. BottomNav SELALU tampil.
-    // ─────────────────────────────────────────────────────────────────────
     return Scaffold(
-      // AppBar hanya muncul di tab Home (index 0).
-      // Tab lain (Search, Favorite) punya AppBar sendiri di dalam Scaffold mereka.
+      backgroundColor: AppColors.background,
       appBar: _navIndex == 0
           ? AppBar(
-              title: const Text(
-                'ShopEase',
-                style: TextStyle(
-                  color: Color(0xFF0A5EB0),
-                  fontWeight: FontWeight.bold,
-                ),
+              backgroundColor: AppColors.surface,
+              elevation: 0,
+              titleSpacing: 16,
+              title: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(6),
+                    decoration: BoxDecoration(
+                      color: AppColors.accent.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: const Icon(
+                      Icons.shopping_bag_rounded,
+                      color: AppColors.accent,
+                      size: 22,
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  const Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'BlueMart Retail',
+                        style: TextStyle(
+                          color: AppColors.primary,
+                          fontWeight: FontWeight.w900,
+                          fontSize: 17,
+                          letterSpacing: -0.5,
+                        ),
+                      ),
+                      Row(
+                        children: [
+                          Icon(Icons.location_on_rounded, size: 11, color: AppColors.accentOrange),
+                          SizedBox(width: 2),
+                          Text(
+                            'Dikirim ke Denpasar, Bali',
+                            style: TextStyle(
+                              color: AppColors.textSecondary,
+                              fontSize: 10.5,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ],
               ),
               actions: [
+                // Tombol Scan Barcode Cepat
+                IconButton(
+                  icon: const Icon(Icons.qr_code_scanner_rounded, color: AppColors.textPrimary),
+                  tooltip: 'Scan Barcode / QR',
+                  onPressed: () => Navigator.of(context).pushNamed('/barcode-scanner'),
+                ),
+                // Notifikasi
                 NotificationBadge(
                   count: notificationProvider.unreadCount,
                   onTap: () async {
@@ -122,12 +169,12 @@ class _ProductHomeScreenState extends State<ProductHomeScreen> {
                     }
                   },
                 ),
-                // [FIJI INTEGRATION] Cart icon + badge → CartScreen Fiji
+                // Keranjang
                 Stack(
                   clipBehavior: Clip.none,
                   children: [
                     IconButton(
-                      icon: const Icon(Icons.shopping_bag_outlined),
+                      icon: const Icon(Icons.shopping_cart_outlined, color: AppColors.textPrimary),
                       onPressed: () => Navigator.of(context).pushNamed('/cart'),
                     ),
                     if (cartProvider.totalItems > 0)
@@ -135,19 +182,19 @@ class _ProductHomeScreenState extends State<ProductHomeScreen> {
                         top: 4,
                         right: 4,
                         child: Container(
-                          width: 16,
-                          height: 16,
+                          padding: const EdgeInsets.all(4),
                           decoration: const BoxDecoration(
-                            color: Colors.red,
+                            color: AppColors.error,
                             shape: BoxShape.circle,
                           ),
+                          constraints: const BoxConstraints(minWidth: 18, minHeight: 18),
                           child: Center(
                             child: Text(
                               '${cartProvider.totalItems}',
                               style: const TextStyle(
                                 color: Colors.white,
-                                fontSize: 9,
-                                fontWeight: FontWeight.bold,
+                                fontSize: 10,
+                                fontWeight: FontWeight.w800,
                               ),
                             ),
                           ),
@@ -155,64 +202,79 @@ class _ProductHomeScreenState extends State<ProductHomeScreen> {
                       ),
                   ],
                 ),
+                const SizedBox(width: 4),
               ],
-              backgroundColor: Colors.white,
-              elevation: 0,
             )
-          : null, // tab lain handle AppBar sendiri
-      // ── IndexedStack: render semua tab, tampilkan sesuai _navIndex ────────
+          : null,
       body: IndexedStack(
         index: _navIndex,
         children: [
-          // ── Tab 0: Home ───────────────────────────────────────────────
           _HomeTabBody(
             pageController: _pageController,
             bannerIndex: _bannerIndex,
             banners: _banners,
             onPageChanged: (i) => setState(() => _bannerIndex = i),
-            // Tap kategori → filter + pindah ke tab Search
             onCategoryTap: (catId) {
               context.read<ProductProvider>().filterByCategory(catId);
-              setState(() => _navIndex = 1);
+              setState(() => _navIndex = 1); // Pindah ke tab Search
             },
           ),
-
-          // ── Tab 1: Search / Product List ─────────────────────────────
-          // ProductListScreen adalah Scaffold penuh dengan AppBar sendiri
           const ProductListScreen(),
-
-          // ── Tab 2: Favorite ───────────────────────────────────────────
-          // FavoriteScreen adalah Scaffold penuh dengan AppBar sendiri
           const FavoriteScreen(),
-
-          // ── Tab 3: Profile (placeholder) ─────────────────────────────
-          const _ProfileTab(),
+          const ProfileScreen(),
         ],
       ),
-
-      // ── BottomNavigationBar — sekarang SELALU tampil di semua tab ─────────
-      bottomNavigationBar: BottomNavigationBar(
-        type: BottomNavigationBarType.fixed,
-        selectedItemColor: const Color(0xFF0A5EB0),
-        currentIndex: _navIndex,
-        onTap: (index) => setState(() => _navIndex = index),
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-          BottomNavigationBarItem(icon: Icon(Icons.search), label: 'Search'),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.favorite),
-            label: 'Favorite',
+      bottomNavigationBar: Container(
+        decoration: BoxDecoration(
+          color: AppColors.surface,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.06),
+              blurRadius: 16,
+              offset: const Offset(0, -4),
+            ),
+          ],
+        ),
+        child: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+            child: BottomNavigationBar(
+              type: BottomNavigationBarType.fixed,
+              backgroundColor: Colors.transparent,
+              elevation: 0,
+              selectedItemColor: AppColors.accent,
+              unselectedItemColor: AppColors.textHint,
+              currentIndex: _navIndex,
+              onTap: (index) => setState(() => _navIndex = index),
+              items: const [
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.home_outlined),
+                  activeIcon: Icon(Icons.home_rounded),
+                  label: 'Home',
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.search_outlined),
+                  activeIcon: Icon(Icons.search_rounded),
+                  label: 'Katalog',
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.favorite_outline_rounded),
+                  activeIcon: Icon(Icons.favorite_rounded),
+                  label: 'Favorit',
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.person_outline_rounded),
+                  activeIcon: Icon(Icons.person_rounded),
+                  label: 'Akun Saya',
+                ),
+              ],
+            ),
           ),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
-        ],
+        ),
       ),
     );
   }
 }
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Tab 0 — Konten Home (tanpa Scaffold, AppBar sudah di ProductHomeScreen)
-// ─────────────────────────────────────────────────────────────────────────────
 
 class _HomeTabBody extends StatelessWidget {
   const _HomeTabBody({
@@ -236,12 +298,66 @@ class _HomeTabBody extends StatelessWidget {
     final cartProvider = context.watch<CartProvider>();
 
     return SingleChildScrollView(
+      physics: const BouncingScrollPhysics(),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // ── Banner Promo ────────────────────────────────────────────────
+          // ── Search Bar Hero ─────────────────────────────────────────────
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 10, 16, 6),
+            child: GestureDetector(
+              onTap: () {
+                // Pindah ke halaman pencarian/katalog
+                context.read<ProductProvider>().clearSearch();
+              },
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                decoration: BoxDecoration(
+                  color: AppColors.surface,
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(color: AppColors.border),
+                  boxShadow: AppColors.cardShadow,
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.search_rounded, color: AppColors.textHint, size: 22),
+                    const SizedBox(width: 10),
+                    const Expanded(
+                      child: Text(
+                        'Cari laptop, smartphone, audio...',
+                        style: TextStyle(color: AppColors.textHint, fontSize: 13.5),
+                      ),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: AppColors.surfaceVariant,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: const Row(
+                        children: [
+                          Icon(Icons.qr_code_scanner_rounded, size: 16, color: AppColors.accent),
+                          SizedBox(width: 4),
+                          Text(
+                            'Scan',
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w700,
+                              color: AppColors.accent,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+
+          // ── Parallax Promo Banner ───────────────────────────────────────
           SizedBox(
-            height: 180,
+            height: 185,
             child: PageView.builder(
               controller: pageController,
               itemCount: banners.length,
@@ -249,98 +365,190 @@ class _HomeTabBody extends StatelessWidget {
               itemBuilder: (context, index) {
                 final banner = banners[index];
                 return Container(
-                  margin: const EdgeInsets.all(16),
+                  margin: const EdgeInsets.fromLTRB(16, 12, 16, 8),
                   decoration: BoxDecoration(
-                    gradient: LinearGradient(colors: banner.colors),
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(20),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          banner.title,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 6),
-                        Text(
-                          banner.subtitle,
-                          style: TextStyle(
-                            color: Colors.white.withAlpha(210),
-                            fontSize: 13,
-                          ),
-                        ),
-                      ],
+                    gradient: LinearGradient(
+                      colors: banner.colors,
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
                     ),
+                    borderRadius: BorderRadius.circular(20),
+                    boxShadow: [
+                      BoxShadow(
+                        color: banner.colors.first.withOpacity(0.3),
+                        blurRadius: 16,
+                        offset: const Offset(0, 6),
+                      ),
+                    ],
+                  ),
+                  child: Stack(
+                    children: [
+                      Positioned(
+                        right: -20,
+                        bottom: -20,
+                        child: Icon(
+                          Icons.shopping_bag_outlined,
+                          size: 140,
+                          color: Colors.white.withOpacity(0.12),
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(22),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFFACC15),
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              child: Text(
+                                banner.badge,
+                                style: const TextStyle(
+                                  color: AppColors.primaryDark,
+                                  fontSize: 10.5,
+                                  fontWeight: FontWeight.w900,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 10),
+                            Text(
+                              banner.title,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 19,
+                                fontWeight: FontWeight.w800,
+                                letterSpacing: -0.5,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              banner.subtitle,
+                              style: TextStyle(
+                                color: Colors.white.withOpacity(0.9),
+                                fontSize: 13,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
                 );
               },
             ),
           ),
 
-          // ── Dot indicator banner ────────────────────────────────────────
+          // ── Dot Indicator ───────────────────────────────────────────────
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: List.generate(banners.length, (i) {
               final isActive = i == bannerIndex;
               return AnimatedContainer(
-                duration: const Duration(milliseconds: 250),
+                duration: const Duration(milliseconds: 300),
                 margin: const EdgeInsets.symmetric(horizontal: 3),
-                width: isActive ? 18 : 6,
+                width: isActive ? 22 : 6,
                 height: 6,
                 decoration: BoxDecoration(
-                  color: isActive
-                      ? const Color(0xFF0A5EB0)
-                      : Colors.blue.shade100,
+                  color: isActive ? AppColors.accent : AppColors.border,
                   borderRadius: BorderRadius.circular(3),
                 ),
               );
             }),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 16),
 
-          // ── Kategori ───────────────────────────────────────────────────
+          // ── Kategori Pilihan ────────────────────────────────────────────
           const Padding(
             padding: EdgeInsets.symmetric(horizontal: 16),
-            child: Text(
-              'Kategori',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Kategori Pilihan',
+                  style: TextStyle(
+                    fontSize: 17,
+                    fontWeight: FontWeight.w800,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+                Text(
+                  'Lihat Semua',
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.accent,
+                  ),
+                ),
+              ],
             ),
           ),
           const SizedBox(height: 12),
           SizedBox(
-            height: 100,
+            height: 95,
             child: ListView(
               scrollDirection: Axis.horizontal,
+              physics: const BouncingScrollPhysics(),
               padding: const EdgeInsets.symmetric(horizontal: 12),
               children: productProvider.categories.map((cat) {
                 return _CategoryItem(
                   label: cat.name,
                   icon: _iconFromName(cat.iconName),
-                  // Tap kategori → filter produk + pindah ke tab Search
                   onTap: () => onCategoryTap(cat.id),
                 );
               }).toList(),
             ),
           ),
+          const SizedBox(height: 12),
 
-          // ── Rekomendasi Produk ─────────────────────────────────────────
-          const Padding(
-            padding: EdgeInsets.all(16),
-            child: Text(
-              'Rekomendasi',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          // ── Rekomendasi Spesial ─────────────────────────────────────────
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Rekomendasi Spesial 🔥',
+                      style: TextStyle(
+                        fontSize: 17,
+                        fontWeight: FontWeight.w800,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                    Text(
+                      'Produk terbaik pilihan kami untuk Anda',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                  ],
+                ),
+                IconButton(
+                  icon: const Icon(Icons.refresh_rounded, color: AppColors.accent),
+                  tooltip: 'Acak Produk (Shake)',
+                  onPressed: () {
+                    context.read<ProductProvider>().refreshRandom();
+                    ShakeRefreshToast.show(context);
+                  },
+                ),
+              ],
             ),
           ),
+          const SizedBox(height: 10),
 
           if (productProvider.isLoading)
-            const Center(child: CircularProgressIndicator())
+            const Center(
+              child: Padding(
+                padding: EdgeInsets.all(40),
+                child: CircularProgressIndicator(color: AppColors.accent),
+              ),
+            )
           else
             GridView.builder(
               shrinkWrap: true,
@@ -348,126 +556,40 @@ class _HomeTabBody extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 16),
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 2,
-                mainAxisExtent: 292,
-                mainAxisSpacing: 12,
-                crossAxisSpacing: 12,
+                mainAxisExtent: 295,
+                mainAxisSpacing: 14,
+                crossAxisSpacing: 14,
               ),
               itemCount: productProvider.featuredProducts.length,
               itemBuilder: (context, index) {
                 final product = productProvider.featuredProducts[index];
-
                 return ProductCard(
                   product: product,
                   isFavorite: favoriteProvider.isFavorite(product.id),
-                  // [NAVIGASI] Tap card → ProductDetailScreen (push, bisa back)
                   onTap: () => Navigator.of(context).push(
                     MaterialPageRoute(
                       builder: (_) => ProductDetailScreen(product: product),
                     ),
                   ),
-                  // [FIJI INTEGRATION] Toggle favorit
                   onFavoriteTap: () => favoriteProvider.toggleFavorite(product),
-                  // [FIJI INTEGRATION] Tambah ke CartProvider Fiji
                   onAddToCart: () {
                     cartProvider.addItem(product.toCartItem());
                     CartNotificationOverlay.show(
                       context,
                       message: '${product.name} ditambahkan ke keranjang',
-                      onViewCart: () =>
-                          Navigator.of(context).pushNamed('/cart'),
+                      onViewCart: () => Navigator.of(context).pushNamed('/cart'),
                     );
                   },
                 );
               },
             ),
 
-          const SizedBox(height: 20),
+          const SizedBox(height: 30),
         ],
       ),
     );
   }
 }
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Tab 3 — Profile (placeholder sederhana)
-// ─────────────────────────────────────────────────────────────────────────────
-
-class _ProfileTab extends StatelessWidget {
-  const _ProfileTab();
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text(
-          'Profil',
-          style: TextStyle(
-            color: Color(0xFF0A5EB0),
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        backgroundColor: Colors.white,
-        elevation: 0,
-      ),
-      body: Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const CircleAvatar(
-              radius: 48,
-              backgroundColor: Color(0xFFE3F2FD),
-              child: Icon(Icons.person, size: 48, color: Color(0xFF0A5EB0)),
-            ),
-            const SizedBox(height: 16),
-            const Text(
-              'Pengguna ShopEase',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 8),
-            const Text(
-              'user@shopease.com',
-              style: TextStyle(color: Colors.grey),
-            ),
-            const SizedBox(height: 32),
-            // [FIJI INTEGRATION] Shortcut ke Riwayat Pesanan milik Fiji
-            ListTile(
-              leading: const Icon(
-                Icons.receipt_long_outlined,
-                color: Color(0xFF0A5EB0),
-              ),
-              title: const Text('Riwayat Pesanan'),
-              trailing: const Icon(Icons.chevron_right),
-              onTap: () => Navigator.of(context).pushNamed('/orders'),
-            ),
-            // [FIJI INTEGRATION] Shortcut ke Cart milik Fiji
-            ListTile(
-              leading: const Icon(
-                Icons.shopping_bag_outlined,
-                color: Color(0xFF0A5EB0),
-              ),
-              title: const Text('Keranjang Saya'),
-              trailing: const Icon(Icons.chevron_right),
-              onTap: () => Navigator.of(context).pushNamed('/cart'),
-            ),
-            ListTile(
-              leading: const Icon(
-                Icons.admin_panel_settings_outlined,
-                color: Color(0xFF0A5EB0),
-              ),
-              title: const Text('Admin Panel'),
-              trailing: const Icon(Icons.chevron_right),
-              onTap: () => Navigator.of(context).pushNamed('/admin'),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Widget _CategoryItem
-// ─────────────────────────────────────────────────────────────────────────────
 
 class _CategoryItem extends StatelessWidget {
   final String label;
@@ -480,17 +602,33 @@ class _CategoryItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onTap,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 8),
+      child: Container(
+        width: 78,
+        margin: const EdgeInsets.symmetric(horizontal: 4),
         child: Column(
           children: [
-            CircleAvatar(
-              radius: 30,
-              backgroundColor: Colors.blue[50],
-              child: Icon(icon, color: const Color(0xFF0A5EB0)),
+            Container(
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                color: AppColors.surface,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: AppColors.border),
+                boxShadow: AppColors.cardShadow,
+              ),
+              child: Icon(icon, color: AppColors.accent, size: 24),
             ),
-            const SizedBox(height: 4),
-            Text(label),
+            const SizedBox(height: 6),
+            Text(
+              label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontSize: 11.5,
+                fontWeight: FontWeight.w600,
+                color: AppColors.textPrimary,
+              ),
+            ),
           ],
         ),
       ),
@@ -498,33 +636,27 @@ class _CategoryItem extends StatelessWidget {
   }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Data banner
-// ─────────────────────────────────────────────────────────────────────────────
-
 class _BannerData {
   const _BannerData({
     required this.title,
     required this.subtitle,
     required this.colors,
+    required this.badge,
   });
   final String title;
   final String subtitle;
   final List<Color> colors;
+  final String badge;
 }
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Helper: String iconName → IconData
-// ─────────────────────────────────────────────────────────────────────────────
 
 IconData _iconFromName(String name) {
   const map = <String, IconData>{
-    'laptop_mac': Icons.laptop_mac,
-    'smartphone': Icons.smartphone,
-    'headphones': Icons.headphones,
-    'sports_esports': Icons.sports_esports,
-    'cable': Icons.cable,
-    'storage': Icons.storage,
+    'laptop_mac': Icons.laptop_mac_rounded,
+    'smartphone': Icons.smartphone_rounded,
+    'headphones': Icons.headphones_rounded,
+    'sports_esports': Icons.sports_esports_rounded,
+    'cable': Icons.cable_rounded,
+    'storage': Icons.storage_rounded,
   };
-  return map[name] ?? Icons.category;
+  return map[name] ?? Icons.category_rounded;
 }

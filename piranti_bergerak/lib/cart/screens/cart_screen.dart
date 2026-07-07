@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../core/theme/app_colors.dart';
 import '../providers/cart_provider.dart';
 import '../widgets/cart_item_card.dart';
 import '../widgets/order_summary_card.dart';
@@ -25,31 +26,24 @@ class _CartScreenContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final provider = context.watch<CartProvider>();
-    final colorScheme = Theme.of(context).colorScheme;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F7FA),
+      backgroundColor: AppColors.background,
       appBar: AppBar(
         title: const Text('Keranjang Belanja'),
         centerTitle: true,
         elevation: 0,
-        backgroundColor: Colors.white,
-        foregroundColor: colorScheme.primary,
+        backgroundColor: AppColors.surface,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded),
-          color: colorScheme.primary,
-          onPressed: () => Navigator.of(
-            context,
-          ).pushNamedAndRemoveUntil('/', (route) => false),
+          icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 18, color: AppColors.textPrimary),
+          onPressed: () => Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false),
         ),
       ),
-      body: provider.isEmpty
-          ? _buildEmpty(context, provider)
-          : _buildContent(context, provider),
+      body: provider.isEmpty ? _buildEmpty(context, provider) : _buildContent(context, provider),
       bottomNavigationBar: provider.isEmpty
           ? null
           : CheckoutButton(
-              label: 'Checkout • Rp ${formatNumber(provider.grandTotal)}',
+              label: 'Checkout Sekarang • Rp ${formatNumber(provider.grandTotal)}',
               enabled: !provider.isEmpty,
               onPressed: () => Navigator.of(context).pushNamed('/checkout'),
             ),
@@ -57,89 +51,78 @@ class _CartScreenContent extends StatelessWidget {
   }
 
   Widget _buildContent(BuildContext context, CartProvider provider) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        return Column(
-          children: [
-            Expanded(
-              child: RefreshIndicator(
-                onRefresh: () async => Future.value(),
-                child: ScrollConfiguration(
-                  behavior: const NoOverscrollBehavior(),
-                  child: ListView.builder(
-                    physics: const AlwaysScrollableScrollPhysics(
-                      parent: SlowDownScrollPhysics(
-                        velocityFactor: 0.5,
-                        dragFactor: 0.65,
-                      ),
-                    ),
-                    padding: const EdgeInsets.only(top: 12, bottom: 8),
-                    itemCount: provider.items.length + 1,
-                    itemBuilder: (context, index) {
-                      if (index < provider.items.length) {
-                        final item = provider.items[index];
-                        return CartItemCard(
-                          item: item,
-                          onIncrement: () => provider.increaseQuantity(item.id),
-                          onDecrement: () => provider.decreaseQuantity(item.id),
-                          onRemove: () =>
-                              _confirmDelete(context, provider, item.id),
-                        );
-                      }
-                      return OrderSummaryCard(
-                        subtotal: provider.subtotal,
-                        shipping: provider.shipping,
-                        discount: 0,
-                        tax: provider.tax,
-                        grandTotal: provider.grandTotal,
-                      );
-                    },
-                  ),
+    return Column(
+      children: [
+        Expanded(
+          child: RefreshIndicator(
+            color: AppColors.accent,
+            onRefresh: () async => Future.value(),
+            child: ScrollConfiguration(
+              behavior: const NoOverscrollBehavior(),
+              child: ListView.builder(
+                physics: const AlwaysScrollableScrollPhysics(
+                  parent: SlowDownScrollPhysics(velocityFactor: 0.5, dragFactor: 0.65),
                 ),
+                padding: const EdgeInsets.only(top: 12, bottom: 8),
+                itemCount: provider.items.length + 1,
+                itemBuilder: (context, index) {
+                  if (index < provider.items.length) {
+                    final item = provider.items[index];
+                    return CartItemCard(
+                      item: item,
+                      onIncrement: () => provider.increaseQuantity(item.id),
+                      onDecrement: () => provider.decreaseQuantity(item.id),
+                      onRemove: () => _confirmDelete(context, provider, item.id),
+                    );
+                  }
+                  return OrderSummaryCard(
+                    subtotal: provider.subtotal,
+                    shipping: provider.shipping,
+                    discount: 0,
+                    tax: provider.tax,
+                    grandTotal: provider.grandTotal,
+                  );
+                },
               ),
             ),
-          ],
-        );
-      },
+          ),
+        ),
+      ],
     );
   }
 
   Widget _buildEmpty(BuildContext context, CartProvider provider) {
     return EmptyCartWidget(
-      onShop: () =>
-          Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false),
+      onShop: () => Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false),
     );
   }
 
-  Future<void> _confirmDelete(
-    BuildContext context,
-    CartProvider provider,
-    String itemId,
-  ) async {
+  Future<void> _confirmDelete(BuildContext context, CartProvider provider, String itemId) async {
     final dialogContext = context;
-    final confirmed =
-        await showDialog<bool>(
-          context: dialogContext,
-          builder: (innerContext) {
-            return AlertDialog(
-              title: const Text('Hapus Produk'),
-              content: const Text(
-                'Apakah Anda yakin ingin menghapus produk ini dari keranjang?',
+    final confirmed = await showDialog<bool>(
+      context: dialogContext,
+      builder: (innerContext) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          title: const Text('Hapus Item', style: TextStyle(fontWeight: FontWeight.w800)),
+          content: const Text('Apakah Anda yakin ingin menghapus produk ini dari keranjang belanja?'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(innerContext).pop(false),
+              child: const Text('Batal', style: TextStyle(color: AppColors.textSecondary)),
+            ),
+            FilledButton(
+              style: FilledButton.styleFrom(
+                backgroundColor: AppColors.error,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
               ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.of(innerContext).pop(false),
-                  child: const Text('Batal'),
-                ),
-                FilledButton(
-                  onPressed: () => Navigator.of(innerContext).pop(true),
-                  child: const Text('Hapus'),
-                ),
-              ],
-            );
-          },
-        ) ??
-        false;
+              onPressed: () => Navigator.of(innerContext).pop(true),
+              child: const Text('Hapus'),
+            ),
+          ],
+        );
+      },
+    ) ?? false;
 
     if (!confirmed) return;
     if (!context.mounted) return;

@@ -1,209 +1,237 @@
 import 'package:flutter/material.dart';
-
-// [LOGIKA] Import model produk sebagai sumber data tunggal
+import '../../core/theme/app_colors.dart';
 import '../models/product_model.dart';
-// [LOGIKA] Import format angka untuk menampilkan harga (Rp xxx.xxx)
 import '../../cart/utils/format_utils.dart';
 
-/// ProductCard — desain UI dari kamu, logika ditambahkan.
+/// ProductCard Modern & Clean untuk BlueMart Retail.
 ///
-/// Perubahan parameter:
-///   • [product]       menggantikan imageUrl/title/price (sumber data tunggal)
-///   • [isFavorite]    tetap ada, tapi kini datang dari FavoriteProvider (di screen)
-///   • [onTap]         navigasi ke ProductDetailScreen
-///   • [onFavoriteTap] toggle favorit via FavoriteProvider
-///   • [onAddToCart]   mengirim produk ke CartProvider milik Fiji
+/// Menggunakan antarmuka kartu beradius modern (16px), subtle shadow,
+/// badge persentase diskon, rating emas, serta tombol cepat "+ Cart" berdesain premium.
 class ProductCard extends StatelessWidget {
-  final ProductModel
-  product; // [UBAH] dari String imageUrl/title/price → ProductModel
-  final bool
-  isFavorite; // [TETAP] state favorit dikirim dari luar (Consumer di screen)
-  final VoidCallback? onTap; // [TAMBAH] callback navigasi ke detail
-  final VoidCallback? onFavoriteTap; // [TAMBAH] callback toggle favorit
-  final VoidCallback?
-  onAddToCart; // [TAMBAH] callback "Add to Cart" → CartProvider Fiji
+  final ProductModel product;
+  final bool isFavorite;
+  final VoidCallback? onTap;
+  final VoidCallback? onFavoriteTap;
+  final VoidCallback? onAddToCart;
 
   const ProductCard({
     super.key,
-    required this.product, // [UBAH]
+    required this.product,
     required this.isFavorite,
-    this.onTap, // [TAMBAH]
-    this.onFavoriteTap, // [TAMBAH]
-    this.onAddToCart, // [TAMBAH]
+    this.onTap,
+    this.onFavoriteTap,
+    this.onAddToCart,
   });
 
   @override
   Widget build(BuildContext context) {
-    // [LOGIKA] Bungkus seluruh card dengan GestureDetector untuk navigasi onTap
     return GestureDetector(
-      onTap: onTap, // [TAMBAH] navigasi ke ProductDetailScreen
-      child: Card(
-        // ── DESAIN DIPERTAHANKAN ─────────────────────────────────────────
-        elevation: 2,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        // ─────────────────────────────────────────────────────────────────
+      onTap: onTap,
+      child: Container(
+        decoration: BoxDecoration(
+          color: AppColors.surface,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: AppColors.border, width: 1),
+          boxShadow: AppColors.cardShadow,
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // ── Area Gambar & Badges ─────────────────────────────────────
             Stack(
               children: [
-                // ── Area Gambar (desain dipertahankan) ─────────────────
                 Container(
-                  height: 140,
+                  height: 145,
                   width: double.infinity,
-                  decoration: BoxDecoration(
-                    color: Colors.grey[300],
-                    borderRadius: const BorderRadius.vertical(
-                      top: Radius.circular(12),
+                  decoration: const BoxDecoration(
+                    color: AppColors.surfaceVariant,
+                    borderRadius: BorderRadius.vertical(
+                      top: Radius.circular(15),
                     ),
                   ),
-                  // [LOGIKA] Tampilkan gambar produk dari URL. Jika gagal,
-                  // tampilkan placeholder icon (desain fallback tetap sama).
                   child: ClipRRect(
                     borderRadius: const BorderRadius.vertical(
-                      top: Radius.circular(12),
+                      top: Radius.circular(15),
                     ),
                     child: product.imageUrl.isNotEmpty
                         ? Image.network(
-                            product.imageUrl, // [UBAH] dari static icon
+                            product.imageUrl,
                             fit: BoxFit.cover,
-                            // [LOGIKA] Tampilkan loading saat gambar dimuat
                             loadingBuilder: (_, child, progress) {
                               if (progress == null) return child;
                               return const Center(
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                  color: Color(0xFF0A5EB0),
+                                child: SizedBox(
+                                  width: 24,
+                                  height: 24,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2.5,
+                                    color: AppColors.accent,
+                                  ),
                                 ),
                               );
                             },
-                            // [LOGIKA] Fallback jika URL gambar error
                             errorBuilder: (_, _, _) => const Icon(
-                              Icons.image,
-                              size: 50,
-                              color: Colors.grey,
+                              Icons.image_outlined,
+                              size: 44,
+                              color: AppColors.textHint,
                             ),
                           )
-                        // [LOGIKA] Fallback jika imageUrl kosong
-                        : const Icon(Icons.image, size: 50, color: Colors.grey),
+                        : const Icon(
+                            Icons.image_outlined,
+                            size: 44,
+                            color: AppColors.textHint,
+                          ),
                   ),
                 ),
 
-                // ── Badge Diskon (TAMBAH — tidak ubah posisi lain) ──────
-                // [TAMBAH] Tampilkan badge merah jika produk sedang diskon
+                // Badge Diskon (Kiri Atas)
                 if (product.isOnSale)
                   Positioned(
-                    top: 8,
-                    left: 8,
+                    top: 10,
+                    left: 10,
                     child: Container(
                       padding: const EdgeInsets.symmetric(
-                        horizontal: 6,
-                        vertical: 2,
+                        horizontal: 8,
+                        vertical: 4,
                       ),
                       decoration: BoxDecoration(
-                        color: Colors.red,
-                        borderRadius: BorderRadius.circular(6),
+                        color: AppColors.accentOrange,
+                        borderRadius: BorderRadius.circular(8),
+                        boxShadow: const [
+                          BoxShadow(
+                            color: Color(0x33F97316),
+                            blurRadius: 8,
+                            offset: Offset(0, 2),
+                          ),
+                        ],
                       ),
                       child: Text(
                         '-${product.discountPercent}%',
                         style: const TextStyle(
                           color: Colors.white,
-                          fontSize: 10,
-                          fontWeight: FontWeight.bold,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w800,
                         ),
                       ),
                     ),
                   ),
 
-                // ── Tombol Favorit (desain circle putih dipertahankan) ──
+                // Tombol Favorit (Kanan Atas)
                 Positioned(
                   top: 8,
                   right: 8,
-                  child: Container(
-                    decoration: const BoxDecoration(
-                      color: Colors.white, // [TETAP] lingkaran putih
-                      shape: BoxShape.circle,
-                    ),
-                    child: IconButton(
-                      icon: Icon(
-                        // [LOGIKA] Ikon berubah sesuai state isFavorite
-                        isFavorite ? Icons.favorite : Icons.favorite_border,
-                        // [LOGIKA] Warna merah jika favorit, abu jika tidak
-                        color: isFavorite ? Colors.red : Colors.grey,
-                        size: 20,
+                  child: Material(
+                    color: Colors.white.withOpacity(0.9),
+                    shape: const CircleBorder(),
+                    elevation: 2,
+                    child: InkWell(
+                      customBorder: const CircleBorder(),
+                      onTap: onFavoriteTap,
+                      child: Padding(
+                        padding: const EdgeInsets.all(7.0),
+                        child: Icon(
+                          isFavorite ? Icons.favorite : Icons.favorite_border_rounded,
+                          color: isFavorite ? AppColors.error : AppColors.textSecondary,
+                          size: 18,
+                        ),
                       ),
-                      // [UBAH] onPressed kosong → kini memanggil onFavoriteTap
-                      onPressed: onFavoriteTap,
                     ),
                   ),
                 ),
               ],
             ),
 
-            // ── Info Produk (desain padding & style dipertahankan) ──────
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    product.name, // [UBAH] dari static String title
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(fontWeight: FontWeight.w500),
-                  ),
-                  const SizedBox(height: 4),
-                  // [LOGIKA] Tampilkan harga coret jika ada diskon
-                  if (product.isOnSale)
+            // ── Info Produk & Harga ──────────────────────────────────────
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Rating & Kategori
+                    Row(
+                      children: [
+                        const Icon(
+                          Icons.star_rounded,
+                          color: Color(0xFFFACC15),
+                          size: 16,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          '${product.rating} (${product.reviewCount})',
+                          style: const TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.textSecondary,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+
+                    // Nama Produk
                     Text(
-                      'Rp ${formatNumber(product.originalPrice)}',
+                      product.name,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
-                        fontSize: 11,
-                        color: Colors.grey,
-                        decoration: TextDecoration.lineThrough,
+                        fontWeight: FontWeight.w700,
+                        fontSize: 13.5,
+                        color: AppColors.textPrimary,
+                        height: 1.25,
                       ),
                     ),
-                  // [LOGIKA] Harga utama — format angka dari double
-                  Text(
-                    'Rp ${formatNumber(product.price)}', // [UBAH] dari static String price
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      color: Color(0xFF0A5EB0), // [TETAP] warna biru sama
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const Spacer(),
-            // ── Tombol "+" Add to Cart (TAMBAH) ──────────────────
-            // [TAMBAH] Tombol cepat tambah ke keranjang dari grid
-            if (onAddToCart != null)
-              Padding(
-                padding: const EdgeInsets.fromLTRB(8, 0, 8, 8),
-                child: Align(
-                  alignment: Alignment.centerRight,
-                  child: GestureDetector(
-                    // [FIJI INTEGRATION] Panggil CartProvider.addItem()
-                    onTap: onAddToCart,
-                    child: Container(
-                      width: 30,
-                      height: 30,
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF0A5EB0),
-                        borderRadius: BorderRadius.circular(8),
+                    const Spacer(),
+
+                    // Harga Coret & Harga Utama
+                    if (product.isOnSale)
+                      Text(
+                        'Rp ${formatNumber(product.originalPrice)}',
+                        style: const TextStyle(
+                          fontSize: 11,
+                          color: AppColors.textHint,
+                          decoration: TextDecoration.lineThrough,
+                        ),
                       ),
-                      child: const Icon(
-                        Icons.add,
-                        color: Colors.white,
-                        size: 18,
-                      ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Expanded(
+                          child: Text(
+                            'Rp ${formatNumber(product.price)}',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              color: AppColors.accent,
+                              fontWeight: FontWeight.w800,
+                              fontSize: 15,
+                            ),
+                          ),
+                        ),
+                        if (onAddToCart != null)
+                          Material(
+                            color: AppColors.primary,
+                            borderRadius: BorderRadius.circular(10),
+                            child: InkWell(
+                              borderRadius: BorderRadius.circular(10),
+                              onTap: onAddToCart,
+                              child: const Padding(
+                                padding: EdgeInsets.all(6.0),
+                                child: Icon(
+                                  Icons.add_shopping_cart_rounded,
+                                  color: Colors.white,
+                                  size: 18,
+                                ),
+                              ),
+                            ),
+                          ),
+                      ],
                     ),
-                  ),
+                  ],
                 ),
               ),
+            ),
           ],
         ),
       ),

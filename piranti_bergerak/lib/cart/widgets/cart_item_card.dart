@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../core/theme/app_colors.dart';
 import '../models/cart_item_model.dart';
 import 'quantity_button.dart';
 import '../utils/format_utils.dart';
@@ -20,66 +21,124 @@ class CartItemCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Card(
+    return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-      elevation: 2,
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            _buildImage(context),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(item.name, style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700)),
-                  const SizedBox(height: 4),
-                  Text(item.category, style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.primary)),
-                  const SizedBox(height: 8),
-                  Text('Rp ${formatNumber(item.price)}', style: theme.textTheme.bodyMedium),
-                  const SizedBox(height: 8),
-                  Row(
-                    children: [
-                      QuantityButton(icon: Icons.remove, onPressed: onDecrement, disabled: item.quantity <= 1),
-                      const SizedBox(width: 8),
-                      Text('${item.quantity}', style: theme.textTheme.titleMedium),
-                      const SizedBox(width: 8),
-                      QuantityButton(icon: Icons.add, onPressed: onIncrement),
-                      const Spacer(),
-                      IconButton(onPressed: onRemove, icon: const Icon(Icons.delete_outline_rounded), color: theme.colorScheme.error),
-                    ],
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.border),
+        boxShadow: AppColors.cardShadow,
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          _buildImage(),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  item.name,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w700,
+                    fontSize: 14.5,
+                    color: AppColors.textPrimary,
+                    height: 1.25,
                   ),
-                ],
-              ),
+                ),
+                const SizedBox(height: 4),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: AppColors.surfaceVariant,
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: Text(
+                    item.category,
+                    style: const TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 10),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Rp ${formatNumber(item.price)}',
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w800,
+                        fontSize: 14,
+                        color: AppColors.accent,
+                      ),
+                    ),
+                    Row(
+                      children: [
+                        QuantityButton(
+                          icon: Icons.remove_rounded,
+                          onPressed: onDecrement,
+                          disabled: item.quantity <= 1,
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 10),
+                          child: Text(
+                            '${item.quantity}',
+                            style: const TextStyle(
+                              fontWeight: FontWeight.w800,
+                              fontSize: 14.5,
+                              color: AppColors.textPrimary,
+                            ),
+                          ),
+                        ),
+                        QuantityButton(
+                          icon: Icons.add_rounded,
+                          onPressed: onIncrement,
+                        ),
+                        const SizedBox(width: 8),
+                        IconButton(
+                          onPressed: onRemove,
+                          icon: const Icon(Icons.delete_outline_rounded),
+                          color: AppColors.error,
+                          iconSize: 22,
+                          tooltip: 'Hapus Item',
+                          visualDensity: VisualDensity.compact,
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ],
             ),
-            const SizedBox(width: 8),
-            Text('Rp ${formatNumber(item.subtotal)}', style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w700)),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
 
-  Widget _buildImage(BuildContext context) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(12),
-      child: Image.network(
-        item.imageUrl,
-        width: 80,
-        height: 80,
-        fit: BoxFit.cover,
-            errorBuilder: (context, error, stackTrace) {
-          return Container(
-            width: 80,
-            height: 80,
-            color: Theme.of(context).colorScheme.surfaceContainerHighest,
-            child: const Icon(Icons.image_not_supported_rounded, size: 28),
-          );
-        },
+  Widget _buildImage() {
+    return Container(
+      width: 82,
+      height: 82,
+      decoration: BoxDecoration(
+        color: AppColors.surfaceVariant,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(11),
+        child: Image.network(
+          item.imageUrl,
+          fit: BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) => const Center(
+            child: Icon(Icons.image_outlined, color: AppColors.textHint, size: 32),
+          ),
+        ),
       ),
     );
   }
