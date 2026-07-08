@@ -121,7 +121,7 @@ class ProductCard extends StatelessWidget {
                   top: 8,
                   right: 8,
                   child: Material(
-                    color: Colors.white.withOpacity(0.9),
+                    color: Colors.white.withValues(alpha: 0.9),
                     shape: const CircleBorder(),
                     elevation: 2,
                     child: InkWell(
@@ -130,8 +130,12 @@ class ProductCard extends StatelessWidget {
                       child: Padding(
                         padding: const EdgeInsets.all(7.0),
                         child: Icon(
-                          isFavorite ? Icons.favorite : Icons.favorite_border_rounded,
-                          color: isFavorite ? AppColors.error : AppColors.textSecondary,
+                          isFavorite
+                              ? Icons.favorite
+                              : Icons.favorite_border_rounded,
+                          color: isFavorite
+                              ? AppColors.error
+                              : AppColors.textSecondary,
                           size: 18,
                         ),
                       ),

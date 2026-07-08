@@ -107,7 +107,9 @@ class _PaymentOption extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: selected ? AppColors.accent.withOpacity(0.12) : AppColors.surfaceVariant,
+                color: selected
+                    ? AppColors.accent.withValues(alpha: 0.12)
+                    : AppColors.surfaceVariant,
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Icon(
@@ -129,14 +131,19 @@ class _PaymentOption extends StatelessWidget {
                           style: TextStyle(
                             color: AppColors.textPrimary,
                             fontSize: 14.5,
-                            fontWeight: selected ? FontWeight.w800 : FontWeight.w600,
+                            fontWeight: selected
+                                ? FontWeight.w800
+                                : FontWeight.w600,
                           ),
                         ),
                       ),
                       if (badge != null) ...[
                         const SizedBox(width: 6),
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 6,
+                            vertical: 2,
+                          ),
                           decoration: BoxDecoration(
                             color: AppColors.accentOrange,
                             borderRadius: BorderRadius.circular(6),
@@ -166,7 +173,9 @@ class _PaymentOption extends StatelessWidget {
             ),
             const SizedBox(width: 8),
             Icon(
-              selected ? Icons.radio_button_checked_rounded : Icons.radio_button_unchecked_rounded,
+              selected
+                  ? Icons.radio_button_checked_rounded
+                  : Icons.radio_button_unchecked_rounded,
               color: selected ? AppColors.accent : AppColors.textHint,
             ),
           ],

@@ -112,7 +112,7 @@ class _ProductHomeScreenState extends State<ProductHomeScreen> {
                   Container(
                     padding: const EdgeInsets.all(6),
                     decoration: BoxDecoration(
-                      color: AppColors.accent.withOpacity(0.1),
+                      color: AppColors.accent.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: const Icon(
@@ -136,7 +136,11 @@ class _ProductHomeScreenState extends State<ProductHomeScreen> {
                       ),
                       Row(
                         children: [
-                          Icon(Icons.location_on_rounded, size: 11, color: AppColors.accentOrange),
+                          Icon(
+                            Icons.location_on_rounded,
+                            size: 11,
+                            color: AppColors.accentOrange,
+                          ),
                           SizedBox(width: 2),
                           Text(
                             'Dikirim ke Denpasar, Bali',
@@ -155,9 +159,21 @@ class _ProductHomeScreenState extends State<ProductHomeScreen> {
               actions: [
                 // Tombol Scan Barcode Cepat
                 IconButton(
-                  icon: const Icon(Icons.qr_code_scanner_rounded, color: AppColors.textPrimary),
+                  icon: const Icon(
+                    Icons.qr_code_scanner_rounded,
+                    color: AppColors.textPrimary,
+                  ),
                   tooltip: 'Scan Barcode / QR',
-                  onPressed: () => Navigator.of(context).pushNamed('/barcode-scanner'),
+                  onPressed: () =>
+                      Navigator.of(context).pushNamed('/barcode-scanner'),
+                ),
+                IconButton(
+                  icon: const Icon(
+                    Icons.admin_panel_settings_outlined,
+                    color: AppColors.textPrimary,
+                  ),
+                  tooltip: 'Admin Panel',
+                  onPressed: () => Navigator.of(context).pushNamed('/admin'),
                 ),
                 // Notifikasi
                 NotificationBadge(
@@ -174,7 +190,10 @@ class _ProductHomeScreenState extends State<ProductHomeScreen> {
                   clipBehavior: Clip.none,
                   children: [
                     IconButton(
-                      icon: const Icon(Icons.shopping_cart_outlined, color: AppColors.textPrimary),
+                      icon: const Icon(
+                        Icons.shopping_cart_outlined,
+                        color: AppColors.textPrimary,
+                      ),
                       onPressed: () => Navigator.of(context).pushNamed('/cart'),
                     ),
                     if (cartProvider.totalItems > 0)
@@ -187,7 +206,10 @@ class _ProductHomeScreenState extends State<ProductHomeScreen> {
                             color: AppColors.error,
                             shape: BoxShape.circle,
                           ),
-                          constraints: const BoxConstraints(minWidth: 18, minHeight: 18),
+                          constraints: const BoxConstraints(
+                            minWidth: 18,
+                            minHeight: 18,
+                          ),
                           child: Center(
                             child: Text(
                               '${cartProvider.totalItems}',
@@ -229,7 +251,7 @@ class _ProductHomeScreenState extends State<ProductHomeScreen> {
           color: AppColors.surface,
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.06),
+              color: Colors.black.withValues(alpha: 0.06),
               blurRadius: 16,
               offset: const Offset(0, -4),
             ),
@@ -311,7 +333,10 @@ class _HomeTabBody extends StatelessWidget {
                 context.read<ProductProvider>().clearSearch();
               },
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 12,
+                ),
                 decoration: BoxDecoration(
                   color: AppColors.surface,
                   borderRadius: BorderRadius.circular(14),
@@ -320,23 +345,37 @@ class _HomeTabBody extends StatelessWidget {
                 ),
                 child: Row(
                   children: [
-                    const Icon(Icons.search_rounded, color: AppColors.textHint, size: 22),
+                    const Icon(
+                      Icons.search_rounded,
+                      color: AppColors.textHint,
+                      size: 22,
+                    ),
                     const SizedBox(width: 10),
                     const Expanded(
                       child: Text(
                         'Cari laptop, smartphone, audio...',
-                        style: TextStyle(color: AppColors.textHint, fontSize: 13.5),
+                        style: TextStyle(
+                          color: AppColors.textHint,
+                          fontSize: 13.5,
+                        ),
                       ),
                     ),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
                       decoration: BoxDecoration(
                         color: AppColors.surfaceVariant,
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: const Row(
                         children: [
-                          Icon(Icons.qr_code_scanner_rounded, size: 16, color: AppColors.accent),
+                          Icon(
+                            Icons.qr_code_scanner_rounded,
+                            size: 16,
+                            color: AppColors.accent,
+                          ),
                           SizedBox(width: 4),
                           Text(
                             'Scan',
@@ -375,7 +414,7 @@ class _HomeTabBody extends StatelessWidget {
                     borderRadius: BorderRadius.circular(20),
                     boxShadow: [
                       BoxShadow(
-                        color: banner.colors.first.withOpacity(0.3),
+                        color: banner.colors.first.withValues(alpha: 0.3),
                         blurRadius: 16,
                         offset: const Offset(0, 6),
                       ),
@@ -389,7 +428,7 @@ class _HomeTabBody extends StatelessWidget {
                         child: Icon(
                           Icons.shopping_bag_outlined,
                           size: 140,
-                          color: Colors.white.withOpacity(0.12),
+                          color: Colors.white.withValues(alpha: 0.12),
                         ),
                       ),
                       Padding(
@@ -399,7 +438,10 @@ class _HomeTabBody extends StatelessWidget {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 10,
+                                vertical: 4,
+                              ),
                               decoration: BoxDecoration(
                                 color: const Color(0xFFFACC15),
                                 borderRadius: BorderRadius.circular(20),
@@ -427,7 +469,7 @@ class _HomeTabBody extends StatelessWidget {
                             Text(
                               banner.subtitle,
                               style: TextStyle(
-                                color: Colors.white.withOpacity(0.9),
+                                color: Colors.white.withValues(alpha: 0.9),
                                 fontSize: 13,
                               ),
                             ),
@@ -530,7 +572,10 @@ class _HomeTabBody extends StatelessWidget {
                   ],
                 ),
                 IconButton(
-                  icon: const Icon(Icons.refresh_rounded, color: AppColors.accent),
+                  icon: const Icon(
+                    Icons.refresh_rounded,
+                    color: AppColors.accent,
+                  ),
                   tooltip: 'Acak Produk (Shake)',
                   onPressed: () {
                     context.read<ProductProvider>().refreshRandom();
@@ -577,7 +622,8 @@ class _HomeTabBody extends StatelessWidget {
                     CartNotificationOverlay.show(
                       context,
                       message: '${product.name} ditambahkan ke keranjang',
-                      onViewCart: () => Navigator.of(context).pushNamed('/cart'),
+                      onViewCart: () =>
+                          Navigator.of(context).pushNamed('/cart'),
                     );
                   },
                 );

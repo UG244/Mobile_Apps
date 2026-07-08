@@ -15,10 +15,7 @@ import '../widgets/cart_notification_overlay.dart';
 class ProductDetailScreen extends StatefulWidget {
   final ProductModel product;
 
-  const ProductDetailScreen({
-    super.key,
-    required this.product,
-  });
+  const ProductDetailScreen({super.key, required this.product});
 
   @override
   State<ProductDetailScreen> createState() => _ProductDetailScreenState();
@@ -78,11 +75,15 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
             leading: Padding(
               padding: const EdgeInsets.all(8.0),
               child: Material(
-                color: Colors.white.withOpacity(0.9),
+                color: Colors.white.withValues(alpha: 0.9),
                 shape: const CircleBorder(),
                 elevation: 2,
                 child: IconButton(
-                  icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 18, color: AppColors.textPrimary),
+                  icon: const Icon(
+                    Icons.arrow_back_ios_new_rounded,
+                    size: 18,
+                    color: AppColors.textPrimary,
+                  ),
                   onPressed: () => Navigator.of(context).pop(),
                 ),
               ),
@@ -91,7 +92,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
               Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: Material(
-                  color: Colors.white.withOpacity(0.9),
+                  color: Colors.white.withValues(alpha: 0.9),
                   shape: const CircleBorder(),
                   elevation: 2,
                   child: IconButton(
@@ -145,14 +146,21 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                       Row(
                         children: [
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 4,
+                            ),
                             decoration: BoxDecoration(
                               color: const Color(0xFFFEF08A),
                               borderRadius: BorderRadius.circular(20),
                             ),
                             child: Row(
                               children: [
-                                const Icon(Icons.star_rounded, color: Color(0xFFCA8A04), size: 16),
+                                const Icon(
+                                  Icons.star_rounded,
+                                  color: Color(0xFFCA8A04),
+                                  size: 16,
+                                ),
                                 const SizedBox(width: 4),
                                 Text(
                                   '${product.rating} (${product.reviewCount} ulasan)',
@@ -169,7 +177,10 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                       ),
                       if (product.isOnSale)
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 4,
+                          ),
                           decoration: BoxDecoration(
                             color: AppColors.errorLight,
                             borderRadius: BorderRadius.circular(20),
@@ -229,15 +240,24 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                         ],
                       ),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 6,
+                        ),
                         decoration: BoxDecoration(
-                          color: product.stock > 0 ? AppColors.successLight : AppColors.errorLight,
+                          color: product.stock > 0
+                              ? AppColors.successLight
+                              : AppColors.errorLight,
                           borderRadius: BorderRadius.circular(10),
                         ),
                         child: Text(
-                          product.stock > 0 ? 'Stok Tersedia (${product.stock})' : 'Stok Habis',
+                          product.stock > 0
+                              ? 'Stok Tersedia (${product.stock})'
+                              : 'Stok Habis',
                           style: TextStyle(
-                            color: product.stock > 0 ? AppColors.success : AppColors.error,
+                            color: product.stock > 0
+                                ? AppColors.success
+                                : AppColors.error,
                             fontWeight: FontWeight.w700,
                             fontSize: 12,
                           ),
@@ -265,7 +285,10 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                           ),
                           Text(
                             'Batas pembelian sesuai stok',
-                            style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: AppColors.textSecondary,
+                            ),
                           ),
                         ],
                       ),
@@ -280,10 +303,14 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                             IconButton(
                               onPressed: _decrement,
                               icon: const Icon(Icons.remove_rounded, size: 18),
-                              color: _quantity > 1 ? AppColors.textPrimary : AppColors.textHint,
+                              color: _quantity > 1
+                                  ? AppColors.textPrimary
+                                  : AppColors.textHint,
                             ),
                             Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 12),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                              ),
                               child: Text(
                                 '$_quantity',
                                 style: const TextStyle(
@@ -296,7 +323,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                             IconButton(
                               onPressed: _increment,
                               icon: const Icon(Icons.add_rounded, size: 18),
-                              color: _quantity < product.stock ? AppColors.accent : AppColors.textHint,
+                              color: _quantity < product.stock
+                                  ? AppColors.accent
+                                  : AppColors.textHint,
                             ),
                           ],
                         ),
@@ -311,9 +340,11 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                     width: double.infinity,
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: AppColors.accent.withOpacity(0.08),
+                      color: AppColors.accent.withValues(alpha: 0.08),
                       borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: AppColors.accent.withOpacity(0.2)),
+                      border: Border.all(
+                        color: AppColors.accent.withValues(alpha: 0.2),
+                      ),
                     ),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -352,7 +383,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                   const SizedBox(height: 10),
                   AnimatedCrossFade(
                     duration: const Duration(milliseconds: 250),
-                    crossFadeState: _showFullDesc ? CrossFadeState.showSecond : CrossFadeState.showFirst,
+                    crossFadeState: _showFullDesc
+                        ? CrossFadeState.showSecond
+                        : CrossFadeState.showFirst,
                     firstChild: Text(
                       product.description,
                       maxLines: 4,
@@ -403,7 +436,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
           color: AppColors.surface,
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.06),
+              color: Colors.black.withValues(alpha: 0.06),
               blurRadius: 16,
               offset: const Offset(0, -6),
             ),
@@ -434,7 +467,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                   ),
                   icon: const Icon(Icons.add_shopping_cart_rounded, size: 18),
                   label: Text(product.stock > 0 ? '+ Keranjang' : 'Stok Habis'),
-                  onPressed: product.stock > 0 ? () => _addToCart(context) : null,
+                  onPressed: product.stock > 0
+                      ? () => _addToCart(context)
+                      : null,
                 ),
               ),
             ],

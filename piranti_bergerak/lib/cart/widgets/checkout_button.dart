@@ -21,7 +21,7 @@ class CheckoutButton extends StatelessWidget {
         color: AppColors.surface,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.06),
+            color: Colors.black.withValues(alpha: 0.06),
             blurRadius: 16,
             offset: const Offset(0, -6),
           ),
@@ -35,12 +35,18 @@ class CheckoutButton extends StatelessWidget {
             backgroundColor: AppColors.accent,
             disabledBackgroundColor: AppColors.surfaceVariant,
             minimumSize: const Size.fromHeight(54),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(14),
+            ),
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(Icons.shopping_bag_rounded, size: 20, color: Colors.white),
+              const Icon(
+                Icons.shopping_bag_rounded,
+                size: 20,
+                color: Colors.white,
+              ),
               const SizedBox(width: 8),
               Text(
                 label,

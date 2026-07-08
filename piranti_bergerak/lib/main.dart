@@ -19,6 +19,7 @@ import 'notification/services/notification_service.dart';
 import 'product/providers/favorite_provider.dart';
 import 'product/providers/product_provider.dart';
 import 'product/screens/home_screen.dart';
+import 'sensor/screens/barcode_scanner_screen.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -60,6 +61,7 @@ class MyApp extends StatelessWidget {
           '/orders': (context) => const OrderHistoryPage(),
           '/notifications': (context) => const NotificationPage(),
           '/admin': (context) => const AdminPanelScreen(),
+          '/barcode-scanner': (context) => const BarcodeScannerScreen(),
           '/order-detail': (context) {
             final arg = ModalRoute.of(context)?.settings.arguments;
             return OrderDetailPage(orderId: arg is int ? arg : 0);
