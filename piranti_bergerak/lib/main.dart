@@ -4,6 +4,10 @@ import 'package:provider/provider.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:sqflite_common_ffi_web/sqflite_ffi_web.dart';
 
+import 'auth/providers/auth_provider.dart';
+import 'auth/screens/login_screen.dart';
+import 'auth/screens/register_screen.dart';
+import 'auth/widgets/admin_gate.dart';
 import 'core/theme/app_theme.dart';
 import 'admin/screens/admin_panel_screen.dart';
 import 'cart/providers/cart_provider.dart';
@@ -45,21 +49,26 @@ class MyApp extends StatelessWidget {
         // Provider modul Product & Shopping (kita)
         ChangeNotifierProvider(create: (_) => ProductProvider()),
         ChangeNotifierProvider(create: (_) => FavoriteProvider()),
+
+        // Provider auth untuk login dan role
+        ChangeNotifierProvider(create: (_) => AuthProvider()),
       ],
       child: MaterialApp(
         title: 'BlueMart Retail',
         debugShowCheckedModeBanner: false,
         scrollBehavior: const NoOverscrollBehavior(),
         theme: AppTheme.lightTheme,
-        // Halaman utama sekarang adalah ProductHomeScreen
-        home: const ProductHomeScreen(),
+        home: const LoginScreen(),
         routes: {
+          '/login': (context) => const LoginScreen(),
+          '/home': (context) => const ProductHomeScreen(),
           '/cart': (context) => const CartScreen(),
           '/checkout': (context) => const CheckoutScreen(),
           '/order-success': (context) => const OrderSuccessScreen(),
           '/orders': (context) => const OrderHistoryPage(),
           '/notifications': (context) => const NotificationPage(),
-          '/admin': (context) => const AdminPanelScreen(),
+          '/admin': (context) => const AdminGate(child: AdminPanelScreen()),
+          '/register': (context) => const RegisterScreen(),
           '/order-detail': (context) {
             final arg = ModalRoute.of(context)?.settings.arguments;
             return OrderDetailPage(orderId: arg is int ? arg : 0);
