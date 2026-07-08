@@ -93,7 +93,7 @@ class ProfileScreen extends StatelessWidget {
                             Text(
                               'user@bluemart.id • +62 812-3456-7890',
                               style: TextStyle(
-                                color: Colors.white.withOpacity(0.8),
+                                color: Colors.white.withValues(alpha: 0.8),
                                 fontSize: 13,
                               ),
                             ),
@@ -101,7 +101,7 @@ class ProfileScreen extends StatelessWidget {
                             Container(
                               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                               decoration: BoxDecoration(
-                                color: const Color(0xFFFACC15).withOpacity(0.2),
+                                color: const Color(0xFFFACC15).withValues(alpha: 0.2),
                                 borderRadius: BorderRadius.circular(20),
                                 border: Border.all(color: const Color(0xFFFACC15), width: 1),
                               ),
@@ -376,7 +376,7 @@ class _MenuItem extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: iconColor.withOpacity(0.1),
+                color: iconColor.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Icon(icon, color: iconColor, size: 22),

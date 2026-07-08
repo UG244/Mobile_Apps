@@ -112,7 +112,7 @@ class _ProductHomeScreenState extends State<ProductHomeScreen> {
                   Container(
                     padding: const EdgeInsets.all(6),
                     decoration: BoxDecoration(
-                      color: AppColors.accent.withOpacity(0.1),
+                      color: AppColors.accent.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: const Icon(
@@ -229,7 +229,7 @@ class _ProductHomeScreenState extends State<ProductHomeScreen> {
           color: AppColors.surface,
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.06),
+              color: Colors.black.withValues(alpha: 0.06),
               blurRadius: 16,
               offset: const Offset(0, -4),
             ),
@@ -375,7 +375,7 @@ class _HomeTabBody extends StatelessWidget {
                     borderRadius: BorderRadius.circular(20),
                     boxShadow: [
                       BoxShadow(
-                        color: banner.colors.first.withOpacity(0.3),
+                        color: banner.colors.first.withValues(alpha: 0.3),
                         blurRadius: 16,
                         offset: const Offset(0, 6),
                       ),
@@ -389,7 +389,7 @@ class _HomeTabBody extends StatelessWidget {
                         child: Icon(
                           Icons.shopping_bag_outlined,
                           size: 140,
-                          color: Colors.white.withOpacity(0.12),
+                          color: Colors.white.withValues(alpha: 0.12),
                         ),
                       ),
                       Padding(
@@ -427,7 +427,7 @@ class _HomeTabBody extends StatelessWidget {
                             Text(
                               banner.subtitle,
                               style: TextStyle(
-                                color: Colors.white.withOpacity(0.9),
+                                color: Colors.white.withValues(alpha: 0.9),
                                 fontSize: 13,
                               ),
                             ),

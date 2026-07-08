@@ -93,7 +93,7 @@ class OrderTrackingCard extends StatelessWidget {
                         decoration: BoxDecoration(
                           color: step.isActive
                               ? AppColors.accent
-                              : (step.isDone ? AppColors.accent.withOpacity(0.15) : AppColors.surfaceVariant),
+                              : (step.isDone ? AppColors.accent.withValues(alpha: 0.15) : AppColors.surfaceVariant),
                           shape: BoxShape.circle,
                         ),
                         child: Icon(

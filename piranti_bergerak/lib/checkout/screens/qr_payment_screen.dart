@@ -199,7 +199,7 @@ class _QrPaymentScreenState extends State<QrPaymentScreen> {
                       border: Border.all(color: AppColors.border, width: 2),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.04),
+                          color: Colors.black.withValues(alpha: 0.04),
                           blurRadius: 10,
                           offset: const Offset(0, 4),
                         ),
@@ -337,7 +337,7 @@ class _QrPaymentScreenState extends State<QrPaymentScreen> {
             width: 22,
             height: 22,
             decoration: BoxDecoration(
-              color: AppColors.accent.withOpacity(0.12),
+              color: AppColors.accent.withValues(alpha: 0.12),
               shape: BoxShape.circle,
             ),
             child: Center(

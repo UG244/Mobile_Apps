@@ -78,7 +78,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
             leading: Padding(
               padding: const EdgeInsets.all(8.0),
               child: Material(
-                color: Colors.white.withOpacity(0.9),
+                color: Colors.white.withValues(alpha: 0.9),
                 shape: const CircleBorder(),
                 elevation: 2,
                 child: IconButton(
@@ -91,7 +91,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
               Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: Material(
-                  color: Colors.white.withOpacity(0.9),
+                  color: Colors.white.withValues(alpha: 0.9),
                   shape: const CircleBorder(),
                   elevation: 2,
                   child: IconButton(
@@ -311,9 +311,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                     width: double.infinity,
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: AppColors.accent.withOpacity(0.08),
+                      color: AppColors.accent.withValues(alpha: 0.08),
                       borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: AppColors.accent.withOpacity(0.2)),
+                      border: Border.all(color: AppColors.accent.withValues(alpha: 0.2)),
                     ),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -403,7 +403,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
           color: AppColors.surface,
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.06),
+              color: Colors.black.withValues(alpha: 0.06),
               blurRadius: 16,
               offset: const Offset(0, -6),
             ),

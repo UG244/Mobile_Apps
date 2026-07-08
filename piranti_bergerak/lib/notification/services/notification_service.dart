@@ -21,7 +21,7 @@ class NotificationService {
     );
     const settings = InitializationSettings(android: androidSettings);
 
-    await _plugin.initialize(settings);
+    await _plugin.initialize(settings: settings);
     await _requestAndroidPermission();
 
     _initialized = true;
@@ -51,10 +51,10 @@ class NotificationService {
     const details = NotificationDetails(android: androidDetails);
 
     await _plugin.show(
-      DateTime.now().millisecondsSinceEpoch ~/ 1000,
-      title,
-      body,
-      details,
+      id: DateTime.now().millisecondsSinceEpoch ~/ 1000,
+      title: title,
+      body: body,
+      notificationDetails: details,
     );
   }
 }

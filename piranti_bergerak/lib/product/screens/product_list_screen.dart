@@ -79,7 +79,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
           Container(
             margin: const EdgeInsets.only(right: 12, left: 6),
             decoration: BoxDecoration(
-              color: AppColors.accent.withOpacity(0.1),
+              color: AppColors.accent.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(10),
             ),
             child: IconButton(

@@ -107,7 +107,7 @@ class _PaymentOption extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: selected ? AppColors.accent.withOpacity(0.12) : AppColors.surfaceVariant,
+                color: selected ? AppColors.accent.withValues(alpha: 0.12) : AppColors.surfaceVariant,
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Icon(

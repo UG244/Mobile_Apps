@@ -121,7 +121,7 @@ class ProductCard extends StatelessWidget {
                   top: 8,
                   right: 8,
                   child: Material(
-                    color: Colors.white.withOpacity(0.9),
+                    color: Colors.white.withValues(alpha: 0.9),
                     shape: const CircleBorder(),
                     elevation: 2,
                     child: InkWell(
