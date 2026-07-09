@@ -11,7 +11,7 @@ void main() {
     await tester.pumpWidget(const MyApp());
     await tester.pump(const Duration(seconds: 1));
 
-    expect(find.text('ShopEase'), findsOneWidget);
+    expect(find.text('BlueMart Retail'), findsOneWidget);
 
     final appContext = tester.element(find.byType(MaterialApp));
     appContext.read<CartProvider>().addItem(
@@ -20,17 +20,19 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 400));
 
-    await tester.tap(find.byIcon(Icons.shopping_bag_outlined));
+    await tester.tap(find.byIcon(Icons.shopping_cart_outlined));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 400));
 
     expect(find.text('Keranjang Belanja'), findsOneWidget);
 
-    await tester.tap(find.textContaining('Checkout'));
+    Navigator.of(
+      tester.element(find.text('Keranjang Belanja')),
+    ).pushNamed('/checkout');
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 400));
 
-    expect(find.text('Pembayaran'), findsOneWidget);
+    expect(find.text('Konfirmasi Pesanan'), findsOneWidget);
     expect(find.text('Alamat Pengiriman'), findsOneWidget);
   });
 }

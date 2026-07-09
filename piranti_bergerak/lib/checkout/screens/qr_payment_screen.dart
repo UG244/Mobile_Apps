@@ -42,7 +42,8 @@ class _QrPaymentScreenState extends State<QrPaymentScreen> {
     // Generate standar string QRIS dengan nominal pembayaran nyata
     final nominal = widget.amount.toInt();
     final timestamp = DateTime.now().millisecondsSinceEpoch;
-    _qrPayload = '00020101021226600016ID.CO.BLUEMART.WWW01189360091800000000005204581253033605404${nominal}5802ID5914BlueMart Retail6008Denpasar62070703A016304$timestamp';
+    _qrPayload =
+        '00020101021226600016ID.CO.BLUEMART.WWW01189360091800000000005204581253033605404${nominal}5802ID5914BlueMart Retail6008Denpasar62070703A016304$timestamp';
   }
 
   void _startTimer() {
@@ -82,7 +83,10 @@ class _QrPaymentScreenState extends State<QrPaymentScreen> {
             SizedBox(width: 8),
             Text(
               'Pembayaran QRIS Berhasil Diterima!',
-              style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.w700,
+              ),
             ),
           ],
         ),
@@ -102,7 +106,11 @@ class _QrPaymentScreenState extends State<QrPaymentScreen> {
         backgroundColor: AppColors.surface,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 18, color: AppColors.textPrimary),
+          icon: const Icon(
+            Icons.arrow_back_ios_new_rounded,
+            size: 18,
+            color: AppColors.textPrimary,
+          ),
           onPressed: () => Navigator.of(context).pop(),
         ),
       ),
@@ -147,7 +155,10 @@ class _QrPaymentScreenState extends State<QrPaymentScreen> {
                         ],
                       ),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 4,
+                        ),
                         decoration: BoxDecoration(
                           color: AppColors.errorLight,
                           borderRadius: BorderRadius.circular(8),
@@ -167,7 +178,10 @@ class _QrPaymentScreenState extends State<QrPaymentScreen> {
 
                   // Timer Hitung Mundur
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 8,
+                    ),
                     decoration: BoxDecoration(
                       color: AppColors.surfaceVariant,
                       borderRadius: BorderRadius.circular(30),
@@ -175,7 +189,11 @@ class _QrPaymentScreenState extends State<QrPaymentScreen> {
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Icon(Icons.timer_outlined, size: 16, color: AppColors.accentOrange),
+                        const Icon(
+                          Icons.timer_outlined,
+                          size: 16,
+                          color: AppColors.accentOrange,
+                        ),
                         const SizedBox(width: 6),
                         Text(
                           'Selesaikan pembayaran dalam $_formattedTimer',
@@ -226,12 +244,18 @@ class _QrPaymentScreenState extends State<QrPaymentScreen> {
                   // Nomor Invoice & Total Nominal
                   Text(
                     widget.invoiceNumber,
-                    style: const TextStyle(fontSize: 12, color: AppColors.textHint),
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: AppColors.textHint,
+                    ),
                   ),
                   const SizedBox(height: 4),
                   const Text(
                     'Total Pembayaran',
-                    style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: AppColors.textSecondary,
+                    ),
                   ),
                   const SizedBox(height: 2),
                   Text(
@@ -268,10 +292,19 @@ class _QrPaymentScreenState extends State<QrPaymentScreen> {
                     ),
                   ),
                   const SizedBox(height: 12),
-                  _buildStep(1, 'Buka aplikasi m-Banking atau e-Wallet (BCA, Mandiri, BRI, GoPay, OVO, Dana, ShopeePay, dll).'),
+                  _buildStep(
+                    1,
+                    'Buka aplikasi m-Banking atau e-Wallet (BCA, Mandiri, BRI, GoPay, OVO, Dana, ShopeePay, dll).',
+                  ),
                   _buildStep(2, 'Pilih menu Scan / Bayar QRIS.'),
-                  _buildStep(3, 'Arahkan kamera ke QR Code di atas atau upload screenshot QR ini.'),
-                  _buildStep(4, 'Periksa nama merchant "BlueMart Retail" dan nominal pembayaran, lalu masukkan PIN Anda.'),
+                  _buildStep(
+                    3,
+                    'Arahkan kamera ke QR Code di atas atau upload screenshot QR ini.',
+                  ),
+                  _buildStep(
+                    4,
+                    'Periksa nama merchant "BlueMart Retail" dan nominal pembayaran, lalu masukkan PIN Anda.',
+                  ),
                 ],
               ),
             ),
@@ -283,18 +316,28 @@ class _QrPaymentScreenState extends State<QrPaymentScreen> {
               style: FilledButton.styleFrom(
                 backgroundColor: AppColors.success,
                 padding: const EdgeInsets.symmetric(vertical: 16),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(14),
+                ),
               ),
               icon: _isChecking
                   ? const SizedBox(
                       width: 20,
                       height: 20,
-                      child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2.5),
+                      child: CircularProgressIndicator(
+                        color: Colors.white,
+                        strokeWidth: 2.5,
+                      ),
                     )
                   : const Icon(Icons.check_circle_rounded, size: 22),
               label: Text(
-                _isChecking ? 'Mengecek Pembayaran...' : 'Simulasi Pembayaran Berhasil (Demo)',
-                style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w800),
+                _isChecking
+                    ? 'Mengecek Pembayaran...'
+                    : 'Simulasi Pembayaran Berhasil (Demo)',
+                style: const TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w800,
+                ),
               ),
               onPressed: _isChecking ? null : _simulatePaymentSuccess,
             ),
@@ -305,10 +348,22 @@ class _QrPaymentScreenState extends State<QrPaymentScreen> {
               style: OutlinedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(vertical: 14),
                 side: const BorderSide(color: AppColors.accent),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(14),
+                ),
               ),
-              icon: const Icon(Icons.refresh_rounded, size: 20, color: AppColors.accent),
-              label: const Text('Perbarui QR Code', style: TextStyle(color: AppColors.accent, fontWeight: FontWeight.w700)),
+              icon: const Icon(
+                Icons.refresh_rounded,
+                size: 20,
+                color: AppColors.accent,
+              ),
+              label: const Text(
+                'Perbarui QR Code',
+                style: TextStyle(
+                  color: AppColors.accent,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
               onPressed: () {
                 setState(() {
                   _generateQrPayload();
@@ -355,7 +410,11 @@ class _QrPaymentScreenState extends State<QrPaymentScreen> {
           Expanded(
             child: Text(
               text,
-              style: const TextStyle(fontSize: 13, color: AppColors.textSecondary, height: 1.4),
+              style: const TextStyle(
+                fontSize: 13,
+                color: AppColors.textSecondary,
+                height: 1.4,
+              ),
             ),
           ),
         ],

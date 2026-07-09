@@ -56,14 +56,22 @@ class _ProductListScreenState extends State<ProductListScreen> {
             style: const TextStyle(fontSize: 14, color: AppColors.textPrimary),
             decoration: InputDecoration(
               hintText: 'Cari barang di BlueMart...',
-              prefixIcon: const Icon(Icons.search_rounded, color: AppColors.textHint, size: 20),
+              prefixIcon: const Icon(
+                Icons.search_rounded,
+                color: AppColors.textHint,
+                size: 20,
+              ),
               border: InputBorder.none,
               enabledBorder: InputBorder.none,
               focusedBorder: InputBorder.none,
               contentPadding: const EdgeInsets.symmetric(vertical: 10),
               suffixIcon: _searchController.text.isNotEmpty
                   ? IconButton(
-                      icon: const Icon(Icons.close_rounded, size: 18, color: AppColors.textHint),
+                      icon: const Icon(
+                        Icons.close_rounded,
+                        size: 18,
+                        color: AppColors.textHint,
+                      ),
                       onPressed: () {
                         _searchController.clear();
                         productProvider.clearSearch();
@@ -83,11 +91,17 @@ class _ProductListScreenState extends State<ProductListScreen> {
               borderRadius: BorderRadius.circular(10),
             ),
             child: IconButton(
-              icon: const Icon(Icons.qr_code_scanner_rounded, color: AppColors.accent, size: 22),
+              icon: const Icon(
+                Icons.qr_code_scanner_rounded,
+                color: AppColors.accent,
+                size: 22,
+              ),
               tooltip: 'Scan Barcode / QR',
               onPressed: () {
                 Navigator.of(context).push(
-                  MaterialPageRoute(builder: (_) => const BarcodeScannerScreen()),
+                  MaterialPageRoute(
+                    builder: (_) => const BarcodeScannerScreen(),
+                  ),
                 );
               },
             ),
@@ -131,41 +145,47 @@ class _ProductListScreenState extends State<ProductListScreen> {
           // ── Grid Produk ─────────────────────────────────────────────────
           Expanded(
             child: productProvider.isLoading
-                ? const Center(child: CircularProgressIndicator(color: AppColors.accent))
+                ? const Center(
+                    child: CircularProgressIndicator(color: AppColors.accent),
+                  )
                 : products.isEmpty
-                    ? _buildEmptyState(productProvider)
-                    : GridView.builder(
-                        physics: const BouncingScrollPhysics(),
-                        padding: const EdgeInsets.all(16),
-                        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                ? _buildEmptyState(productProvider)
+                : GridView.builder(
+                    physics: const BouncingScrollPhysics(),
+                    padding: const EdgeInsets.all(16),
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
                           crossAxisCount: 2,
                           mainAxisExtent: 295,
                           mainAxisSpacing: 14,
                           crossAxisSpacing: 14,
                         ),
-                        itemCount: products.length,
-                        itemBuilder: (context, index) {
-                          final product = products[index];
-                          return ProductCard(
-                            product: product,
-                            isFavorite: favoriteProvider.isFavorite(product.id),
-                            onTap: () => Navigator.of(context).push(
-                              MaterialPageRoute(
-                                builder: (_) => ProductDetailScreen(product: product),
-                              ),
-                            ),
-                            onFavoriteTap: () => favoriteProvider.toggleFavorite(product),
-                            onAddToCart: () {
-                              cartProvider.addItem(product.toCartItem());
-                              CartNotificationOverlay.show(
-                                context,
-                                message: '${product.name} ditambahkan ke keranjang',
-                                onViewCart: () => Navigator.of(context).pushNamed('/cart'),
-                              );
-                            },
+                    itemCount: products.length,
+                    itemBuilder: (context, index) {
+                      final product = products[index];
+                      return ProductCard(
+                        product: product,
+                        isFavorite: favoriteProvider.isFavorite(product.id),
+                        onTap: () => Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) =>
+                                ProductDetailScreen(product: product),
+                          ),
+                        ),
+                        onFavoriteTap: () =>
+                            favoriteProvider.toggleFavorite(product),
+                        onAddToCart: () {
+                          cartProvider.addItem(product.toCartItem());
+                          CartNotificationOverlay.show(
+                            context,
+                            message: '${product.name} ditambahkan ke keranjang',
+                            onViewCart: () =>
+                                Navigator.of(context).pushNamed('/cart'),
                           );
                         },
-                      ),
+                      );
+                    },
+                  ),
           ),
         ],
       ),
@@ -217,7 +237,11 @@ class _ProductListScreenState extends State<ProductListScreen> {
                 color: AppColors.surfaceVariant,
                 shape: BoxShape.circle,
               ),
-              child: const Icon(Icons.search_off_rounded, size: 56, color: AppColors.textHint),
+              child: const Icon(
+                Icons.search_off_rounded,
+                size: 56,
+                color: AppColors.textHint,
+              ),
             ),
             const SizedBox(height: 16),
             const Text(
