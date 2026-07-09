@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../auth/providers/auth_provider.dart';
 import '../../core/theme/app_colors.dart';
 import '../../cart/providers/cart_provider.dart';
 import '../../checkout/screens/address_book_screen.dart';
@@ -14,6 +15,7 @@ class ProfileScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cart = context.watch<CartProvider>();
+    final auth = context.watch<AuthProvider>();
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -85,9 +87,11 @@ class ProfileScreen extends StatelessWidget {
                           children: [
                             Row(
                               children: [
-                                const Text(
-                                  'Pengguna BlueMart',
-                                  style: TextStyle(
+                                Text(
+                                  auth.currentUser != null
+                                      ? auth.currentUser!.username
+                                      : 'Pengguna BlueMart',
+                                  style: const TextStyle(
                                     color: Colors.white,
                                     fontSize: 18,
                                     fontWeight: FontWeight.w800,
@@ -103,7 +107,9 @@ class ProfileScreen extends StatelessWidget {
                             ),
                             const SizedBox(height: 4),
                             Text(
-                              'user@bluemart.id • +62 812-3456-7890',
+                              auth.currentUser != null
+                                  ? 'Role: ${auth.currentUser!.role.toUpperCase()}'
+                                  : 'Role: USER',
                               style: TextStyle(
                                 color: Colors.white.withValues(alpha: 0.8),
                                 fontSize: 13,
@@ -125,7 +131,7 @@ class ProfileScreen extends StatelessWidget {
                                   width: 1,
                                 ),
                               ),
-                              child: const Row(
+                              child: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
                                   Icon(
@@ -135,9 +141,9 @@ class ProfileScreen extends StatelessWidget {
                                   ),
                                   SizedBox(width: 4),
                                   Text(
-                                    'GOLD MEMBER • 1.250 Poin',
+                                    auth.isAdmin ? 'ADMINISTRATOR' : 'PENGGUNA BIASA',
                                     style: TextStyle(
-                                      color: Color(0xFFFACC15),
+                                      color: auth.isAdmin ? const Color(0xFF4ADE80) : const Color(0xFFFACC15),
                                       fontSize: 11,
                                       fontWeight: FontWeight.w800,
                                     ),
@@ -249,14 +255,16 @@ class ProfileScreen extends StatelessWidget {
             const SizedBox(height: 8),
             _MenuCard(
               children: [
-                _MenuItem(
-                  icon: Icons.admin_panel_settings_outlined,
-                  iconColor: AppColors.primary,
-                  title: 'Admin Panel BlueMart',
-                  subtitle: 'Kelola katalog produk, harga, dan stok barang',
-                  onTap: () => Navigator.of(context).pushNamed('/admin'),
-                ),
-                const Divider(height: 1, color: AppColors.divider),
+                if (auth.isAdmin) ...[
+                  _MenuItem(
+                    icon: Icons.admin_panel_settings_outlined,
+                    iconColor: AppColors.primary,
+                    title: 'Admin Panel BlueMart',
+                    subtitle: 'Kelola katalog produk, harga, dan stok barang',
+                    onTap: () => Navigator.of(context).pushNamed('/admin'),
+                  ),
+                  const Divider(height: 1, color: AppColors.divider),
+                ],
                 _MenuItem(
                   icon: Icons.help_outline_rounded,
                   iconColor: AppColors.info,

@@ -69,6 +69,13 @@ class _AdminPanelViewState extends State<_AdminPanelView> {
             onPressed: () => Navigator.of(context).pushNamed('/notifications'),
             icon: const Icon(Icons.notifications_none_rounded),
           ),
+          IconButton(
+            tooltip: 'Keluar',
+            onPressed: () {
+              Navigator.of(context).pushNamedAndRemoveUntil('/login', (route) => false);
+            },
+            icon: const Icon(Icons.logout_outlined),
+          ),
           const Padding(
             padding: EdgeInsets.only(right: 12),
             child: CircleAvatar(
