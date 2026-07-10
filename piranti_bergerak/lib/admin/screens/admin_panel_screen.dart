@@ -1,8 +1,16 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:path/path.dart' as p;
+import 'package:path_provider/path_provider.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 
+import '../../auth/providers/auth_provider.dart';
 import '../../cart/providers/cart_provider.dart';
 import '../../cart/utils/format_utils.dart';
+import '../../checkout/models/order_detail_model.dart';
 import '../../checkout/models/order_model.dart';
 import '../../core/theme/app_colors.dart';
 import '../../notification/providers/notification_provider.dart';
@@ -10,6 +18,7 @@ import '../../product/models/category_model.dart';
 import '../../product/models/product_model.dart';
 import '../../product/providers/favorite_provider.dart';
 import '../../product/providers/product_provider.dart';
+import '../../product/widgets/product_image.dart';
 import '../providers/admin_provider.dart';
 
 class AdminPanelScreen extends StatelessWidget {
@@ -72,7 +81,11 @@ class _AdminPanelViewState extends State<_AdminPanelView> {
           IconButton(
             tooltip: 'Keluar',
             onPressed: () {
-              Navigator.of(context).pushNamedAndRemoveUntil('/login', (route) => false);
+              context.read<AuthProvider>().logout();
+              context.read<NotificationProvider>().clearScope();
+              Navigator.of(
+                context,
+              ).pushNamedAndRemoveUntil('/login', (route) => false);
             },
             icon: const Icon(Icons.logout_outlined),
           ),
@@ -527,6 +540,15 @@ class _ProductManagementSection extends StatelessWidget {
           onAction: () => _showProductForm(context),
         ),
         const SizedBox(height: 12),
+        if (admin.products.isEmpty)
+          _EmptyAdminState(
+            icon: Icons.inventory_2_outlined,
+            title: 'Belum ada produk',
+            subtitle:
+                'Tambahkan produk baru atau pulihkan data contoh agar katalog user terisi kembali.',
+            actionLabel: 'Pulihkan Produk Contoh',
+            onAction: () => _restoreSeedCatalog(context),
+          ),
         ...admin.products.map(
           (product) => _ProductAdminCard(
             product: product,
@@ -539,14 +561,19 @@ class _ProductManagementSection extends StatelessWidget {
   }
 
   void _showProductForm(BuildContext context, {ProductModel? product}) {
+    final admin = context.read<AdminProvider>();
     showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.white,
+      useSafeArea: true,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(18)),
       ),
-      builder: (_) => _ProductForm(product: product),
+      builder: (_) => ChangeNotifierProvider.value(
+        value: admin,
+        child: _ProductForm(product: product),
+      ),
     );
   }
 
@@ -580,6 +607,18 @@ class _ProductManagementSection extends StatelessWidget {
       favoriteProvider: context.read<FavoriteProvider>(),
     );
   }
+
+  Future<void> _restoreSeedCatalog(BuildContext context) async {
+    await context.read<AdminProvider>().restoreSeedCatalog(
+      productProvider: context.read<ProductProvider>(),
+      cartProvider: context.read<CartProvider>(),
+      favoriteProvider: context.read<FavoriteProvider>(),
+    );
+    if (!context.mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Produk contoh berhasil dipulihkan.')),
+    );
+  }
 }
 
 class _ProductForm extends StatefulWidget {
@@ -593,6 +632,7 @@ class _ProductForm extends StatefulWidget {
 
 class _ProductFormState extends State<_ProductForm> {
   final _formKey = GlobalKey<FormState>();
+  final _imagePicker = ImagePicker();
   late final TextEditingController _name;
   late final TextEditingController _price;
   late final TextEditingController _stock;
@@ -641,91 +681,134 @@ class _ProductFormState extends State<_ProductForm> {
   @override
   Widget build(BuildContext context) {
     final categories = context.watch<AdminProvider>().categories;
-    return Padding(
-      padding: EdgeInsets.only(
-        left: 16,
-        right: 16,
-        top: 16,
-        bottom: MediaQuery.viewInsetsOf(context).bottom + 16,
-      ),
-      child: Form(
-        key: _formKey,
-        child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                widget.product == null ? 'Tambah Produk' : 'Edit Produk',
-                style: Theme.of(
-                  context,
-                ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w900),
-              ),
-              const SizedBox(height: 14),
-              _TextField(controller: _name, label: 'Nama Produk'),
-              DropdownButtonFormField<String>(
-                initialValue: _categoryId,
-                decoration: const InputDecoration(
-                  labelText: 'Kategori',
-                  border: OutlineInputBorder(),
-                ),
-                items: categories
-                    .map(
-                      (category) => DropdownMenuItem(
-                        value: category.id,
-                        child: Text(category.name),
+    final screenHeight = MediaQuery.sizeOf(context).height;
+    return SafeArea(
+      top: true,
+      child: ConstrainedBox(
+        constraints: BoxConstraints(maxHeight: screenHeight * 0.92),
+        child: Padding(
+          padding: EdgeInsets.only(
+            left: 16,
+            right: 16,
+            top: 10,
+            bottom: MediaQuery.viewInsetsOf(context).bottom + 16,
+          ),
+          child: Form(
+            key: _formKey,
+            child: SingleChildScrollView(
+              physics: const BouncingScrollPhysics(),
+              keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          widget.product == null
+                              ? 'Tambah Produk'
+                              : 'Edit Produk',
+                          style: Theme.of(context).textTheme.titleLarge
+                              ?.copyWith(fontWeight: FontWeight.w900),
+                        ),
                       ),
-                    )
-                    .toList(),
-                onChanged: (value) => setState(() => _categoryId = value),
-                validator: (value) => value == null ? 'Pilih kategori' : null,
+                      IconButton(
+                        tooltip: 'Tutup',
+                        onPressed: () => Navigator.of(context).pop(),
+                        icon: const Icon(Icons.close_rounded),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 14),
+                  _TextField(controller: _name, label: 'Nama Produk'),
+                  if (categories.isEmpty)
+                    const Padding(
+                      padding: EdgeInsets.only(bottom: 12),
+                      child: Text(
+                        'Kategori belum tersedia. Tarik untuk refresh atau tambah kategori terlebih dahulu.',
+                        style: TextStyle(
+                          color: Colors.red,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                  DropdownButtonFormField<String>(
+                    initialValue: _categoryId,
+                    decoration: const InputDecoration(
+                      labelText: 'Kategori',
+                      border: OutlineInputBorder(),
+                    ),
+                    items: categories
+                        .map(
+                          (category) => DropdownMenuItem(
+                            value: category.id,
+                            child: Text(category.name),
+                          ),
+                        )
+                        .toList(),
+                    onChanged: (value) => setState(() => _categoryId = value),
+                    validator: (value) =>
+                        value == null ? 'Pilih kategori' : null,
+                  ),
+                  const SizedBox(height: 12),
+                  _TextField(
+                    controller: _price,
+                    label: 'Harga',
+                    keyboardType: TextInputType.number,
+                    numberOnly: true,
+                  ),
+                  _TextField(
+                    controller: _stock,
+                    label: 'Stok',
+                    keyboardType: TextInputType.number,
+                    integerOnly: true,
+                  ),
+                  _TextField(
+                    controller: _description,
+                    label: 'Deskripsi',
+                    maxLines: 3,
+                  ),
+                  _TextField(
+                    controller: _weight,
+                    label: 'Berat Produk (kg)',
+                    keyboardType: TextInputType.number,
+                    numberOnly: true,
+                  ),
+                  _TextField(
+                    controller: _discount,
+                    label: 'Diskon (%)',
+                    keyboardType: TextInputType.number,
+                    numberOnly: true,
+                  ),
+                  _ProductImagePicker(
+                    imageUrl: _imageUrl.text,
+                    onGalleryTap: () => _pickProductImage(ImageSource.gallery),
+                    onCameraTap: () => _pickProductImage(ImageSource.camera),
+                  ),
+                  _TextField(
+                    controller: _imageUrl,
+                    label: 'URL Gambar atau Path File',
+                    onChanged: (_) => setState(() {}),
+                  ),
+                  SwitchListTile(
+                    contentPadding: EdgeInsets.zero,
+                    value: _isActive,
+                    onChanged: (value) => setState(() => _isActive = value),
+                    title: const Text('Status Produk'),
+                    subtitle: Text(_isActive ? 'Aktif' : 'Tidak Aktif'),
+                  ),
+                  const SizedBox(height: 10),
+                  SizedBox(
+                    width: double.infinity,
+                    child: FilledButton(
+                      onPressed: () => _submit(context),
+                      child: const Text('Simpan Produk'),
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(height: 12),
-              _TextField(
-                controller: _price,
-                label: 'Harga',
-                keyboardType: TextInputType.number,
-              ),
-              _TextField(
-                controller: _stock,
-                label: 'Stok',
-                keyboardType: TextInputType.number,
-              ),
-              _TextField(
-                controller: _description,
-                label: 'Deskripsi',
-                maxLines: 3,
-              ),
-              _TextField(
-                controller: _weight,
-                label: 'Berat Produk (kg)',
-                keyboardType: TextInputType.number,
-              ),
-              _TextField(
-                controller: _discount,
-                label: 'Diskon (%)',
-                keyboardType: TextInputType.number,
-              ),
-              _TextField(
-                controller: _imageUrl,
-                label: 'Upload Gambar / URL Gambar',
-              ),
-              SwitchListTile(
-                contentPadding: EdgeInsets.zero,
-                value: _isActive,
-                onChanged: (value) => setState(() => _isActive = value),
-                title: const Text('Status Produk'),
-                subtitle: Text(_isActive ? 'Aktif' : 'Tidak Aktif'),
-              ),
-              const SizedBox(height: 10),
-              SizedBox(
-                width: double.infinity,
-                child: FilledButton(
-                  onPressed: () => _submit(context),
-                  child: const Text('Simpan Produk'),
-                ),
-              ),
-            ],
+            ),
           ),
         ),
       ),
@@ -737,10 +820,21 @@ class _ProductFormState extends State<_ProductForm> {
       return;
     }
 
-    final category = context.read<AdminProvider>().categories.firstWhere(
-      (item) => item.id == _categoryId,
-    );
-    final originalPrice = double.parse(_price.text);
+    final categories = context.read<AdminProvider>().categories;
+    CategoryModel? category;
+    for (final item in categories) {
+      if (item.id == _categoryId) {
+        category = item;
+        break;
+      }
+    }
+    if (category == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Pilih kategori produk terlebih dahulu.')),
+      );
+      return;
+    }
+    final originalPrice = double.tryParse(_price.text.trim()) ?? 0;
     final discount = double.tryParse(_discount.text) ?? 0;
     final finalPrice =
         originalPrice - (originalPrice * (discount.clamp(0, 100) / 100));
@@ -755,7 +849,7 @@ class _ProductFormState extends State<_ProductForm> {
       categoryName: category.name,
       rating: widget.product?.rating ?? 0,
       reviewCount: widget.product?.reviewCount ?? 0,
-      stock: int.parse(_stock.text),
+      stock: int.tryParse(_stock.text.trim()) ?? 0,
       weight: double.tryParse(_weight.text) ?? 0,
       isActive: _isActive,
     );
@@ -765,6 +859,8 @@ class _ProductFormState extends State<_ProductForm> {
       await admin.addProduct(
         product,
         productProvider: context.read<ProductProvider>(),
+        cartProvider: context.read<CartProvider>(),
+        favoriteProvider: context.read<FavoriteProvider>(),
       );
     } else {
       await admin.updateProduct(
@@ -775,6 +871,155 @@ class _ProductFormState extends State<_ProductForm> {
       );
     }
     if (context.mounted) Navigator.of(context).pop();
+  }
+
+  Future<void> _pickProductImage(ImageSource source) async {
+    if (source == ImageSource.camera) {
+      final status = await Permission.camera.request();
+      if (!status.isGranted) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Izin kamera diperlukan untuk mengambil foto produk.',
+            ),
+          ),
+        );
+        if (status.isPermanentlyDenied) {
+          await openAppSettings();
+        }
+        return;
+      }
+    } else {
+      final status = await _requestGalleryPermission();
+      if (!status.isGranted) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Izin galeri diperlukan untuk memilih foto produk.',
+            ),
+          ),
+        );
+        if (status.isPermanentlyDenied) {
+          await openAppSettings();
+        }
+        return;
+      }
+    }
+
+    XFile? picked;
+    try {
+      picked = await _imagePicker.pickImage(
+        source: source,
+        imageQuality: 85,
+        maxWidth: 1600,
+      );
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            source == ImageSource.camera
+                ? 'Kamera belum bisa dibuka di perangkat ini.'
+                : 'Galeri belum bisa dibuka di perangkat ini.',
+          ),
+        ),
+      );
+      return;
+    }
+    if (picked == null) return;
+
+    final appDir = await getApplicationDocumentsDirectory();
+    final imageDir = Directory(p.join(appDir.path, 'product_images'));
+    if (!await imageDir.exists()) {
+      await imageDir.create(recursive: true);
+    }
+
+    final extension = p.extension(picked.path).isEmpty
+        ? '.jpg'
+        : p.extension(picked.path);
+    final fileName =
+        'product_${DateTime.now().millisecondsSinceEpoch}$extension';
+    final savedPath = p.join(imageDir.path, fileName);
+    await File(picked.path).copy(savedPath);
+
+    if (!mounted) return;
+    setState(() => _imageUrl.text = savedPath);
+  }
+
+  Future<PermissionStatus> _requestGalleryPermission() async {
+    if (Platform.isIOS) {
+      return Permission.photos.request();
+    }
+
+    if (Platform.isAndroid) {
+      final photosStatus = await Permission.photos.request();
+      if (photosStatus.isGranted || photosStatus.isLimited) {
+        return photosStatus;
+      }
+
+      final storageStatus = await Permission.storage.request();
+      if (storageStatus.isGranted || storageStatus.isLimited) {
+        return storageStatus;
+      }
+
+      return storageStatus;
+    }
+
+    return PermissionStatus.granted;
+  }
+}
+
+class _ProductImagePicker extends StatelessWidget {
+  const _ProductImagePicker({
+    required this.imageUrl,
+    required this.onGalleryTap,
+    required this.onCameraTap,
+  });
+
+  final String imageUrl;
+  final VoidCallback onGalleryTap;
+  final VoidCallback onCameraTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            height: 150,
+            width: double.infinity,
+            decoration: BoxDecoration(
+              color: const Color(0xFFE8EEF6),
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: const Color(0xFFD8E0EA)),
+            ),
+            clipBehavior: Clip.antiAlias,
+            child: ProductImage(imageUrl: imageUrl, placeholderSize: 48),
+          ),
+          const SizedBox(height: 10),
+          Wrap(
+            spacing: 10,
+            runSpacing: 8,
+            children: [
+              FilledButton.icon(
+                onPressed: onGalleryTap,
+                icon: const Icon(Icons.photo_library_outlined),
+                label: const Text('Pilih dari Galeri'),
+              ),
+              OutlinedButton.icon(
+                onPressed: onCameraTap,
+                icon: const Icon(Icons.photo_camera_outlined),
+                label: const Text('Kamera'),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
   }
 }
 
@@ -805,9 +1050,13 @@ class _CategoryManagementSection extends StatelessWidget {
   }
 
   void _showCategoryForm(BuildContext context, {CategoryModel? category}) {
+    final admin = context.read<AdminProvider>();
     showDialog<void>(
       context: context,
-      builder: (_) => _CategoryForm(category: category),
+      builder: (_) => ChangeNotifierProvider.value(
+        value: admin,
+        child: _CategoryForm(category: category),
+      ),
     );
   }
 
@@ -855,6 +1104,7 @@ class _CategoryForm extends StatefulWidget {
 
 class _CategoryFormState extends State<_CategoryForm> {
   final _formKey = GlobalKey<FormState>();
+  final _imagePicker = ImagePicker();
   late final TextEditingController _name;
   late final TextEditingController _iconName;
 
@@ -882,12 +1132,22 @@ class _CategoryFormState extends State<_CategoryForm> {
       ),
       content: Form(
         key: _formKey,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            _TextField(controller: _name, label: 'Nama Kategori'),
-            _TextField(controller: _iconName, label: 'Icon Material'),
-          ],
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _TextField(controller: _name, label: 'Nama Kategori'),
+              _CategoryLogoPicker(
+                iconName: _iconName.text,
+                onGalleryTap: _pickCategoryLogo,
+              ),
+              _TextField(
+                controller: _iconName,
+                label: 'Icon Material atau Path Logo',
+                onChanged: (_) => setState(() {}),
+              ),
+            ],
+          ),
         ),
       ),
       actions: [
@@ -924,6 +1184,87 @@ class _CategoryFormState extends State<_CategoryForm> {
       );
     }
     if (context.mounted) Navigator.of(context).pop();
+  }
+
+  Future<void> _pickCategoryLogo() async {
+    XFile? picked;
+    try {
+      picked = await _imagePicker.pickImage(
+        source: ImageSource.gallery,
+        imageQuality: 85,
+        maxWidth: 1000,
+      );
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Galeri belum bisa dibuka di perangkat ini.'),
+        ),
+      );
+      return;
+    }
+    if (picked == null) return;
+
+    final appDir = await getApplicationDocumentsDirectory();
+    final imageDir = Directory(p.join(appDir.path, 'category_images'));
+    if (!await imageDir.exists()) {
+      await imageDir.create(recursive: true);
+    }
+
+    final extension = p.extension(picked.path).isEmpty
+        ? '.jpg'
+        : p.extension(picked.path);
+    final fileName =
+        'category_${DateTime.now().millisecondsSinceEpoch}$extension';
+    final savedPath = p.join(imageDir.path, fileName);
+    await File(picked.path).copy(savedPath);
+
+    if (!mounted) return;
+    setState(() => _iconName.text = savedPath);
+  }
+}
+
+class _CategoryLogoPicker extends StatelessWidget {
+  const _CategoryLogoPicker({
+    required this.iconName,
+    required this.onGalleryTap,
+  });
+
+  final String iconName;
+  final VoidCallback onGalleryTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Column(
+        children: [
+          Container(
+            width: 92,
+            height: 92,
+            decoration: BoxDecoration(
+              color: const Color(0xFFE8EEF6),
+              borderRadius: BorderRadius.circular(18),
+              border: Border.all(color: const Color(0xFFD8E0EA)),
+            ),
+            clipBehavior: Clip.antiAlias,
+            child: _isLocalOrNetworkImage(iconName)
+                ? ProductImage(imageUrl: iconName, placeholderSize: 34)
+                : Icon(
+                    _adminIconFromName(iconName),
+                    color: const Color(0xFF1565C0),
+                    size: 36,
+                  ),
+          ),
+          const SizedBox(height: 10),
+          OutlinedButton.icon(
+            onPressed: onGalleryTap,
+            icon: const Icon(Icons.photo_library_outlined),
+            label: const Text('Pilih Logo dari Galeri'),
+          ),
+        ],
+      ),
+    );
   }
 }
 
@@ -1404,7 +1745,21 @@ class _CategoryAdminCard extends StatelessWidget {
       child: ListTile(
         leading: CircleAvatar(
           backgroundColor: Color(category.color).withValues(alpha: 0.12),
-          child: Icon(Icons.category_outlined, color: Color(category.color)),
+          child: _isLocalOrNetworkImage(category.iconName)
+              ? ClipOval(
+                  child: SizedBox(
+                    width: 40,
+                    height: 40,
+                    child: ProductImage(
+                      imageUrl: category.iconName,
+                      placeholderSize: 22,
+                    ),
+                  ),
+                )
+              : Icon(
+                  _adminIconFromName(category.iconName),
+                  color: Color(category.color),
+                ),
         ),
         title: Text(
           category.name,
@@ -1440,46 +1795,234 @@ class _OrderAdminCard extends StatelessWidget {
       elevation: 0,
       color: Colors.white,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-      child: Padding(
-        padding: const EdgeInsets.all(14),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    order.invoice,
-                    style: const TextStyle(fontWeight: FontWeight.w900),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(8),
+        onTap: () => _showOrderDetails(context),
+        child: Padding(
+          padding: const EdgeInsets.all(14),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      order.invoice,
+                      style: const TextStyle(fontWeight: FontWeight.w900),
+                    ),
                   ),
-                ),
-                DropdownButton<String>(
-                  value: order.status,
-                  items: const ['Diproses', 'Dikemas', 'Dikirim', 'Selesai']
-                      .map(
-                        (status) => DropdownMenuItem(
-                          value: status,
-                          child: Text(status),
+                  TextButton.icon(
+                    onPressed: () => _showOrderDetails(context),
+                    icon: const Icon(Icons.visibility_outlined, size: 18),
+                    label: const Text('Detail'),
+                  ),
+                  const SizedBox(width: 8),
+                  DropdownButton<String>(
+                    value: order.status,
+                    items: const ['Diproses', 'Dikemas', 'Dikirim', 'Selesai']
+                        .map(
+                          (status) => DropdownMenuItem(
+                            value: status,
+                            child: Text(status),
+                          ),
+                        )
+                        .toList(),
+                    onChanged: (status) {
+                      if (status == null || order.id == null) return;
+                      context.read<AdminProvider>().updateOrderStatus(
+                        orderId: order.id!,
+                        status: status,
+                        notificationProvider: context
+                            .read<NotificationProvider>(),
+                      );
+                    },
+                  ),
+                ],
+              ),
+              const SizedBox(height: 6),
+              Text('${order.customerName} • ${order.phone}'),
+              const SizedBox(height: 6),
+              Text('Total: Rp ${formatNumber(order.grandTotal)}'),
+              const SizedBox(height: 6),
+              const Text(
+                'Ketuk kartu untuk melihat produk yang dipesan',
+                style: TextStyle(color: Colors.black54, fontSize: 12),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showOrderDetails(BuildContext context) {
+    if (order.id == null) return;
+    final admin = context.read<AdminProvider>();
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(18)),
+      ),
+      builder: (_) => ChangeNotifierProvider.value(
+        value: admin,
+        child: _OrderDetailSheet(order: order),
+      ),
+    );
+  }
+}
+
+class _OrderDetailSheet extends StatelessWidget {
+  const _OrderDetailSheet({required this.order});
+
+  final OrderModel order;
+
+  @override
+  Widget build(BuildContext context) {
+    final orderId = order.id;
+    return SafeArea(
+      child: Padding(
+        padding: EdgeInsets.only(
+          left: 16,
+          right: 16,
+          top: 16,
+          bottom: MediaQuery.viewInsetsOf(context).bottom + 16,
+        ),
+        child: SingleChildScrollView(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 720),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        'Detail Pesanan',
+                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.w900,
                         ),
-                      )
-                      .toList(),
-                  onChanged: (status) {
-                    if (status == null || order.id == null) return;
-                    context.read<AdminProvider>().updateOrderStatus(
-                      orderId: order.id!,
-                      status: status,
-                      notificationProvider: context
-                          .read<NotificationProvider>(),
-                    );
-                  },
+                      ),
+                    ),
+                    IconButton(
+                      onPressed: () => Navigator.of(context).pop(),
+                      icon: const Icon(Icons.close_rounded),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                _InfoPanel(
+                  rows: [
+                    _InfoRow(label: 'Invoice', value: order.invoice),
+                    _InfoRow(label: 'Status', value: order.status),
+                    _InfoRow(label: 'Nama Pembeli', value: order.customerName),
+                    _InfoRow(label: 'No. HP', value: order.phone),
+                    _InfoRow(label: 'Alamat', value: order.address),
+                    if (order.note.trim().isNotEmpty)
+                      _InfoRow(label: 'Catatan', value: order.note),
+                    _InfoRow(label: 'Pembayaran', value: order.paymentMethod),
+                    _InfoRow(label: 'Pengiriman', value: order.shippingMethod),
+                  ],
+                ),
+                const SizedBox(height: 14),
+                const Text(
+                  'Produk yang Dipesan',
+                  style: TextStyle(fontWeight: FontWeight.w900, fontSize: 16),
+                ),
+                const SizedBox(height: 10),
+                if (orderId == null)
+                  const _EmptyAdminCard(message: 'Detail pesanan tidak valid.')
+                else
+                  FutureBuilder<List<OrderDetailModel>>(
+                    future: context.read<AdminProvider>().getOrderDetails(
+                      orderId,
+                    ),
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return const Padding(
+                          padding: EdgeInsets.all(24),
+                          child: Center(child: CircularProgressIndicator()),
+                        );
+                      }
+                      final details = snapshot.data ?? [];
+                      if (details.isEmpty) {
+                        return const _EmptyAdminCard(
+                          message: 'Belum ada item di pesanan ini.',
+                        );
+                      }
+                      return Column(
+                        children: details
+                            .map((item) => _OrderDetailItem(item: item))
+                            .toList(),
+                      );
+                    },
+                  ),
+                const SizedBox(height: 14),
+                _InfoPanel(
+                  rows: [
+                    _InfoRow(
+                      label: 'Subtotal',
+                      value: 'Rp ${formatNumber(order.subtotal)}',
+                    ),
+                    _InfoRow(
+                      label: 'Ongkir',
+                      value: 'Rp ${formatNumber(order.shippingCost)}',
+                    ),
+                    _InfoRow(
+                      label: 'Diskon',
+                      value: '- Rp ${formatNumber(order.discount)}',
+                    ),
+                    _InfoRow(
+                      label: 'Pajak',
+                      value: 'Rp ${formatNumber(order.tax)}',
+                    ),
+                    _InfoRow(
+                      label: 'Grand Total',
+                      value: 'Rp ${formatNumber(order.grandTotal)}',
+                    ),
+                  ],
                 ),
               ],
             ),
-            const SizedBox(height: 6),
-            Text('${order.customerName} • ${order.phone}'),
-            const SizedBox(height: 6),
-            Text('Total: Rp ${formatNumber(order.grandTotal)}'),
-          ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _OrderDetailItem extends StatelessWidget {
+  const _OrderDetailItem({required this.item});
+
+  final OrderDetailModel item;
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      elevation: 0,
+      color: const Color(0xFFF5F7FA),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      child: ListTile(
+        contentPadding: const EdgeInsets.all(12),
+        leading: ClipRRect(
+          borderRadius: BorderRadius.circular(8),
+          child: Container(
+            width: 54,
+            height: 54,
+            color: Colors.white,
+            child: ProductImage(imageUrl: item.imageUrl, placeholderSize: 24),
+          ),
+        ),
+        title: Text(
+          item.name,
+          style: const TextStyle(fontWeight: FontWeight.w900),
+        ),
+        subtitle: Text('${item.quantity} x Rp ${formatNumber(item.price)}'),
+        trailing: Text(
+          'Rp ${formatNumber(item.total)}',
+          style: const TextStyle(fontWeight: FontWeight.w900),
         ),
       ),
     );
@@ -2051,12 +2594,18 @@ class _TextField extends StatelessWidget {
     required this.label,
     this.keyboardType,
     this.maxLines = 1,
+    this.numberOnly = false,
+    this.integerOnly = false,
+    this.onChanged,
   });
 
   final TextEditingController controller;
   final String label;
   final TextInputType? keyboardType;
   final int maxLines;
+  final bool numberOnly;
+  final bool integerOnly;
+  final ValueChanged<String>? onChanged;
 
   @override
   Widget build(BuildContext context) {
@@ -2066,12 +2615,22 @@ class _TextField extends StatelessWidget {
         controller: controller,
         keyboardType: keyboardType,
         maxLines: maxLines,
+        onChanged: onChanged,
         decoration: InputDecoration(
           labelText: label,
           border: const OutlineInputBorder(),
         ),
-        validator: (value) =>
-            value == null || value.trim().isEmpty ? '$label wajib diisi' : null,
+        validator: (value) {
+          final text = value?.trim() ?? '';
+          if (text.isEmpty) return '$label wajib diisi';
+          if (integerOnly && int.tryParse(text) == null) {
+            return '$label harus berupa angka bulat';
+          }
+          if (numberOnly && double.tryParse(text) == null) {
+            return '$label harus berupa angka';
+          }
+          return null;
+        },
       ),
     );
   }
@@ -2140,5 +2699,90 @@ class _EmptyAdminCard extends StatelessWidget {
         child: Center(child: Text(message)),
       ),
     );
+  }
+}
+
+class _EmptyAdminState extends StatelessWidget {
+  const _EmptyAdminState({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    required this.actionLabel,
+    required this.onAction,
+  });
+
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final String actionLabel;
+  final VoidCallback onAction;
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      elevation: 0,
+      color: Colors.white,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          children: [
+            CircleAvatar(
+              radius: 28,
+              backgroundColor: const Color(0xFFE3F2FD),
+              child: Icon(icon, color: const Color(0xFF1565C0), size: 30),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              title,
+              textAlign: TextAlign.center,
+              style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w900),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              subtitle,
+              textAlign: TextAlign.center,
+              style: const TextStyle(color: Colors.black54, height: 1.4),
+            ),
+            const SizedBox(height: 14),
+            FilledButton.icon(
+              onPressed: onAction,
+              icon: const Icon(Icons.restore_rounded),
+              label: Text(actionLabel),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+bool _isLocalOrNetworkImage(String value) {
+  final source = value.trim();
+  final uri = Uri.tryParse(source);
+  if (uri != null && (uri.isScheme('http') || uri.isScheme('https'))) {
+    return true;
+  }
+  return File(source).existsSync();
+}
+
+IconData _adminIconFromName(String name) {
+  switch (name.trim()) {
+    case 'laptop_mac':
+      return Icons.laptop_mac;
+    case 'smartphone':
+      return Icons.smartphone;
+    case 'headphones':
+      return Icons.headphones;
+    case 'sports_esports':
+      return Icons.sports_esports;
+    case 'cable':
+      return Icons.cable;
+    case 'storage':
+      return Icons.storage;
+    case 'category':
+      return Icons.category_outlined;
+    default:
+      return Icons.category_outlined;
   }
 }

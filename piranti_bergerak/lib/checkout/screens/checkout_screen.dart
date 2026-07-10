@@ -3,7 +3,9 @@ import 'package:provider/provider.dart';
 
 import '../../core/theme/app_colors.dart';
 import '../../cart/providers/cart_provider.dart';
+import '../../auth/providers/auth_provider.dart';
 import '../../notification/providers/notification_provider.dart';
+import '../../product/providers/product_provider.dart';
 import '../models/checkout_address_model.dart';
 import 'address_book_screen.dart';
 import 'promo_selection_screen.dart';
@@ -251,6 +253,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     CheckoutProvider prov,
   ) async {
     final formValid = _formKey.currentState?.validate() ?? false;
+    final userId = context.read<AuthProvider>().currentUser?.id;
     if (!formValid || !prov.validate()) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -271,10 +274,37 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             invoiceNumber: invoice,
             onPaymentSuccess: () async {
               Navigator.of(context).pop(); // Tutup QrPaymentScreen
-              final id = await prov.placeOrder();
-              if (!context.mounted) return;
-              if (id > 0) {
-                await context.read<NotificationProvider>().loadNotifications();
+              try {
+                final id = await prov.placeOrder(
+                  productProvider: context.read<ProductProvider>(),
+                  userId: userId,
+                );
+                if (!context.mounted) return;
+
+                if (id > 0) {
+                  await context
+                      .read<NotificationProvider>()
+                      .loadNotifications();
+                  if (!context.mounted) return;
+                  Navigator.of(
+                    context,
+                  ).pushReplacementNamed('/order-success', arguments: id);
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Pesanan gagal dibuat. Silakan coba lagi.'),
+                    ),
+                  );
+                }
+              } on CheckoutStockException catch (error) {
+                if (!context.mounted) return;
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    backgroundColor: AppColors.error,
+                    content: Text(error.message),
+                  ),
+                );
+              } catch (_) {
                 if (!context.mounted) return;
                 Navigator.of(
                   context,
@@ -352,7 +382,10 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     if (!confirmed || !context.mounted) return;
 
     try {
-      final id = await prov.placeOrder();
+      final id = await prov.placeOrder(
+        productProvider: context.read<ProductProvider>(),
+        userId: userId,
+      );
       if (!context.mounted) return;
 
       if (id > 0) {
@@ -369,6 +402,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         await prov.addCheckoutNotification(
           title: 'Pesanan Gagal',
           message: 'Pesanan gagal dibuat. Silakan coba lagi.',
+          userId: userId,
         );
         if (!context.mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
@@ -377,10 +411,24 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           ),
         );
       }
+    } on CheckoutStockException catch (error) {
+      await prov.addCheckoutNotification(
+        title: 'Stok Berubah',
+        message: error.message,
+        userId: userId,
+      );
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          backgroundColor: AppColors.error,
+          content: Text(error.message),
+        ),
+      );
     } catch (_) {
       await prov.addCheckoutNotification(
         title: 'Pesanan Gagal',
         message: 'Terjadi kesalahan saat membuat pesanan.',
+        userId: userId,
       );
       if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(

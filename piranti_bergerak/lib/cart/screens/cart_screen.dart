@@ -35,15 +35,24 @@ class _CartScreenContent extends StatelessWidget {
         elevation: 0,
         backgroundColor: AppColors.surface,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 18, color: AppColors.textPrimary),
-          onPressed: () => Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false),
+          icon: const Icon(
+            Icons.arrow_back_ios_new_rounded,
+            size: 18,
+            color: AppColors.textPrimary,
+          ),
+          onPressed: () => Navigator.of(
+            context,
+          ).pushNamedAndRemoveUntil('/home', (route) => false),
         ),
       ),
-      body: provider.isEmpty ? _buildEmpty(context, provider) : _buildContent(context, provider),
+      body: provider.isEmpty
+          ? _buildEmpty(context, provider)
+          : _buildContent(context, provider),
       bottomNavigationBar: provider.isEmpty
           ? null
           : CheckoutButton(
-              label: 'Checkout Sekarang • Rp ${formatNumber(provider.grandTotal)}',
+              label:
+                  'Checkout Sekarang • Rp ${formatNumber(provider.grandTotal)}',
               enabled: !provider.isEmpty,
               onPressed: () => Navigator.of(context).pushNamed('/checkout'),
             ),
@@ -61,7 +70,10 @@ class _CartScreenContent extends StatelessWidget {
               behavior: const NoOverscrollBehavior(),
               child: ListView.builder(
                 physics: const AlwaysScrollableScrollPhysics(
-                  parent: SlowDownScrollPhysics(velocityFactor: 0.5, dragFactor: 0.65),
+                  parent: SlowDownScrollPhysics(
+                    velocityFactor: 0.5,
+                    dragFactor: 0.65,
+                  ),
                 ),
                 padding: const EdgeInsets.only(top: 12, bottom: 8),
                 itemCount: provider.items.length + 1,
@@ -72,7 +84,8 @@ class _CartScreenContent extends StatelessWidget {
                       item: item,
                       onIncrement: () => provider.increaseQuantity(item.id),
                       onDecrement: () => provider.decreaseQuantity(item.id),
-                      onRemove: () => _confirmDelete(context, provider, item.id),
+                      onRemove: () =>
+                          _confirmDelete(context, provider, item.id),
                     );
                   }
                   return OrderSummaryCard(
@@ -93,36 +106,56 @@ class _CartScreenContent extends StatelessWidget {
 
   Widget _buildEmpty(BuildContext context, CartProvider provider) {
     return EmptyCartWidget(
-      onShop: () => Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false),
+      onShop: () => Navigator.of(
+        context,
+      ).pushNamedAndRemoveUntil('/home', (route) => false),
     );
   }
 
-  Future<void> _confirmDelete(BuildContext context, CartProvider provider, String itemId) async {
+  Future<void> _confirmDelete(
+    BuildContext context,
+    CartProvider provider,
+    String itemId,
+  ) async {
     final dialogContext = context;
-    final confirmed = await showDialog<bool>(
-      context: dialogContext,
-      builder: (innerContext) {
-        return AlertDialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-          title: const Text('Hapus Item', style: TextStyle(fontWeight: FontWeight.w800)),
-          content: const Text('Apakah Anda yakin ingin menghapus produk ini dari keranjang belanja?'),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(innerContext).pop(false),
-              child: const Text('Batal', style: TextStyle(color: AppColors.textSecondary)),
-            ),
-            FilledButton(
-              style: FilledButton.styleFrom(
-                backgroundColor: AppColors.error,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+    final confirmed =
+        await showDialog<bool>(
+          context: dialogContext,
+          builder: (innerContext) {
+            return AlertDialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
               ),
-              onPressed: () => Navigator.of(innerContext).pop(true),
-              child: const Text('Hapus'),
-            ),
-          ],
-        );
-      },
-    ) ?? false;
+              title: const Text(
+                'Hapus Item',
+                style: TextStyle(fontWeight: FontWeight.w800),
+              ),
+              content: const Text(
+                'Apakah Anda yakin ingin menghapus produk ini dari keranjang belanja?',
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(innerContext).pop(false),
+                  child: const Text(
+                    'Batal',
+                    style: TextStyle(color: AppColors.textSecondary),
+                  ),
+                ),
+                FilledButton(
+                  style: FilledButton.styleFrom(
+                    backgroundColor: AppColors.error,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                  onPressed: () => Navigator.of(innerContext).pop(true),
+                  child: const Text('Hapus'),
+                ),
+              ],
+            );
+          },
+        ) ??
+        false;
 
     if (!confirmed) return;
     if (!context.mounted) return;

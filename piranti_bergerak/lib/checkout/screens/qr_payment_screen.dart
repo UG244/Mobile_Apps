@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import '../../core/theme/app_colors.dart';
 import '../../cart/utils/format_utils.dart';
@@ -29,6 +30,7 @@ class _QrPaymentScreenState extends State<QrPaymentScreen> {
   late Timer _timer;
   int _remainingSeconds = 300; // 5 Menit
   bool _isChecking = false;
+  bool get _isExpired => _remainingSeconds <= 0;
   late String _qrPayload;
 
   @override
@@ -69,6 +71,14 @@ class _QrPaymentScreenState extends State<QrPaymentScreen> {
   }
 
   Future<void> _simulatePaymentSuccess() async {
+    if (_isExpired) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('QR sudah kedaluwarsa. Perbarui QR dulu.'),
+        ),
+      );
+      return;
+    }
     setState(() => _isChecking = true);
     await Future.delayed(const Duration(milliseconds: 1500));
     if (!mounted) return;
@@ -119,6 +129,33 @@ class _QrPaymentScreenState extends State<QrPaymentScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: AppColors.infoLight,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: AppColors.accentLight),
+              ),
+              child: const Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Icon(Icons.info_outline_rounded, color: AppColors.accent),
+                  SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      'QR ini dipakai sebagai simulasi QRIS checkout. Di aplikasi nyata, QR akan dibuat oleh payment gateway dan status pembayaran dicek otomatis.',
+                      style: TextStyle(
+                        color: AppColors.textPrimary,
+                        height: 1.4,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
+
             // ── Card Utama QRIS ──────────────────────────────────────────
             Container(
               padding: const EdgeInsets.all(24),
@@ -183,7 +220,9 @@ class _QrPaymentScreenState extends State<QrPaymentScreen> {
                       vertical: 8,
                     ),
                     decoration: BoxDecoration(
-                      color: AppColors.surfaceVariant,
+                      color: _isExpired
+                          ? AppColors.errorLight
+                          : AppColors.surfaceVariant,
                       borderRadius: BorderRadius.circular(30),
                     ),
                     child: Row(
@@ -196,11 +235,15 @@ class _QrPaymentScreenState extends State<QrPaymentScreen> {
                         ),
                         const SizedBox(width: 6),
                         Text(
-                          'Selesaikan pembayaran dalam $_formattedTimer',
-                          style: const TextStyle(
+                          _isExpired
+                              ? 'QR kedaluwarsa, perbarui untuk lanjut'
+                              : 'Selesaikan pembayaran dalam $_formattedTimer',
+                          style: TextStyle(
                             fontSize: 12.5,
                             fontWeight: FontWeight.w700,
-                            color: AppColors.textPrimary,
+                            color: _isExpired
+                                ? AppColors.error
+                                : AppColors.textPrimary,
                           ),
                         ),
                       ],
@@ -272,6 +315,10 @@ class _QrPaymentScreenState extends State<QrPaymentScreen> {
 
             const SizedBox(height: 24),
 
+            _PaymentStatusCard(isExpired: _isExpired, isChecking: _isChecking),
+
+            const SizedBox(height: 16),
+
             // ── Petunjuk Pembayaran ──────────────────────────────────────
             Container(
               padding: const EdgeInsets.all(18),
@@ -284,7 +331,7 @@ class _QrPaymentScreenState extends State<QrPaymentScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Text(
-                    'Cara Pembayaran Mudah:',
+                    'Cara Bayar QRIS:',
                     style: TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.w800,
@@ -314,7 +361,9 @@ class _QrPaymentScreenState extends State<QrPaymentScreen> {
             // ── Tombol Simulasi & Action ─────────────────────────────────
             FilledButton.icon(
               style: FilledButton.styleFrom(
-                backgroundColor: AppColors.success,
+                backgroundColor: _isExpired
+                    ? AppColors.textHint
+                    : AppColors.success,
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(14),
@@ -339,7 +388,9 @@ class _QrPaymentScreenState extends State<QrPaymentScreen> {
                   fontWeight: FontWeight.w800,
                 ),
               ),
-              onPressed: _isChecking ? null : _simulatePaymentSuccess,
+              onPressed: _isChecking || _isExpired
+                  ? null
+                  : _simulatePaymentSuccess,
             ),
 
             const SizedBox(height: 12),

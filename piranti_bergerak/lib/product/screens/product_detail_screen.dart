@@ -6,7 +6,9 @@ import '../../cart/providers/cart_provider.dart';
 import '../../cart/utils/format_utils.dart';
 import '../models/product_model.dart';
 import '../providers/favorite_provider.dart';
+import '../providers/product_provider.dart';
 import '../widgets/cart_notification_overlay.dart';
+import '../widgets/product_image.dart';
 
 /// ProductDetailScreen — Halaman Detail Produk Modern & Clean.
 ///
@@ -25,9 +27,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   int _quantity = 1;
   bool _showFullDesc = false;
 
-  ProductModel get product => widget.product;
-
-  void _increment() {
+  void _increment(ProductModel product) {
     if (_quantity < product.stock) {
       setState(() => _quantity++);
     }
@@ -39,7 +39,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     }
   }
 
-  void _addToCart(BuildContext context) {
+  void _addToCart(BuildContext context, ProductModel product) {
     final cartItem = product.toCartItem(quantity: _quantity);
     context.read<CartProvider>().addItem(cartItem);
 
@@ -50,7 +50,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     );
   }
 
-  void _buyNow(BuildContext context) {
+  void _buyNow(BuildContext context, ProductModel product) {
     final cartItem = product.toCartItem(quantity: _quantity);
     context.read<CartProvider>().addItem(cartItem);
     Navigator.of(context).pushNamed('/checkout');
@@ -58,7 +58,16 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final product = context.watch<ProductProvider>().findActiveById(
+      widget.product.id,
+    );
     final favoriteProvider = context.watch<FavoriteProvider>();
+    if (product == null) {
+      return const _UnavailableProductView();
+    }
+    if (_quantity > product.stock && product.stock > 0) {
+      _quantity = product.stock;
+    }
     final isFav = favoriteProvider.isFavorite(product.id);
 
     return Scaffold(
@@ -109,21 +118,10 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
             flexibleSpace: FlexibleSpaceBar(
               background: Container(
                 color: AppColors.surfaceVariant,
-                child: product.imageUrl.isNotEmpty
-                    ? Image.network(
-                        product.imageUrl,
-                        fit: BoxFit.cover,
-                        errorBuilder: (_, _, _) => const Icon(
-                          Icons.image_outlined,
-                          size: 80,
-                          color: AppColors.textHint,
-                        ),
-                      )
-                    : const Icon(
-                        Icons.image_outlined,
-                        size: 80,
-                        color: AppColors.textHint,
-                      ),
+                child: ProductImage(
+                  imageUrl: product.imageUrl,
+                  placeholderSize: 80,
+                ),
               ),
             ),
           ),
@@ -321,7 +319,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                               ),
                             ),
                             IconButton(
-                              onPressed: _increment,
+                              onPressed: () => _increment(product),
                               icon: const Icon(Icons.add_rounded, size: 18),
                               color: _quantity < product.stock
                                   ? AppColors.accent
@@ -452,7 +450,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                     padding: const EdgeInsets.symmetric(vertical: 14),
                     side: const BorderSide(color: AppColors.accent, width: 1.5),
                   ),
-                  onPressed: product.stock > 0 ? () => _buyNow(context) : null,
+                  onPressed: product.stock > 0
+                      ? () => _buyNow(context, product)
+                      : null,
                   child: const Text('Beli Sekarang'),
                 ),
               ),
@@ -471,6 +471,70 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                       ? () => _addToCart(context)
                       : null,
                 ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _UnavailableProductView extends StatelessWidget {
+  const _UnavailableProductView();
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: AppColors.background,
+      appBar: AppBar(
+        backgroundColor: AppColors.surface,
+        elevation: 0,
+        title: const Text('Produk Tidak Tersedia'),
+      ),
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(32),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(22),
+                decoration: const BoxDecoration(
+                  color: AppColors.errorLight,
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.inventory_2_outlined,
+                  color: AppColors.error,
+                  size: 56,
+                ),
+              ),
+              const SizedBox(height: 18),
+              const Text(
+                'Produk sudah tidak tersedia',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: AppColors.textPrimary,
+                  fontSize: 20,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                'Produk ini mungkin sudah dihapus atau dinonaktifkan oleh admin.',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: AppColors.textSecondary,
+                  fontSize: 14,
+                  height: 1.5,
+                ),
+              ),
+              const SizedBox(height: 22),
+              FilledButton.icon(
+                onPressed: () => Navigator.of(context).pop(),
+                icon: const Icon(Icons.arrow_back_rounded, size: 18),
+                label: const Text('Kembali ke katalog'),
               ),
             ],
           ),

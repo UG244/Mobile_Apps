@@ -28,8 +28,9 @@ class AuthDb {
 
     return await openDatabase(
       path,
-      version: 1,
+      version: 2,
       onCreate: _createDB,
+      onUpgrade: _upgradeDB,
     );
   }
 
@@ -39,9 +40,26 @@ class AuthDb {
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         username TEXT UNIQUE NOT NULL,
         password TEXT NOT NULL,
-        role TEXT NOT NULL
+        role TEXT NOT NULL,
+        displayName TEXT NOT NULL DEFAULT '',
+        email TEXT NOT NULL DEFAULT '',
+        phone TEXT NOT NULL DEFAULT ''
       )
     ''');
+  }
+
+  Future<void> _upgradeDB(Database db, int oldVersion, int newVersion) async {
+    if (oldVersion < 2) {
+      await db.execute("ALTER TABLE users ADD COLUMN displayName TEXT NOT NULL DEFAULT ''");
+      await db.execute("ALTER TABLE users ADD COLUMN email TEXT NOT NULL DEFAULT ''");
+      await db.execute("ALTER TABLE users ADD COLUMN phone TEXT NOT NULL DEFAULT ''");
+      await db.update(
+        'users',
+        {'displayName': 'admin'},
+        where: 'username = ?',
+        whereArgs: ['admin'],
+      );
+    }
   }
 
   Future<void> _ensureDefaultAdmin() async {
@@ -55,6 +73,9 @@ class AuthDb {
         'username': 'admin',
         'password': 'admin123',
         'role': 'admin',
+        'displayName': 'Administrator',
+        'email': 'admin@bluemart.id',
+        'phone': '',
       });
     }
   }
@@ -87,8 +108,43 @@ class AuthDb {
         'username': username,
         'password': password,
         'role': role,
+        'displayName': username,
+        'email': '',
+        'phone': '',
       },
       conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  Future<void> updateUserProfile({
+    required int id,
+    required String displayName,
+    required String email,
+    required String phone,
+  }) async {
+    final db = await database;
+    await db.update(
+      'users',
+      {
+        'displayName': displayName,
+        'email': email,
+        'phone': phone,
+      },
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+  }
+
+  Future<void> updateUserPassword({
+    required int id,
+    required String password,
+  }) async {
+    final db = await database;
+    await db.update(
+      'users',
+      {'password': password},
+      where: 'id = ?',
+      whereArgs: [id],
     );
   }
 

@@ -63,7 +63,11 @@ class ProductDb {
 
   Future<List<CategoryModel>> getCategories() async {
     final db = await database;
-    final rows = await db.query('categories', orderBy: 'name ASC');
+    var rows = await db.query('categories', orderBy: 'name ASC');
+    if (rows.isEmpty) {
+      await _seedCategoriesOnly(db);
+      rows = await db.query('categories', orderBy: 'name ASC');
+    }
     return rows.map(CategoryModel.fromMap).toList();
   }
 
@@ -97,6 +101,56 @@ class ProductDb {
     );
   }
 
+  Future<Map<String, ProductModel>> getActiveProductsByIds(
+    Iterable<String> ids,
+  ) async {
+    final uniqueIds = ids.toSet().toList();
+    if (uniqueIds.isEmpty) return {};
+
+    final db = await database;
+    final placeholders = List.filled(uniqueIds.length, '?').join(',');
+    final rows = await db.query(
+      'products',
+      where: 'isActive = ? AND id IN ($placeholders)',
+      whereArgs: [1, ...uniqueIds],
+    );
+    return {
+      for (final product in rows.map(ProductModel.fromMap)) product.id: product,
+    };
+  }
+
+  Future<void> reduceStock(Map<String, int> quantitiesByProductId) async {
+    if (quantitiesByProductId.isEmpty) return;
+
+    final db = await database;
+    await db.transaction((txn) async {
+      for (final entry in quantitiesByProductId.entries) {
+        final rows = await txn.query(
+          'products',
+          columns: ['stock', 'isActive'],
+          where: 'id = ?',
+          whereArgs: [entry.key],
+          limit: 1,
+        );
+        if (rows.isEmpty || rows.first['isActive'] != 1) {
+          throw StateError('Produk tidak tersedia.');
+        }
+
+        final stock = (rows.first['stock'] as num?)?.toInt() ?? 0;
+        if (stock < entry.value) {
+          throw StateError('Stok produk tidak cukup.');
+        }
+
+        await txn.update(
+          'products',
+          {'stock': stock - entry.value},
+          where: 'id = ?',
+          whereArgs: [entry.key],
+        );
+      }
+    });
+  }
+
   Future<void> deleteProduct(String id) async {
     final db = await database;
     await db.delete('products', where: 'id = ?', whereArgs: [id]);
@@ -113,12 +167,20 @@ class ProductDb {
 
   Future<void> updateCategory(CategoryModel category) async {
     final db = await database;
-    await db.update(
-      'categories',
-      category.toMap(),
-      where: 'id = ?',
-      whereArgs: [category.id],
-    );
+    await db.transaction((txn) async {
+      await txn.update(
+        'categories',
+        category.toMap(),
+        where: 'id = ?',
+        whereArgs: [category.id],
+      );
+      await txn.update(
+        'products',
+        {'categoryName': category.name},
+        where: 'categoryId = ?',
+        whereArgs: [category.id],
+      );
+    });
   }
 
   Future<void> deleteCategory(String id) async {
@@ -132,12 +194,40 @@ class ProductDb {
     );
   }
 
+  Future<void> restoreSeedCatalog() async {
+    final db = await database;
+    await db.transaction((txn) async {
+      for (final category in _seedCategories) {
+        await txn.insert(
+          'categories',
+          category.toMap(),
+          conflictAlgorithm: ConflictAlgorithm.replace,
+        );
+      }
+      for (final product in _seedProducts) {
+        await txn.insert(
+          'products',
+          product.toMap(),
+          conflictAlgorithm: ConflictAlgorithm.replace,
+        );
+      }
+    });
+  }
+
   Future<void> _seedCatalog(Database db) async {
-    for (final category in _seedCategories) {
-      await db.insert('categories', category.toMap());
-    }
+    await _seedCategoriesOnly(db);
     for (final product in _seedProducts) {
       await db.insert('products', product.toMap());
+    }
+  }
+
+  Future<void> _seedCategoriesOnly(Database db) async {
+    for (final category in _seedCategories) {
+      await db.insert(
+        'categories',
+        category.toMap(),
+        conflictAlgorithm: ConflictAlgorithm.replace,
+      );
     }
   }
 

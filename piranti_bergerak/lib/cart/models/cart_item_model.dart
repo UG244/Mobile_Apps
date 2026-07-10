@@ -6,6 +6,7 @@ class CartItemModel {
     required this.price,
     required this.quantity,
     required this.category,
+    required this.stock,
   });
 
   final String id;
@@ -14,6 +15,8 @@ class CartItemModel {
   final double price;
   int quantity;
   final String category;
+  final int stock;
 
   double get subtotal => price * quantity;
+  bool get isAtMaxStock => stock > 0 && quantity >= stock;
 }

@@ -32,19 +32,27 @@ class _OrderHistoryView extends StatelessWidget {
         backgroundColor: AppColors.surface,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 18, color: AppColors.textPrimary),
+          icon: const Icon(
+            Icons.arrow_back_ios_new_rounded,
+            size: 18,
+            color: AppColors.textPrimary,
+          ),
           onPressed: () => Navigator.of(context).pop(),
         ),
       ),
       body: Consumer<OrderProvider>(
         builder: (context, provider, _) {
           if (provider.isLoading) {
-            return const Center(child: CircularProgressIndicator(color: AppColors.accent));
+            return const Center(
+              child: CircularProgressIndicator(color: AppColors.accent),
+            );
           }
 
           if (provider.orders.isEmpty) {
             return EmptyOrderWidget(
-              onShop: () => Navigator.of(context).pushNamedAndRemoveUntil('/', (_) => false),
+              onShop: () => Navigator.of(
+                context,
+              ).pushNamedAndRemoveUntil('/home', (_) => false),
             );
           }
 
@@ -53,13 +61,17 @@ class _OrderHistoryView extends StatelessWidget {
             onRefresh: provider.refreshOrders,
             child: LayoutBuilder(
               builder: (context, constraints) {
-                final maxWidth = constraints.maxWidth >= 720 ? 680.0 : double.infinity;
+                final maxWidth = constraints.maxWidth >= 720
+                    ? 680.0
+                    : double.infinity;
 
                 return Center(
                   child: ConstrainedBox(
                     constraints: BoxConstraints(maxWidth: maxWidth),
                     child: ListView.builder(
-                      physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
+                      physics: const AlwaysScrollableScrollPhysics(
+                        parent: BouncingScrollPhysics(),
+                      ),
                       padding: const EdgeInsets.all(16),
                       itemCount: provider.orders.length,
                       itemBuilder: (context, index) {
@@ -70,13 +82,16 @@ class _OrderHistoryView extends StatelessWidget {
                         return OrderHistoryCard(
                           order: order,
                           totalItems: provider.getTotalItems(orderId),
-                          formattedDate: provider.formatDateIndonesia(order.date),
+                          formattedDate: provider.formatDateIndonesia(
+                            order.date,
+                          ),
                           status: status,
                           statusColor: provider.getStatusColor(status),
                           onTap: () {
                             Navigator.of(context).push(
                               MaterialPageRoute(
-                                builder: (_) => OrderDetailPage(orderId: orderId),
+                                builder: (_) =>
+                                    OrderDetailPage(orderId: orderId),
                               ),
                             );
                           },

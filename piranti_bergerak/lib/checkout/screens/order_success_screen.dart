@@ -92,7 +92,7 @@ class OrderSuccessScreen extends StatelessWidget {
                         FilledButton(
                           onPressed: () => Navigator.of(
                             context,
-                          ).pushNamedAndRemoveUntil('/', (r) => false),
+                          ).pushNamedAndRemoveUntil('/home', (r) => false),
                           child: const Text('Kembali ke Homepage'),
                         ),
                       ],

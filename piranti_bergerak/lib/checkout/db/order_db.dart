@@ -30,7 +30,7 @@ class OrderDb {
 
     return await openDatabase(
       path,
-      version: 5,
+      version: 6,
       onCreate: _createDB,
       onUpgrade: _upgradeDB,
     );
@@ -53,7 +53,8 @@ class OrderDb {
       tax REAL,
       grandTotal REAL,
       date TEXT,
-      status TEXT DEFAULT 'Diproses'
+      status TEXT DEFAULT 'Diproses',
+      userId INTEGER
     )
     ''');
 
@@ -79,6 +80,8 @@ class OrderDb {
       type TEXT DEFAULT 'Pesanan',
       date TEXT,
       createdAt TEXT,
+      userId INTEGER,
+      targetRole TEXT DEFAULT 'user',
       isRead INTEGER DEFAULT 0
     )
     ''');
@@ -135,6 +138,13 @@ class OrderDb {
         "ALTER TABLE notifications ADD COLUMN type TEXT DEFAULT 'Pesanan'",
       );
       await db.execute("ALTER TABLE notifications ADD COLUMN createdAt TEXT");
+    }
+    if (oldVersion < 6) {
+      await db.execute("ALTER TABLE orders ADD COLUMN userId INTEGER");
+      await db.execute("ALTER TABLE notifications ADD COLUMN userId INTEGER");
+      await db.execute(
+        "ALTER TABLE notifications ADD COLUMN targetRole TEXT DEFAULT 'user'",
+      );
     }
   }
 
@@ -207,6 +217,8 @@ class OrderDb {
     required String message,
     required DateTime date,
     String type = 'Pesanan',
+    int? userId,
+    String targetRole = 'user',
   }) async {
     final db = await instance.database;
     return db.insert('notifications', {
@@ -216,6 +228,8 @@ class OrderDb {
       'type': type,
       'date': date.toIso8601String(),
       'createdAt': date.toIso8601String(),
+      'userId': userId,
+      'targetRole': targetRole,
       'isRead': 0,
     });
   }
@@ -228,9 +242,24 @@ class OrderDb {
     return db.insert('notifications', map);
   }
 
-  Future<List<AppNotificationModel>> getNotifications() async {
+  Future<List<AppNotificationModel>> getNotifications({
+    int? userId,
+    String targetRole = 'user',
+  }) async {
     final db = await instance.database;
-    final rows = await db.query('notifications', orderBy: 'id DESC');
+    final rows = targetRole == 'admin'
+        ? await db.query(
+            'notifications',
+            where: 'targetRole IN (?, ?)',
+            whereArgs: ['admin', 'all'],
+            orderBy: 'id DESC',
+          )
+        : await db.query(
+            'notifications',
+            where: '(userId = ? OR targetRole = ?)',
+            whereArgs: [userId, 'all'],
+            orderBy: 'id DESC',
+          );
     return rows.map(AppNotificationModel.fromMap).toList();
   }
 
@@ -244,9 +273,26 @@ class OrderDb {
     );
   }
 
-  Future<void> markAllNotificationsAsRead() async {
+  Future<void> markAllNotificationsAsRead({
+    int? userId,
+    String targetRole = 'user',
+  }) async {
     final db = await instance.database;
-    await db.update('notifications', {'isRead': 1});
+    if (targetRole == 'admin') {
+      await db.update(
+        'notifications',
+        {'isRead': 1},
+        where: 'targetRole IN (?, ?)',
+        whereArgs: ['admin', 'all'],
+      );
+      return;
+    }
+    await db.update(
+      'notifications',
+      {'isRead': 1},
+      where: '(userId = ? OR targetRole = ?)',
+      whereArgs: [userId, 'all'],
+    );
   }
 
   Future<void> deleteNotification(int id) async {
@@ -254,9 +300,24 @@ class OrderDb {
     await db.delete('notifications', where: 'id = ?', whereArgs: [id]);
   }
 
-  Future<void> clearAllNotifications() async {
+  Future<void> clearAllNotifications({
+    int? userId,
+    String targetRole = 'user',
+  }) async {
     final db = await instance.database;
-    await db.delete('notifications');
+    if (targetRole == 'admin') {
+      await db.delete(
+        'notifications',
+        where: 'targetRole IN (?, ?)',
+        whereArgs: ['admin', 'all'],
+      );
+      return;
+    }
+    await db.delete(
+      'notifications',
+      where: '(userId = ? OR targetRole = ?)',
+      whereArgs: [userId, 'all'],
+    );
   }
 
   Future<List<CheckoutAddressModel>> getCheckoutAddresses() async {

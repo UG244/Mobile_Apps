@@ -67,6 +67,10 @@
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
 	<key>NSCameraUsageDescription</key>
-	<string>Aplikasi membutuhkan akses kamera untuk memindai barcode produk dan kode QR.</string>
+	<string>Aplikasi membutuhkan akses kamera untuk memindai barcode, kode QR, dan mengambil foto produk.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Aplikasi membutuhkan akses galeri untuk memilih foto produk.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>Aplikasi membutuhkan akses galeri untuk menyimpan atau memakai foto produk.</string>
 </dict>
 </plist>

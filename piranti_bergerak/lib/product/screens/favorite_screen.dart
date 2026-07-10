@@ -114,7 +114,7 @@ class _FavoriteGrid extends StatelessWidget {
         crossAxisCount: 2,
         crossAxisSpacing: 14,
         mainAxisSpacing: 14,
-        mainAxisExtent: 310,
+        mainAxisExtent: 330,
       ),
       itemCount: products.length,
       itemBuilder: (context, index) {

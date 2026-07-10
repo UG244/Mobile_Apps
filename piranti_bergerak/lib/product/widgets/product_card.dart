@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../core/theme/app_colors.dart';
 import '../models/product_model.dart';
 import '../../cart/utils/format_utils.dart';
+import 'product_image.dart';
 
 /// ProductCard Modern & Clean untuk BlueMart Retail.
 ///
@@ -25,6 +26,7 @@ class ProductCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final canAddToCart = product.stock > 0 && onAddToCart != null;
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -53,39 +55,42 @@ class ProductCard extends StatelessWidget {
                     borderRadius: const BorderRadius.vertical(
                       top: Radius.circular(15),
                     ),
-                    child: product.imageUrl.isNotEmpty
-                        ? Image.network(
-                            product.imageUrl,
-                            fit: BoxFit.cover,
-                            loadingBuilder: (_, child, progress) {
-                              if (progress == null) return child;
-                              return const Center(
-                                child: SizedBox(
-                                  width: 24,
-                                  height: 24,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2.5,
-                                    color: AppColors.accent,
-                                  ),
-                                ),
-                              );
-                            },
-                            errorBuilder: (_, _, _) => const Icon(
-                              Icons.image_outlined,
-                              size: 44,
-                              color: AppColors.textHint,
-                            ),
-                          )
-                        : const Icon(
-                            Icons.image_outlined,
-                            size: 44,
-                            color: AppColors.textHint,
-                          ),
+                    child: ProductImage(imageUrl: product.imageUrl),
                   ),
                 ),
 
-                // Badge Diskon (Kiri Atas)
-                if (product.isOnSale)
+                // Badge status stok / diskon (Kiri Atas)
+                if (product.stock <= 0)
+                  Positioned(
+                    top: 10,
+                    left: 10,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: AppColors.error,
+                        borderRadius: BorderRadius.circular(8),
+                        boxShadow: const [
+                          BoxShadow(
+                            color: Color(0x33DC2626),
+                            blurRadius: 8,
+                            offset: Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: const Text(
+                        'Stok Habis',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                    ),
+                  )
+                else if (product.isOnSale)
                   Positioned(
                     top: 10,
                     left: 10,
@@ -185,6 +190,21 @@ class ProductCard extends StatelessWidget {
                         height: 1.25,
                       ),
                     ),
+                    const SizedBox(height: 6),
+                    Text(
+                      product.stock > 0
+                          ? 'Stok tersisa ${product.stock}'
+                          : 'Stok habis',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        color: product.stock > 0
+                            ? AppColors.textSecondary
+                            : AppColors.error,
+                        fontSize: 11.5,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
                     const Spacer(),
 
                     // Harga Coret & Harga Utama
@@ -215,11 +235,13 @@ class ProductCard extends StatelessWidget {
                         ),
                         if (onAddToCart != null)
                           Material(
-                            color: AppColors.primary,
+                            color: canAddToCart
+                                ? AppColors.primary
+                                : AppColors.textHint,
                             borderRadius: BorderRadius.circular(10),
                             child: InkWell(
                               borderRadius: BorderRadius.circular(10),
-                              onTap: onAddToCart,
+                              onTap: canAddToCart ? onAddToCart : null,
                               child: const Padding(
                                 padding: EdgeInsets.all(6.0),
                                 child: Icon(

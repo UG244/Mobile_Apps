@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../cart/models/cart_item_model.dart';
 import '../../cart/utils/format_utils.dart';
 import '../../cart/widgets/quantity_button.dart';
+import '../../product/widgets/product_image.dart';
 
 class CheckoutProductCard extends StatelessWidget {
   const CheckoutProductCard({
@@ -31,22 +32,11 @@ class CheckoutProductCard extends StatelessWidget {
           children: [
             ClipRRect(
               borderRadius: BorderRadius.circular(8),
-              child: Image.network(
-                item.imageUrl,
+              child: ProductImage(
+                imageUrl: item.imageUrl,
                 width: 72,
                 height: 72,
-                fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) {
-                  return Container(
-                    width: 72,
-                    height: 72,
-                    color: const Color(0xFFE8EEF6),
-                    child: const Icon(
-                      Icons.inventory_2_outlined,
-                      color: Color(0xFF1565C0),
-                    ),
-                  );
-                },
+                placeholderSize: 30,
               ),
             ),
             const SizedBox(width: 12),
