@@ -43,9 +43,7 @@ class MyApp extends StatelessWidget {
       providers: [
         // Provider milik Fiji (Cart & Checkout)
         ChangeNotifierProvider(create: (_) => CartProvider()),
-        ChangeNotifierProvider(
-          create: (_) => NotificationProvider()..loadNotifications(),
-        ),
+        ChangeNotifierProvider(create: (_) => NotificationProvider()),
 
         // Provider modul Product & Shopping (kita)
         ChangeNotifierProvider(create: (_) => ProductProvider()),

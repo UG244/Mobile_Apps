@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../../core/theme/app_colors.dart';
 import '../../cart/providers/cart_provider.dart';
+import '../../auth/providers/auth_provider.dart';
 import '../../notification/providers/notification_provider.dart';
 import '../../product/providers/product_provider.dart';
 import '../models/checkout_address_model.dart';
@@ -252,6 +253,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     CheckoutProvider prov,
   ) async {
     final formValid = _formKey.currentState?.validate() ?? false;
+    final userId = context.read<AuthProvider>().currentUser?.id;
     if (!formValid || !prov.validate()) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -275,6 +277,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
               try {
                 final id = await prov.placeOrder(
                   productProvider: context.read<ProductProvider>(),
+                  userId: userId,
                 );
                 if (!context.mounted) return;
 
@@ -377,6 +380,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     try {
       final id = await prov.placeOrder(
         productProvider: context.read<ProductProvider>(),
+        userId: userId,
       );
       if (!context.mounted) return;
 
@@ -394,6 +398,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         await prov.addCheckoutNotification(
           title: 'Pesanan Gagal',
           message: 'Pesanan gagal dibuat. Silakan coba lagi.',
+          userId: userId,
         );
         if (!context.mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
@@ -406,6 +411,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       await prov.addCheckoutNotification(
         title: 'Stok Berubah',
         message: error.message,
+        userId: userId,
       );
       if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -418,6 +424,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       await prov.addCheckoutNotification(
         title: 'Pesanan Gagal',
         message: 'Terjadi kesalahan saat membuat pesanan.',
+        userId: userId,
       );
       if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(

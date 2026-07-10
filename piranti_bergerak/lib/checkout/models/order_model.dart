@@ -1,6 +1,7 @@
 class OrderModel {
   OrderModel({
     this.id,
+    this.userId,
     required this.invoice,
     required this.customerName,
     required this.phone,
@@ -18,6 +19,7 @@ class OrderModel {
   });
 
   int? id;
+  int? userId;
   String invoice;
   String customerName;
   String phone;
@@ -36,6 +38,7 @@ class OrderModel {
   Map<String, dynamic> toMap() {
     return {
       'id': id,
+      'userId': userId,
       'invoice': invoice,
       'customerName': customerName,
       'phone': phone,
@@ -56,6 +59,7 @@ class OrderModel {
   factory OrderModel.fromMap(Map<String, dynamic> m) {
     return OrderModel(
       id: m['id'] as int?,
+      userId: m['userId'] as int?,
       invoice: m['invoice'] as String,
       customerName: m['customerName'] as String,
       phone: m['phone'] as String,

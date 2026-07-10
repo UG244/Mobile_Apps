@@ -9,7 +9,6 @@ import 'package:provider/provider.dart';
 
 import '../../cart/providers/cart_provider.dart';
 import '../../cart/utils/format_utils.dart';
-import '../../auth/providers/auth_provider.dart';
 import '../../checkout/models/order_detail_model.dart';
 import '../../checkout/models/order_model.dart';
 import '../../notification/providers/notification_provider.dart';
@@ -42,39 +41,6 @@ class _AdminPanelView extends StatefulWidget {
 class _AdminPanelViewState extends State<_AdminPanelView> {
   int _selectedIndex = 0;
 
-  void _confirmAdminLogout(BuildContext context) {
-    showDialog<void>(
-      context: context,
-      builder: (dialogContext) {
-        return AlertDialog(
-          title: const Text('Keluar dari Admin?'),
-          content: const Text(
-            'Sesi admin akan dihapus dan kamu akan kembali ke halaman login.',
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(dialogContext).pop(),
-              child: const Text('Batal'),
-            ),
-            FilledButton.icon(
-              style: FilledButton.styleFrom(
-                backgroundColor: const Color(0xFFE53935),
-                foregroundColor: Colors.white,
-              ),
-              onPressed: () {
-                Navigator.of(dialogContext).pop();
-                context.read<AuthProvider>().logout();
-                Navigator.of(context).pushNamedAndRemoveUntil('/login', (route) => false);
-              },
-              icon: const Icon(Icons.logout_rounded),
-              label: const Text('Logout'),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final admin = context.watch<AdminProvider>();
@@ -93,44 +59,35 @@ class _AdminPanelViewState extends State<_AdminPanelView> {
     ];
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF3F6FB),
+      backgroundColor: const Color(0xFFF5F7FA),
       appBar: AppBar(
-        title: const Text('BlueMart Admin'),
+        title: const Text('Admin Dashboard'),
         centerTitle: false,
-        backgroundColor: const Color(0xFF0F172A),
-        foregroundColor: Colors.white,
-        titleTextStyle: const TextStyle(
-          color: Colors.white,
-          fontSize: 18,
-          fontWeight: FontWeight.w900,
-          letterSpacing: -0.3,
-        ),
+        backgroundColor: Colors.white,
+        foregroundColor: const Color(0xFF1565C0),
         actions: [
           IconButton(
             tooltip: 'Notifikasi',
             onPressed: () => Navigator.of(context).pushNamed('/notifications'),
             icon: const Icon(Icons.notifications_none_rounded),
           ),
+          IconButton(
+            tooltip: 'Keluar',
+            onPressed: () {
+              Navigator.of(
+                context,
+              ).pushNamedAndRemoveUntil('/login', (route) => false);
+            },
+            icon: const Icon(Icons.logout_outlined),
+          ),
           const Padding(
-            padding: EdgeInsets.only(right: 8),
+            padding: EdgeInsets.only(right: 12),
             child: CircleAvatar(
-              backgroundColor: Color(0xFF1D4ED8),
+              backgroundColor: Color(0xFFE3F2FD),
               child: Icon(
                 Icons.admin_panel_settings_outlined,
-                color: Colors.white,
+                color: Color(0xFF1565C0),
               ),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.only(right: 12),
-            child: IconButton(
-              tooltip: 'Logout Admin',
-              style: IconButton.styleFrom(
-                backgroundColor: const Color(0xFFE53935).withValues(alpha: 0.16),
-                foregroundColor: Colors.white,
-              ),
-              onPressed: () => _confirmAdminLogout(context),
-              icon: const Icon(Icons.logout_rounded),
             ),
           ),
         ],
@@ -154,17 +111,7 @@ class _AdminPanelViewState extends State<_AdminPanelView> {
                       child: Center(
                         child: ConstrainedBox(
                           constraints: const BoxConstraints(maxWidth: 1180),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              if (_selectedIndex == 0) ...[
-                                const SizedBox(height: 6),
-                                _AdminHeroCard(admin: admin),
-                                const SizedBox(height: 16),
-                              ],
-                              pages[_selectedIndex],
-                            ],
-                          ),
+                          child: pages[_selectedIndex],
                         ),
                       ),
                     ),
@@ -2199,114 +2146,6 @@ class _SettingSwitch extends StatelessWidget {
   }
 }
 
-class _AdminHeroCard extends StatelessWidget {
-  const _AdminHeroCard({required this.admin});
-
-  final AdminProvider admin;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [Color(0xFF0F172A), Color(0xFF1D4ED8)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(24),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x221E3A8A),
-            blurRadius: 20,
-            offset: Offset(0, 10),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: const Icon(Icons.dashboard_rounded, color: Colors.white, size: 28),
-              ),
-              const SizedBox(width: 14),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Dashboard Operasional',
-                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w900,
-                          ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      'Pantau produk, pesanan, dan performa toko dalam satu tempat.',
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: Colors.white.withValues(alpha: 0.82),
-                          ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 18),
-          Wrap(
-            spacing: 12,
-            runSpacing: 12,
-            children: [
-              _AdminStatPill(label: 'Produk aktif', value: '${admin.totalProducts}'),
-              _AdminStatPill(label: 'Pesanan', value: '${admin.totalOrders}'),
-              _AdminStatPill(label: 'Revenue', value: 'Rp ${formatNumber(admin.totalRevenue)}'),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _AdminStatPill extends StatelessWidget {
-  const _AdminStatPill({required this.label, required this.value});
-
-  final String label;
-  final String value;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-      decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(label, style: TextStyle(color: Colors.white.withValues(alpha: 0.72), fontSize: 11)),
-          const SizedBox(height: 2),
-          Text(
-            value,
-            style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w800, fontSize: 14),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
 class _SalesChartCard extends StatelessWidget {
   const _SalesChartCard({required this.values});
 
@@ -2432,13 +2271,11 @@ class _AdminMenuCard extends StatelessWidget {
     required this.title,
     required this.icon,
     required this.onTap,
-    this.iconColor = const Color(0xFF1565C0),
   });
 
   final String title;
   final IconData icon;
   final VoidCallback onTap;
-  final Color iconColor;
 
   @override
   Widget build(BuildContext context) {
@@ -2454,7 +2291,7 @@ class _AdminMenuCard extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(icon, color: iconColor, size: 34),
+              Icon(icon, color: const Color(0xFF1565C0), size: 34),
               const SizedBox(height: 10),
               Text(
                 title,
