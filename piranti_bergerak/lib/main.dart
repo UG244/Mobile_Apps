@@ -6,8 +6,6 @@ import 'package:sqflite_common_ffi_web/sqflite_ffi_web.dart';
 
 import 'auth/providers/auth_provider.dart';
 import 'auth/screens/login_screen.dart';
-import 'auth/screens/register_screen.dart';
-import 'auth/widgets/admin_gate.dart';
 import 'core/theme/app_theme.dart';
 import 'core/providers/app_settings_provider.dart';
 import 'admin/screens/admin_panel_screen.dart';
@@ -18,6 +16,7 @@ import 'checkout/screens/checkout_screen.dart';
 import 'checkout/screens/order_success_screen.dart';
 import 'history/screens/order_detail_page.dart';
 import 'history/screens/order_history_page.dart';
+import 'location/screens/store_location_screen.dart';
 import 'notification/providers/notification_provider.dart';
 import 'notification/screens/notification_page.dart';
 import 'notification/services/notification_service.dart';
@@ -51,7 +50,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => FavoriteProvider()),
 
         // Provider auth untuk login dan role
-        ChangeNotifierProvider(create: (_) => AuthProvider()),
+        ChangeNotifierProvider(create: (_) => AuthProvider()..loadSession()),
         ChangeNotifierProvider(create: (_) => AppSettingsProvider()..load()),
       ],
       child: MaterialApp(
@@ -59,7 +58,7 @@ class MyApp extends StatelessWidget {
         debugShowCheckedModeBanner: false,
         scrollBehavior: const NoOverscrollBehavior(),
         theme: AppTheme.lightTheme,
-        home: const LoginScreen(),
+        home: const _AuthGate(),
         routes: {
           '/login': (context) => const LoginScreen(),
           '/home': (context) => const ProductHomeScreen(),
@@ -70,6 +69,7 @@ class MyApp extends StatelessWidget {
           '/notifications': (context) => const NotificationPage(),
           '/admin': (context) => const AdminPanelScreen(),
           '/barcode-scanner': (context) => const BarcodeScannerScreen(),
+          '/store-location': (context) => const StoreLocationScreen(),
           '/order-detail': (context) {
             final arg = ModalRoute.of(context)?.settings.arguments;
             return OrderDetailPage(orderId: arg is int ? arg : 0);
@@ -77,5 +77,23 @@ class MyApp extends StatelessWidget {
         },
       ),
     );
+  }
+}
+
+class _AuthGate extends StatelessWidget {
+  const _AuthGate();
+
+  @override
+  Widget build(BuildContext context) {
+    final auth = context.watch<AuthProvider>();
+    if (auth.isLoadingSession) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+    if (auth.isAuthenticated) {
+      return auth.isAdmin ? const AdminPanelScreen() : const ProductHomeScreen();
+    }
+    return const LoginScreen();
   }
 }

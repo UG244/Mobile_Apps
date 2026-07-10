@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import '../db/product_db.dart';
 import '../models/category_model.dart';
 import '../models/product_model.dart';
+import '../../core/services/cloud_api_service.dart';
 
 /// Provider untuk semua data produk dan kategori.
 ///
@@ -14,6 +15,7 @@ class ProductProvider extends ChangeNotifier {
   List<ProductModel> _allProducts = [];
   List<CategoryModel> _categories = [];
   List<ProductModel> _filteredProducts = [];
+  List<String> _remoteProductNames = [];
   String _searchQuery = '';
   String? _selectedCategoryId; // null = tampilkan semua
   bool _isLoading = false;
@@ -25,6 +27,7 @@ class ProductProvider extends ChangeNotifier {
       List.unmodifiable(_activeProducts);
   List<CategoryModel> get categories => List.unmodifiable(_categories);
   bool get isLoading => _isLoading;
+  List<String> get remoteProductNames => List.unmodifiable(_remoteProductNames);
   String get searchQuery => _searchQuery;
   String? get selectedCategoryId => _selectedCategoryId;
 
@@ -72,6 +75,9 @@ class ProductProvider extends ChangeNotifier {
     try {
       _categories = await ProductDb.instance.getCategories();
       _allProducts = await ProductDb.instance.getProducts();
+      _remoteProductNames = await CloudApiService.instance
+          .fetchRemoteProductNames()
+          .catchError((_) => <String>[]);
     } catch (_) {
       _categories = ProductDb.seedCategories;
       _allProducts = ProductDb.seedProducts;

@@ -1,16 +1,18 @@
+// ignore_for_file: unused_element, unused_field
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../auth/providers/auth_provider.dart';
 import '../../cart/providers/cart_provider.dart';
 import '../../checkout/screens/address_book_screen.dart';
-import '../../notification/providers/notification_provider.dart';
+import '../../core/theme/app_colors.dart';
 
 /// ProfileScreen — User Dashboard VIP yang modern, elegan, dan fungsional.
 ///
 /// Menggantikan placeholder lama dengan kartu keanggotaan VIP, statistik belanja,
 /// serta akses cepat ke Riwayat Pesanan, Buku Alamat, dan Panel Admin.
-class ProfileScreen extends StatelessWidget {
+class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
 
   @override
@@ -86,18 +88,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
     final auth = context.watch<AuthProvider>();
-    final settings = context.watch<AppSettingsProvider>();
     final cart = context.watch<CartProvider>();
-    final user = auth.currentUser;
-    final displayName = user?.displayName.trim().isNotEmpty == true
-        ? user!.displayName
-        : 'Pengguna BlueMart';
-    final emailOrUsername = user?.email.trim().isNotEmpty == true
-        ? user!.email
-        : user?.username ?? 'Login untuk mulai';
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -112,13 +104,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               Icons.settings_outlined,
               color: AppColors.textPrimary,
             ),
-            onPressed: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Pengaturan akun akan segera hadir!'),
-                ),
-              );
-            },
+            onPressed: () => _showProfileSettings(context, auth),
           ),
         ],
       ),
@@ -377,12 +363,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 padding: const EdgeInsets.symmetric(vertical: 14),
               ),
               onPressed: () {
+                context.read<AuthProvider>().logout();
+                Navigator.of(context).pushNamedAndRemoveUntil(
+                  '/login',
+                  (route) => false,
+                );
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
                     content: Text('Anda telah keluar dari sesi demo.'),
                   ),
                 );
               },
+              icon: const Icon(Icons.logout_rounded),
+              label: const Text('Keluar'),
             ),
 
             const SizedBox(height: 32),
@@ -768,23 +761,18 @@ class _MenuItem extends StatelessWidget {
 
   const _MenuItem({
     required this.icon,
+    required this.iconColor,
     required this.title,
     required this.subtitle,
     required this.onTap,
   });
 
-  final IconData icon;
-  final String title;
-  final String subtitle;
-  final VoidCallback onTap;
-
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
     return ListTile(
       contentPadding: EdgeInsets.zero,
       onTap: onTap,
-      child: Padding(
+      title: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         child: Row(
           children: [

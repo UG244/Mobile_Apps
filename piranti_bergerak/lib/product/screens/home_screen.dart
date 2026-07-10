@@ -8,7 +8,6 @@ import '../../core/theme/app_colors.dart';
 import '../../cart/providers/cart_provider.dart';
 import '../../notification/providers/notification_provider.dart';
 import '../../notification/widgets/notification_badge.dart';
-import '../../sensor/screens/barcode_scanner_screen.dart';
 import '../../sensor/services/shake_detector_service.dart';
 import '../../sensor/widgets/shake_refresh_toast.dart';
 import '../../profile/screens/profile_screen.dart';
@@ -169,6 +168,15 @@ class _ProductHomeScreenState extends State<ProductHomeScreen> {
                   tooltip: 'Scan Barcode / QR',
                   onPressed: () =>
                       Navigator.of(context).pushNamed('/barcode-scanner'),
+                ),
+                IconButton(
+                  icon: const Icon(
+                    Icons.map_outlined,
+                    color: AppColors.textPrimary,
+                  ),
+                  tooltip: 'Lokasi Toko',
+                  onPressed: () =>
+                      Navigator.of(context).pushNamed('/store-location'),
                 ),
                 IconButton(
                   icon: const Icon(
