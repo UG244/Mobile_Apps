@@ -5,6 +5,17 @@ import '../models/order_model.dart';
 import '../models/order_detail_model.dart';
 import '../db/order_db.dart';
 import '../../notification/services/notification_service.dart';
+import '../../product/db/product_db.dart';
+import '../../product/providers/product_provider.dart';
+
+class CheckoutStockException implements Exception {
+  const CheckoutStockException(this.message);
+
+  final String message;
+
+  @override
+  String toString() => message;
+}
 
 class CheckoutProvider extends ChangeNotifier {
   CheckoutProvider(this.cart) {
@@ -191,7 +202,14 @@ class CheckoutProvider extends ChangeNotifier {
         address.trim().isNotEmpty;
   }
 
-  Future<int> placeOrder() async {
+  Future<int> placeOrder({ProductProvider? productProvider}) async {
+    await _syncCartWithLatestStock();
+    if (cart.items.isEmpty) {
+      throw const CheckoutStockException(
+        'Produk di keranjang sudah tidak tersedia.',
+      );
+    }
+
     final invoice = 'INV-${DateTime.now().millisecondsSinceEpoch}';
     final orderDate = DateTime.now();
     final order = OrderModel(
@@ -224,6 +242,10 @@ class CheckoutProvider extends ChangeNotifier {
         )
         .toList();
 
+    await ProductDb.instance.reduceStock({
+      for (final item in cart.items) item.id: item.quantity,
+    });
+
     final id = await OrderDb.instance.insertOrder(order, details);
     final itemCount = cart.totalItems;
     final shortAddress = address.length > 48
@@ -235,20 +257,49 @@ class CheckoutProvider extends ChangeNotifier {
         '($shippingEstimate) ke $shortAddress. '
         'Cek Riwayat Pesanan untuk melihat posisi pesanan terbaru.';
 
-    await OrderDb.instance.insertNotification(
-      title: 'Pesanan $invoice Diproses',
-      message: message,
-      type: 'Pesanan',
-      date: orderDate,
-    );
-    await NotificationService.instance.showInstantNotification(
-      title: 'Pesanan $invoice Diproses',
-      body:
-          'Pesanan sedang diproses dan akan dikirim via $shippingMethod. $shippingEstimate.',
-    );
+    try {
+      await OrderDb.instance.insertNotification(
+        title: 'Pesanan $invoice Diproses',
+        message: message,
+        type: 'Pesanan',
+        date: orderDate,
+      );
+      await NotificationService.instance.showInstantNotification(
+        title: 'Pesanan $invoice Diproses',
+        body:
+            'Pesanan sedang diproses dan akan dikirim via $shippingMethod. $shippingEstimate.',
+      );
+    } catch (_) {
+      // Pesanan dan stok tetap valid walau notifikasi lokal gagal dibuat.
+    }
 
     cart.clearCart();
+    await productProvider?.refresh();
 
     return id;
+  }
+
+  Future<void> _syncCartWithLatestStock() async {
+    final requestedQuantities = {
+      for (final item in cart.items) item.id: item.quantity,
+    };
+    final productsById = await ProductDb.instance.getActiveProductsByIds(
+      cart.items.map((item) => item.id),
+    );
+    cart.syncWithProducts(productsById.values.toList());
+
+    for (final entry in requestedQuantities.entries) {
+      final product = productsById[entry.key];
+      if (product == null || product.stock <= 0) {
+        throw const CheckoutStockException(
+          'Sebagian produk sudah tidak tersedia.',
+        );
+      }
+      if (entry.value > product.stock) {
+        throw CheckoutStockException(
+          'Stok ${product.name} tersisa ${product.stock}. Jumlah di keranjang sudah disesuaikan.',
+        );
+      }
+    }
   }
 }

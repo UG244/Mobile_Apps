@@ -6,7 +6,9 @@ import '../../cart/providers/cart_provider.dart';
 import '../../cart/utils/format_utils.dart';
 import '../models/product_model.dart';
 import '../providers/favorite_provider.dart';
+import '../providers/product_provider.dart';
 import '../widgets/cart_notification_overlay.dart';
+import '../widgets/product_image.dart';
 
 /// ProductDetailScreen — Halaman Detail Produk Modern & Clean.
 ///
@@ -15,10 +17,7 @@ import '../widgets/cart_notification_overlay.dart';
 class ProductDetailScreen extends StatefulWidget {
   final ProductModel product;
 
-  const ProductDetailScreen({
-    super.key,
-    required this.product,
-  });
+  const ProductDetailScreen({super.key, required this.product});
 
   @override
   State<ProductDetailScreen> createState() => _ProductDetailScreenState();
@@ -28,9 +27,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   int _quantity = 1;
   bool _showFullDesc = false;
 
-  ProductModel get product => widget.product;
-
-  void _increment() {
+  void _increment(ProductModel product) {
     if (_quantity < product.stock) {
       setState(() => _quantity++);
     }
@@ -42,7 +39,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     }
   }
 
-  void _addToCart(BuildContext context) {
+  void _addToCart(BuildContext context, ProductModel product) {
     final cartItem = product.toCartItem(quantity: _quantity);
     context.read<CartProvider>().addItem(cartItem);
 
@@ -53,7 +50,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     );
   }
 
-  void _buyNow(BuildContext context) {
+  void _buyNow(BuildContext context, ProductModel product) {
     final cartItem = product.toCartItem(quantity: _quantity);
     context.read<CartProvider>().addItem(cartItem);
     Navigator.of(context).pushNamed('/checkout');
@@ -61,7 +58,16 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final product = context.watch<ProductProvider>().findActiveById(
+      widget.product.id,
+    );
     final favoriteProvider = context.watch<FavoriteProvider>();
+    if (product == null) {
+      return const _UnavailableProductView();
+    }
+    if (_quantity > product.stock && product.stock > 0) {
+      _quantity = product.stock;
+    }
     final isFav = favoriteProvider.isFavorite(product.id);
 
     return Scaffold(
@@ -82,7 +88,11 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                 shape: const CircleBorder(),
                 elevation: 2,
                 child: IconButton(
-                  icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 18, color: AppColors.textPrimary),
+                  icon: const Icon(
+                    Icons.arrow_back_ios_new_rounded,
+                    size: 18,
+                    color: AppColors.textPrimary,
+                  ),
                   onPressed: () => Navigator.of(context).pop(),
                 ),
               ),
@@ -108,21 +118,10 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
             flexibleSpace: FlexibleSpaceBar(
               background: Container(
                 color: AppColors.surfaceVariant,
-                child: product.imageUrl.isNotEmpty
-                    ? Image.network(
-                        product.imageUrl,
-                        fit: BoxFit.cover,
-                        errorBuilder: (_, _, _) => const Icon(
-                          Icons.image_outlined,
-                          size: 80,
-                          color: AppColors.textHint,
-                        ),
-                      )
-                    : const Icon(
-                        Icons.image_outlined,
-                        size: 80,
-                        color: AppColors.textHint,
-                      ),
+                child: ProductImage(
+                  imageUrl: product.imageUrl,
+                  placeholderSize: 80,
+                ),
               ),
             ),
           ),
@@ -145,14 +144,21 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                       Row(
                         children: [
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 4,
+                            ),
                             decoration: BoxDecoration(
                               color: const Color(0xFFFEF08A),
                               borderRadius: BorderRadius.circular(20),
                             ),
                             child: Row(
                               children: [
-                                const Icon(Icons.star_rounded, color: Color(0xFFCA8A04), size: 16),
+                                const Icon(
+                                  Icons.star_rounded,
+                                  color: Color(0xFFCA8A04),
+                                  size: 16,
+                                ),
                                 const SizedBox(width: 4),
                                 Text(
                                   '${product.rating} (${product.reviewCount} ulasan)',
@@ -169,7 +175,10 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                       ),
                       if (product.isOnSale)
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 4,
+                          ),
                           decoration: BoxDecoration(
                             color: AppColors.errorLight,
                             borderRadius: BorderRadius.circular(20),
@@ -229,15 +238,24 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                         ],
                       ),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 6,
+                        ),
                         decoration: BoxDecoration(
-                          color: product.stock > 0 ? AppColors.successLight : AppColors.errorLight,
+                          color: product.stock > 0
+                              ? AppColors.successLight
+                              : AppColors.errorLight,
                           borderRadius: BorderRadius.circular(10),
                         ),
                         child: Text(
-                          product.stock > 0 ? 'Stok Tersedia (${product.stock})' : 'Stok Habis',
+                          product.stock > 0
+                              ? 'Stok Tersedia (${product.stock})'
+                              : 'Stok Habis',
                           style: TextStyle(
-                            color: product.stock > 0 ? AppColors.success : AppColors.error,
+                            color: product.stock > 0
+                                ? AppColors.success
+                                : AppColors.error,
                             fontWeight: FontWeight.w700,
                             fontSize: 12,
                           ),
@@ -265,7 +283,10 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                           ),
                           Text(
                             'Batas pembelian sesuai stok',
-                            style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: AppColors.textSecondary,
+                            ),
                           ),
                         ],
                       ),
@@ -280,10 +301,14 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                             IconButton(
                               onPressed: _decrement,
                               icon: const Icon(Icons.remove_rounded, size: 18),
-                              color: _quantity > 1 ? AppColors.textPrimary : AppColors.textHint,
+                              color: _quantity > 1
+                                  ? AppColors.textPrimary
+                                  : AppColors.textHint,
                             ),
                             Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 12),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                              ),
                               child: Text(
                                 '$_quantity',
                                 style: const TextStyle(
@@ -294,9 +319,11 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                               ),
                             ),
                             IconButton(
-                              onPressed: _increment,
+                              onPressed: () => _increment(product),
                               icon: const Icon(Icons.add_rounded, size: 18),
-                              color: _quantity < product.stock ? AppColors.accent : AppColors.textHint,
+                              color: _quantity < product.stock
+                                  ? AppColors.accent
+                                  : AppColors.textHint,
                             ),
                           ],
                         ),
@@ -313,7 +340,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                     decoration: BoxDecoration(
                       color: AppColors.accent.withValues(alpha: 0.08),
                       borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: AppColors.accent.withValues(alpha: 0.2)),
+                      border: Border.all(
+                        color: AppColors.accent.withValues(alpha: 0.2),
+                      ),
                     ),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -352,7 +381,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                   const SizedBox(height: 10),
                   AnimatedCrossFade(
                     duration: const Duration(milliseconds: 250),
-                    crossFadeState: _showFullDesc ? CrossFadeState.showSecond : CrossFadeState.showFirst,
+                    crossFadeState: _showFullDesc
+                        ? CrossFadeState.showSecond
+                        : CrossFadeState.showFirst,
                     firstChild: Text(
                       product.description,
                       maxLines: 4,
@@ -419,7 +450,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                     padding: const EdgeInsets.symmetric(vertical: 14),
                     side: const BorderSide(color: AppColors.accent, width: 1.5),
                   ),
-                  onPressed: product.stock > 0 ? () => _buyNow(context) : null,
+                  onPressed: product.stock > 0
+                      ? () => _buyNow(context, product)
+                      : null,
                   child: const Text('Beli Sekarang'),
                 ),
               ),
@@ -434,8 +467,74 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                   ),
                   icon: const Icon(Icons.add_shopping_cart_rounded, size: 18),
                   label: Text(product.stock > 0 ? '+ Keranjang' : 'Stok Habis'),
-                  onPressed: product.stock > 0 ? () => _addToCart(context) : null,
+                  onPressed: product.stock > 0
+                      ? () => _addToCart(context, product)
+                      : null,
                 ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _UnavailableProductView extends StatelessWidget {
+  const _UnavailableProductView();
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: AppColors.background,
+      appBar: AppBar(
+        backgroundColor: AppColors.surface,
+        elevation: 0,
+        title: const Text('Produk Tidak Tersedia'),
+      ),
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(32),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(22),
+                decoration: const BoxDecoration(
+                  color: AppColors.errorLight,
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.inventory_2_outlined,
+                  color: AppColors.error,
+                  size: 56,
+                ),
+              ),
+              const SizedBox(height: 18),
+              const Text(
+                'Produk sudah tidak tersedia',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: AppColors.textPrimary,
+                  fontSize: 20,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                'Produk ini mungkin sudah dihapus atau dinonaktifkan oleh admin.',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: AppColors.textSecondary,
+                  fontSize: 14,
+                  height: 1.5,
+                ),
+              ),
+              const SizedBox(height: 22),
+              FilledButton.icon(
+                onPressed: () => Navigator.of(context).pop(),
+                icon: const Icon(Icons.arrow_back_rounded, size: 18),
+                label: const Text('Kembali ke katalog'),
               ),
             ],
           ),

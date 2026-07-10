@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../cart/providers/cart_provider.dart';
 import '../../checkout/db/order_db.dart';
+import '../../checkout/models/order_detail_model.dart';
 import '../../checkout/models/order_model.dart';
 import '../../notification/providers/notification_provider.dart';
 import '../../product/db/product_db.dart';
@@ -36,9 +37,15 @@ class AdminProvider extends ChangeNotifier {
   Future<void> addProduct(
     ProductModel product, {
     ProductProvider? productProvider,
+    CartProvider? cartProvider,
+    FavoriteProvider? favoriteProvider,
   }) async {
     await ProductDb.instance.addProduct(product);
-    await _refreshCatalog(productProvider: productProvider);
+    await _refreshCatalog(
+      productProvider: productProvider,
+      cartProvider: cartProvider,
+      favoriteProvider: favoriteProvider,
+    );
   }
 
   Future<void> updateProduct(
@@ -62,6 +69,19 @@ class AdminProvider extends ChangeNotifier {
     FavoriteProvider? favoriteProvider,
   }) async {
     await ProductDb.instance.deleteProduct(id);
+    await _refreshCatalog(
+      productProvider: productProvider,
+      cartProvider: cartProvider,
+      favoriteProvider: favoriteProvider,
+    );
+  }
+
+  Future<void> restoreSeedCatalog({
+    ProductProvider? productProvider,
+    CartProvider? cartProvider,
+    FavoriteProvider? favoriteProvider,
+  }) async {
+    await ProductDb.instance.restoreSeedCatalog();
     await _refreshCatalog(
       productProvider: productProvider,
       cartProvider: cartProvider,
@@ -107,6 +127,10 @@ class AdminProvider extends ChangeNotifier {
   Future<void> loadOrders() async {
     orders = await OrderDb.instance.getOrders();
     notifyListeners();
+  }
+
+  Future<List<OrderDetailModel>> getOrderDetails(int orderId) {
+    return OrderDb.instance.getOrderDetails(orderId);
   }
 
   Future<void> updateOrderStatus({

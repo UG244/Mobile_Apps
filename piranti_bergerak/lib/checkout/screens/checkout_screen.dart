@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../../core/theme/app_colors.dart';
 import '../../cart/providers/cart_provider.dart';
 import '../../notification/providers/notification_provider.dart';
+import '../../product/providers/product_provider.dart';
 import '../models/checkout_address_model.dart';
 import 'address_book_screen.dart';
 import 'promo_selection_screen.dart';
@@ -42,7 +43,11 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
               elevation: 0,
               backgroundColor: AppColors.surface,
               leading: IconButton(
-                icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 18, color: AppColors.textPrimary),
+                icon: const Icon(
+                  Icons.arrow_back_ios_new_rounded,
+                  size: 18,
+                  color: AppColors.textPrimary,
+                ),
                 onPressed: () => Navigator.of(context).pop(),
               ),
             ),
@@ -67,7 +72,9 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       key: _formKey,
       child: LayoutBuilder(
         builder: (context, constraints) {
-          final maxWidth = constraints.maxWidth >= 720 ? 680.0 : double.infinity;
+          final maxWidth = constraints.maxWidth >= 720
+              ? 680.0
+              : double.infinity;
 
           return SingleChildScrollView(
             physics: const BouncingScrollPhysics(),
@@ -145,7 +152,10 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           ),
           Text(
             trailing,
-            style: const TextStyle(color: AppColors.textSecondary, fontWeight: FontWeight.w600),
+            style: const TextStyle(
+              color: AppColors.textSecondary,
+              fontWeight: FontWeight.w600,
+            ),
           ),
         ],
       ),
@@ -173,11 +183,14 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           child: FilledButton.icon(
             style: FilledButton.styleFrom(
               backgroundColor: AppColors.accent,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(14),
+              ),
             ),
             icon: const Icon(Icons.verified_user_rounded, size: 20),
             label: Text(
-              prov.paymentMethod == 'QRIS' || prov.paymentMethod.contains('QRIS')
+              prov.paymentMethod == 'QRIS' ||
+                      prov.paymentMethod.contains('QRIS')
                   ? 'Bayar Sekarang via QRIS'
                   : 'Konfirmasi Pesanan',
               style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 16),
@@ -211,7 +224,11 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             const SizedBox(height: 20),
             const Text(
               'Keranjang Kosong',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w800,
+                color: AppColors.textPrimary,
+              ),
             ),
             const SizedBox(height: 8),
             const Text(
@@ -255,15 +272,41 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             invoiceNumber: invoice,
             onPaymentSuccess: () async {
               Navigator.of(context).pop(); // Tutup QrPaymentScreen
-              final id = await prov.placeOrder();
-              if (!context.mounted) return;
-              if (id > 0) {
-                await context.read<NotificationProvider>().loadNotifications();
+              try {
+                final id = await prov.placeOrder(
+                  productProvider: context.read<ProductProvider>(),
+                );
                 if (!context.mounted) return;
-                Navigator.of(context).pushReplacementNamed('/order-success', arguments: id);
-              } else {
+
+                if (id > 0) {
+                  await context
+                      .read<NotificationProvider>()
+                      .loadNotifications();
+                  if (!context.mounted) return;
+                  Navigator.of(
+                    context,
+                  ).pushReplacementNamed('/order-success', arguments: id);
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Pesanan gagal dibuat. Silakan coba lagi.'),
+                    ),
+                  );
+                }
+              } on CheckoutStockException catch (error) {
+                if (!context.mounted) return;
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Pesanan gagal dibuat. Silakan coba lagi.')),
+                  SnackBar(
+                    backgroundColor: AppColors.error,
+                    content: Text(error.message),
+                  ),
+                );
+              } catch (_) {
+                if (!context.mounted) return;
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Pesanan gagal dibuat. Silakan coba lagi.'),
+                  ),
                 );
               }
             },
@@ -274,50 +317,67 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     }
 
     // ── Metode Pembayaran Lain (Transfer Bank / E-Wallet / COD) ───────────
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (dialogContext) {
-        return AlertDialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-          title: const Text('Konfirmasi Pesanan', style: TextStyle(fontWeight: FontWeight.w800)),
-          content: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text('Apakah Anda yakin ingin menyelesaikan pesanan ini?'),
-                const SizedBox(height: 16),
-                Text(
-                  'Detail Pembayaran',
-                  style: Theme.of(dialogContext).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w800),
+    final confirmed =
+        await showDialog<bool>(
+          context: context,
+          builder: (dialogContext) {
+            return AlertDialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+              ),
+              title: const Text(
+                'Konfirmasi Pesanan',
+                style: TextStyle(fontWeight: FontWeight.w800),
+              ),
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Apakah Anda yakin ingin menyelesaikan pesanan ini?',
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      'Detail Pembayaran',
+                      style: Theme.of(dialogContext).textTheme.titleSmall
+                          ?.copyWith(fontWeight: FontWeight.w800),
+                    ),
+                    const SizedBox(height: 8),
+                    PaymentInstructionCard(
+                      method: prov.paymentMethod,
+                      grandTotal: prov.grandTotal,
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 8),
-                PaymentInstructionCard(
-                  method: prov.paymentMethod,
-                  grandTotal: prov.grandTotal,
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(dialogContext).pop(false),
+                  child: const Text(
+                    'Batal',
+                    style: TextStyle(color: AppColors.textSecondary),
+                  ),
+                ),
+                FilledButton(
+                  style: FilledButton.styleFrom(
+                    backgroundColor: AppColors.accent,
+                  ),
+                  onPressed: () => Navigator.of(dialogContext).pop(true),
+                  child: const Text('Konfirmasi & Buat Pesanan'),
                 ),
               ],
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(dialogContext).pop(false),
-              child: const Text('Batal', style: TextStyle(color: AppColors.textSecondary)),
-            ),
-            FilledButton(
-              style: FilledButton.styleFrom(backgroundColor: AppColors.accent),
-              onPressed: () => Navigator.of(dialogContext).pop(true),
-              child: const Text('Konfirmasi & Buat Pesanan'),
-            ),
-          ],
-        );
-      },
-    ) ?? false;
+            );
+          },
+        ) ??
+        false;
 
     if (!confirmed || !context.mounted) return;
 
     try {
-      final id = await prov.placeOrder();
+      final id = await prov.placeOrder(
+        productProvider: context.read<ProductProvider>(),
+      );
       if (!context.mounted) return;
 
       if (id > 0) {
@@ -327,7 +387,9 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Pesanan berhasil dibuat!')),
         );
-        Navigator.of(context).pushReplacementNamed('/order-success', arguments: id);
+        Navigator.of(
+          context,
+        ).pushReplacementNamed('/order-success', arguments: id);
       } else {
         await prov.addCheckoutNotification(
           title: 'Pesanan Gagal',
@@ -335,9 +397,23 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         );
         if (!context.mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Pesanan gagal dibuat. Silakan coba lagi.')),
+          const SnackBar(
+            content: Text('Pesanan gagal dibuat. Silakan coba lagi.'),
+          ),
         );
       }
+    } on CheckoutStockException catch (error) {
+      await prov.addCheckoutNotification(
+        title: 'Stok Berubah',
+        message: error.message,
+      );
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          backgroundColor: AppColors.error,
+          content: Text(error.message),
+        ),
+      );
     } catch (_) {
       await prov.addCheckoutNotification(
         title: 'Pesanan Gagal',
@@ -345,7 +421,9 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       );
       if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Pesanan gagal dibuat. Periksa data lalu coba lagi.')),
+        const SnackBar(
+          content: Text('Pesanan gagal dibuat. Periksa data lalu coba lagi.'),
+        ),
       );
     }
   }
@@ -356,7 +434,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   ) async {
     final result = await Navigator.of(context).push<CheckoutAddressModel>(
       MaterialPageRoute(
-        builder: (_) => AddressBookScreen(selectedAddressId: prov.selectedAddressId),
+        builder: (_) =>
+            AddressBookScreen(selectedAddressId: prov.selectedAddressId),
       ),
     );
 
@@ -374,7 +453,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   ) async {
     final result = await Navigator.of(context).push<String>(
       MaterialPageRoute(
-        builder: (_) => PromoSelectionScreen(selectedPromoCode: prov.appliedPromoCode),
+        builder: (_) =>
+            PromoSelectionScreen(selectedPromoCode: prov.appliedPromoCode),
       ),
     );
 
@@ -382,9 +462,9 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
 
     if (result.isEmpty) {
       prov.clearPromo();
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Kupon promo dihapus.')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Kupon promo dihapus.')));
       return;
     }
 
@@ -392,7 +472,9 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
-          ok ? 'Kupon promo berhasil digunakan!' : 'Kupon promo tidak valid atau kadaluarsa.',
+          ok
+              ? 'Kupon promo berhasil digunakan!'
+              : 'Kupon promo tidak valid atau kadaluarsa.',
         ),
       ),
     );
