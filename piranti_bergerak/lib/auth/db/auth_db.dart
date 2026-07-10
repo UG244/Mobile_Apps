@@ -92,6 +92,19 @@ class AuthDb {
     return UserModel.fromMap(rows.first);
   }
 
+  Future<UserModel?> getUserById(int id) async {
+    final db = await database;
+    final rows = await db.query(
+      'users',
+      where: 'id = ?',
+      whereArgs: [id],
+      limit: 1,
+    );
+
+    if (rows.isEmpty) return null;
+    return UserModel.fromMap(rows.first);
+  }
+
   Future<bool> userExists(String username) async {
     final db = await database;
     final count = Sqflite.firstIntValue(

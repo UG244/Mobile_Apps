@@ -16,7 +16,6 @@ class _LoginScreenState extends State<LoginScreen> {
   final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _isLoading = false;
-  bool _obscurePassword = true;
   String? _errorMessage;
 
   @override
@@ -59,6 +58,7 @@ class _LoginScreenState extends State<LoginScreen> {
         await notificationProvider.configureForUser(user.id);
       }
     }
+    if (!mounted) return;
 
     final route = auth.isAdmin ? '/admin' : '/home';
     Navigator.of(context).pushReplacementNamed(route);
@@ -66,8 +66,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
     return Scaffold(
       backgroundColor: Colors.grey.shade100,
       body: Center(

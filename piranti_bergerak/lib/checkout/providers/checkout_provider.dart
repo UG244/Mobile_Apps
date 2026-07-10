@@ -8,6 +8,7 @@ import '../db/order_db.dart';
 import '../../notification/services/notification_service.dart';
 import '../../product/db/product_db.dart';
 import '../../product/providers/product_provider.dart';
+import '../../core/services/cloud_api_service.dart';
 
 class CheckoutStockException implements Exception {
   const CheckoutStockException(this.message);
@@ -271,6 +272,12 @@ class CheckoutProvider extends ChangeNotifier {
         'Cek Riwayat Pesanan untuk melihat posisi pesanan terbaru.';
 
     try {
+      await CloudApiService.instance.submitOrderSummary(
+        invoice: invoice,
+        customerName: customerName.trim(),
+        grandTotal: grandTotal,
+        itemCount: itemCount,
+      );
       await OrderDb.instance.insertNotification(
         title: 'Pesanan $invoice Diproses',
         message: message,

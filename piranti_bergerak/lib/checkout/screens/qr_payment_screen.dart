@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import '../../core/theme/app_colors.dart';
 import '../../cart/utils/format_utils.dart';
@@ -466,6 +465,71 @@ class _QrPaymentScreenState extends State<QrPaymentScreen> {
                 color: AppColors.textSecondary,
                 height: 1.4,
               ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _PaymentStatusCard extends StatelessWidget {
+  const _PaymentStatusCard({
+    required this.isExpired,
+    required this.isChecking,
+  });
+
+  final bool isExpired;
+  final bool isChecking;
+
+  @override
+  Widget build(BuildContext context) {
+    final icon = isExpired
+        ? Icons.error_outline_rounded
+        : isChecking
+            ? Icons.sync_rounded
+            : Icons.verified_user_outlined;
+    final title = isExpired
+        ? 'QR Code kedaluwarsa'
+        : isChecking
+            ? 'Memeriksa pembayaran'
+            : 'Menunggu pembayaran';
+    final subtitle = isExpired
+        ? 'Perbarui QR Code untuk melanjutkan pembayaran.'
+        : 'Selesaikan pembayaran dari aplikasi bank atau e-wallet.';
+    final color = isExpired ? AppColors.error : AppColors.success;
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
+      ),
+      child: Row(
+        children: [
+          Icon(icon, color: color),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: const TextStyle(
+                    color: AppColors.textPrimary,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  subtitle,
+                  style: const TextStyle(
+                    color: AppColors.textSecondary,
+                    fontSize: 12.5,
+                  ),
+                ),
+              ],
             ),
           ),
         ],

@@ -1,14 +1,32 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../db/auth_db.dart';
 import '../models/user_model.dart';
 
 class AuthProvider extends ChangeNotifier {
+  static const _sessionUserIdKey = 'auth.sessionUserId';
+
   UserModel? _currentUser;
+  bool _isLoadingSession = true;
 
   UserModel? get currentUser => _currentUser;
   bool get isAuthenticated => _currentUser != null;
   bool get isAdmin => _currentUser?.role == 'admin';
+  bool get isLoadingSession => _isLoadingSession;
+
+  Future<void> loadSession() async {
+    final prefs = await SharedPreferences.getInstance();
+    final userId = prefs.getInt(_sessionUserIdKey);
+    if (userId != null) {
+      _currentUser = await AuthDb.instance.getUserById(userId);
+      if (_currentUser == null) {
+        await prefs.remove(_sessionUserIdKey);
+      }
+    }
+    _isLoadingSession = false;
+    notifyListeners();
+  }
 
   Future<bool> login(String username, String password) async {
     final user = await AuthDb.instance.getUserByCredentials(username, password);
@@ -17,6 +35,8 @@ class AuthProvider extends ChangeNotifier {
     }
 
     _currentUser = user;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt(_sessionUserIdKey, user.id);
     notifyListeners();
     return true;
   }
@@ -90,7 +110,9 @@ class AuthProvider extends ChangeNotifier {
     return null;
   }
 
-  void logout() {
+  Future<void> logout() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_sessionUserIdKey);
     _currentUser = null;
     notifyListeners();
   }
