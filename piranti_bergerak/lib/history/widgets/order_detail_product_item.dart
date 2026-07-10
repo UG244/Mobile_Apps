@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../core/theme/app_colors.dart';
 import '../../cart/utils/format_utils.dart';
 import '../../checkout/models/order_detail_model.dart';
+import '../../product/widgets/product_image.dart';
 
 class OrderDetailProductItem extends StatelessWidget {
   const OrderDetailProductItem({super.key, required this.detail});
@@ -26,13 +27,10 @@ class OrderDetailProductItem extends StatelessWidget {
             ),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(11),
-              child: detail.imageUrl.isEmpty
-                  ? _buildFallbackImage()
-                  : Image.network(
-                      detail.imageUrl,
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) => _buildFallbackImage(),
-                    ),
+              child: ProductImage(
+                imageUrl: detail.imageUrl,
+                placeholderSize: 28,
+              ),
             ),
           ),
           const SizedBox(width: 14),
@@ -74,12 +72,6 @@ class OrderDetailProductItem extends StatelessWidget {
           ),
         ],
       ),
-    );
-  }
-
-  Widget _buildFallbackImage() {
-    return const Center(
-      child: Icon(Icons.inventory_2_outlined, color: AppColors.textHint, size: 28),
     );
   }
 }

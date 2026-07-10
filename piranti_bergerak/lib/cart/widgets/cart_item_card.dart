@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../core/theme/app_colors.dart';
+import '../../product/widgets/product_image.dart';
 import '../models/cart_item_model.dart';
 import 'quantity_button.dart';
 import '../utils/format_utils.dart';
@@ -52,7 +53,10 @@ class CartItemCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 2,
+                  ),
                   decoration: BoxDecoration(
                     color: AppColors.surfaceVariant,
                     borderRadius: BorderRadius.circular(6),
@@ -67,6 +71,17 @@ class CartItemCard extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 10),
+                Text(
+                  'Stok tersedia: ${item.stock}',
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                    color: item.isAtMaxStock
+                        ? AppColors.error
+                        : AppColors.textSecondary,
+                  ),
+                ),
+                const SizedBox(height: 8),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -99,6 +114,7 @@ class CartItemCard extends StatelessWidget {
                         QuantityButton(
                           icon: Icons.add_rounded,
                           onPressed: onIncrement,
+                          disabled: item.isAtMaxStock,
                         ),
                         const SizedBox(width: 8),
                         IconButton(
@@ -132,13 +148,7 @@ class CartItemCard extends StatelessWidget {
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(11),
-        child: Image.network(
-          item.imageUrl,
-          fit: BoxFit.cover,
-          errorBuilder: (context, error, stackTrace) => const Center(
-            child: Icon(Icons.image_outlined, color: AppColors.textHint, size: 32),
-          ),
-        ),
+        child: ProductImage(imageUrl: item.imageUrl, placeholderSize: 32),
       ),
     );
   }

@@ -69,6 +69,7 @@ class ProductModel {
       price: price,
       quantity: quantity,
       category: categoryName,
+      stock: stock,
     );
   }
 

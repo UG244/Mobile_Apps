@@ -9,6 +9,7 @@ import 'auth/screens/login_screen.dart';
 import 'auth/screens/register_screen.dart';
 import 'auth/widgets/admin_gate.dart';
 import 'core/theme/app_theme.dart';
+import 'core/providers/app_settings_provider.dart';
 import 'admin/screens/admin_panel_screen.dart';
 import 'cart/providers/cart_provider.dart';
 import 'cart/screens/cart_screen.dart';
@@ -43,9 +44,7 @@ class MyApp extends StatelessWidget {
       providers: [
         // Provider milik Fiji (Cart & Checkout)
         ChangeNotifierProvider(create: (_) => CartProvider()),
-        ChangeNotifierProvider(
-          create: (_) => NotificationProvider()..loadNotifications(),
-        ),
+        ChangeNotifierProvider(create: (_) => NotificationProvider()),
 
         // Provider modul Product & Shopping (kita)
         ChangeNotifierProvider(create: (_) => ProductProvider()),
@@ -53,6 +52,7 @@ class MyApp extends StatelessWidget {
 
         // Provider auth untuk login dan role
         ChangeNotifierProvider(create: (_) => AuthProvider()),
+        ChangeNotifierProvider(create: (_) => AppSettingsProvider()..load()),
       ],
       child: MaterialApp(
         title: 'BlueMart Retail',

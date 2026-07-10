@@ -35,12 +35,19 @@ class CartProvider extends ChangeNotifier {
   // Jika produk sudah ada di keranjang, quantity-nya akan bertambah.
   // ─────────────────────────────────────────────────────────────────────────
   void addItem(CartItemModel item) {
+    if (item.stock <= 0) return;
     final index = _items.indexWhere((existing) => existing.id == item.id);
     if (index >= 0) {
       // Produk sudah ada → tambah kuantitas
-      _items[index].quantity += item.quantity;
+      final nextQuantity = _items[index].quantity + item.quantity;
+      _items[index].quantity = nextQuantity > item.stock
+          ? item.stock
+          : nextQuantity;
     } else {
       // Produk baru → tambahkan ke keranjang
+      if (item.quantity > item.stock) {
+        item.quantity = item.stock;
+      }
       _items.add(item);
     }
     notifyListeners();
@@ -49,6 +56,7 @@ class CartProvider extends ChangeNotifier {
   void increaseQuantity(String id) {
     final index = _items.indexWhere((item) => item.id == id);
     if (index < 0) return;
+    if (_items[index].isAtMaxStock) return;
     _items[index].quantity += 1;
     notifyListeners();
   }

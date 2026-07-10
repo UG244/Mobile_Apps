@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../checkout/db/order_db.dart';
 import '../models/app_notification_model.dart';
@@ -8,6 +9,8 @@ class NotificationProvider extends ChangeNotifier {
   List<AppNotificationModel> notifications = [];
   String selectedType = 'Semua';
   bool isLoading = false;
+  int? userId;
+  String targetRole = 'user';
 
   List<String> get categories => const [
     'Semua',
@@ -24,11 +27,33 @@ class NotificationProvider extends ChangeNotifier {
 
   int get unreadCount => notifications.where((item) => !item.isRead).length;
 
+  Future<void> configureForUser(int id) async {
+    userId = id;
+    targetRole = 'user';
+    await loadNotifications();
+  }
+
+  Future<void> configureForAdmin() async {
+    userId = null;
+    targetRole = 'admin';
+    await loadNotifications();
+  }
+
+  void clearScope() {
+    userId = null;
+    targetRole = 'user';
+    notifications = [];
+    notifyListeners();
+  }
+
   Future<void> loadNotifications() async {
     isLoading = true;
     notifyListeners();
 
-    notifications = await OrderDb.instance.getNotifications();
+    notifications = await OrderDb.instance.getNotifications(
+      userId: userId,
+      targetRole: targetRole,
+    );
 
     isLoading = false;
     notifyListeners();
@@ -44,6 +69,8 @@ class NotificationProvider extends ChangeNotifier {
     required String description,
     required String type,
     bool showPush = true,
+    int? userId,
+    String? targetRole,
   }) async {
     final notification = AppNotificationModel(
       title: title,
@@ -51,13 +78,19 @@ class NotificationProvider extends ChangeNotifier {
       type: type,
       isRead: false,
       createdAt: DateTime.now(),
+      userId: userId ?? this.userId,
+      targetRole: targetRole ?? this.targetRole,
     );
 
     final id = await OrderDb.instance.insertAppNotification(notification);
     notification.id = id;
-    notifications = [notification, ...notifications];
+    if (_belongsToCurrentScope(notification)) {
+      notifications = [notification, ...notifications];
+    }
 
-    if (showPush) {
+    final prefs = await SharedPreferences.getInstance();
+    final pushEnabled = prefs.getBool('app_notifications_enabled') ?? true;
+    if (showPush && pushEnabled) {
       await NotificationService.instance.showInstantNotification(
         title: title,
         body: description,
@@ -83,7 +116,10 @@ class NotificationProvider extends ChangeNotifier {
   }
 
   Future<void> markAllAsRead() async {
-    await OrderDb.instance.markAllNotificationsAsRead();
+    await OrderDb.instance.markAllNotificationsAsRead(
+      userId: userId,
+      targetRole: targetRole,
+    );
     for (final item in notifications) {
       item.isRead = true;
     }
@@ -91,7 +127,10 @@ class NotificationProvider extends ChangeNotifier {
   }
 
   Future<void> clearAllNotifications() async {
-    await OrderDb.instance.clearAllNotifications();
+    await OrderDb.instance.clearAllNotifications(
+      userId: userId,
+      targetRole: targetRole,
+    );
     notifications = [];
     notifyListeners();
   }
@@ -128,5 +167,13 @@ class NotificationProvider extends ChangeNotifier {
       description: 'Jangan lewatkan promo 2 jam lagi.',
       type: 'Promo',
     );
+  }
+
+  bool _belongsToCurrentScope(AppNotificationModel notification) {
+    if (targetRole == 'admin') {
+      return notification.targetRole == 'admin' ||
+          notification.targetRole == 'all';
+    }
+    return notification.userId == userId || notification.targetRole == 'all';
   }
 }

@@ -6,6 +6,8 @@ class AppNotificationModel {
     required this.type,
     required this.isRead,
     required this.createdAt,
+    this.userId,
+    this.targetRole = 'user',
   });
 
   int? id;
@@ -14,6 +16,8 @@ class AppNotificationModel {
   String type;
   bool isRead;
   DateTime createdAt;
+  int? userId;
+  String targetRole;
 
   Map<String, dynamic> toMap() {
     return {
@@ -23,6 +27,8 @@ class AppNotificationModel {
       'type': type,
       'isRead': isRead ? 1 : 0,
       'createdAt': createdAt.toIso8601String(),
+      'userId': userId,
+      'targetRole': targetRole,
     };
   }
 
@@ -38,6 +44,8 @@ class AppNotificationModel {
       type: map['type'] as String? ?? 'Pesanan',
       isRead: (map['isRead'] as int? ?? 0) == 1,
       createdAt: createdAt == null ? DateTime.now() : DateTime.parse(createdAt),
+      userId: map['userId'] as int?,
+      targetRole: map['targetRole'] as String? ?? 'user',
     );
   }
 }

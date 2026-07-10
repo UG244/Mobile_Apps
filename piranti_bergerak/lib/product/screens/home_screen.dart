@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -7,6 +8,7 @@ import '../../core/theme/app_colors.dart';
 import '../../cart/providers/cart_provider.dart';
 import '../../notification/providers/notification_provider.dart';
 import '../../notification/widgets/notification_badge.dart';
+import '../../sensor/screens/barcode_scanner_screen.dart';
 import '../../sensor/services/shake_detector_service.dart';
 import '../../sensor/widgets/shake_refresh_toast.dart';
 import '../../profile/screens/profile_screen.dart';
@@ -17,6 +19,7 @@ import '../screens/product_list_screen.dart';
 import '../screens/favorite_screen.dart';
 import '../widgets/cart_notification_overlay.dart';
 import '../widgets/product_card.dart';
+import '../widgets/product_image.dart';
 
 /// ProductHomeScreen — Shell navigasi utama aplikasi BlueMart Retail modern.
 ///
@@ -537,7 +540,7 @@ class _HomeTabBody extends StatelessWidget {
               children: productProvider.categories.map((cat) {
                 return _CategoryItem(
                   label: cat.name,
-                  icon: _iconFromName(cat.iconName),
+                  iconName: cat.iconName,
                   onTap: () => onCategoryTap(cat.id),
                 );
               }).toList(),
@@ -555,7 +558,7 @@ class _HomeTabBody extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Rekomendasi Spesial 🔥',
+                      'Produk Terbaru & Rekomendasi 🔥',
                       style: TextStyle(
                         fontSize: 17,
                         fontWeight: FontWeight.w800,
@@ -563,7 +566,7 @@ class _HomeTabBody extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      'Produk terbaik pilihan kami untuk Anda',
+                      'Produk baru dari admin tampil di sini',
                       style: TextStyle(
                         fontSize: 12,
                         color: AppColors.textSecondary,
@@ -601,7 +604,7 @@ class _HomeTabBody extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 16),
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 2,
-                mainAxisExtent: 295,
+                mainAxisExtent: 315,
                 mainAxisSpacing: 14,
                 crossAxisSpacing: 14,
               ),
@@ -639,10 +642,14 @@ class _HomeTabBody extends StatelessWidget {
 
 class _CategoryItem extends StatelessWidget {
   final String label;
-  final IconData icon;
+  final String iconName;
   final VoidCallback? onTap;
 
-  const _CategoryItem({required this.label, required this.icon, this.onTap});
+  const _CategoryItem({
+    required this.label,
+    required this.iconName,
+    this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -661,7 +668,23 @@ class _CategoryItem extends StatelessWidget {
                 border: Border.all(color: AppColors.border),
                 boxShadow: AppColors.cardShadow,
               ),
-              child: Icon(icon, color: AppColors.accent, size: 24),
+              child: _isCategoryImage(iconName)
+                  ? ClipRRect(
+                      borderRadius: BorderRadius.circular(10),
+                      child: SizedBox(
+                        width: 28,
+                        height: 28,
+                        child: ProductImage(
+                          imageUrl: iconName,
+                          placeholderSize: 22,
+                        ),
+                      ),
+                    )
+                  : Icon(
+                      _iconFromName(iconName),
+                      color: AppColors.accent,
+                      size: 24,
+                    ),
             ),
             const SizedBox(height: 6),
             Text(
@@ -680,6 +703,14 @@ class _CategoryItem extends StatelessWidget {
       ),
     );
   }
+}
+
+bool _isCategoryImage(String value) {
+  final uri = Uri.tryParse(value.trim());
+  if (uri != null && (uri.isScheme('http') || uri.isScheme('https'))) {
+    return true;
+  }
+  return File(value).existsSync();
 }
 
 class _BannerData {

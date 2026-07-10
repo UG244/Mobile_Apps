@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../notification/providers/notification_provider.dart';
 import '../providers/auth_provider.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -15,6 +16,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _isLoading = false;
+  bool _obscurePassword = true;
   String? _errorMessage;
 
   @override
@@ -25,7 +27,7 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> _submit() async {
-    if (!_formKey.currentState!.validate()) return;
+    if (!(_formKey.currentState?.validate() ?? false)) return;
 
     setState(() {
       _isLoading = true;
@@ -33,29 +35,39 @@ class _LoginScreenState extends State<LoginScreen> {
     });
 
     final auth = context.read<AuthProvider>();
+    final notificationProvider = context.read<NotificationProvider>();
     final success = await auth.login(
       _usernameController.text.trim(),
       _passwordController.text.trim(),
     );
 
+    if (!mounted) return;
     setState(() {
       _isLoading = false;
     });
 
     if (!success) {
-      setState(() {
-        _errorMessage = 'Username atau password salah.';
-      });
+      setState(() => _errorMessage = 'Username atau password salah.');
       return;
     }
 
+    final user = auth.currentUser;
+    if (user != null) {
+      if (user.role == 'admin') {
+        await notificationProvider.configureForAdmin();
+      } else {
+        await notificationProvider.configureForUser(user.id);
+      }
+    }
+
     final route = auth.isAdmin ? '/admin' : '/home';
-    if (!mounted) return;
     Navigator.of(context).pushReplacementNamed(route);
   }
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Scaffold(
       backgroundColor: Colors.grey.shade100,
       body: Center(
@@ -65,16 +77,20 @@ class _LoginScreenState extends State<LoginScreen> {
             constraints: const BoxConstraints(maxWidth: 420),
             child: Card(
               elevation: 12,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(18),
+              ),
               child: Padding(
                 padding: const EdgeInsets.all(24),
                 child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     const Text(
                       'Masuk ke BlueMart',
-                      style: TextStyle(fontSize: 24, fontWeight: FontWeight.w700),
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
                     const SizedBox(height: 12),
                     const Text(
@@ -131,7 +147,10 @@ class _LoginScreenState extends State<LoginScreen> {
                                   ? const SizedBox(
                                       height: 20,
                                       width: 20,
-                                      child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                        color: Colors.white,
+                                      ),
                                     )
                                   : const Text('Masuk'),
                             ),

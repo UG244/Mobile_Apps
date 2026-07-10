@@ -6,9 +6,6 @@ import '../models/product_model.dart';
 
 /// Provider untuk semua data produk dan kategori.
 ///
-/// Saat ini menggunakan dummy data statis.
-/// [TODO-DB] Nanti ganti pemanggilan dummy data dengan query dari ProductDb
-/// ketika layer database sudah siap.
 class ProductProvider extends ChangeNotifier {
   ProductProvider() {
     loadProducts();
@@ -24,15 +21,24 @@ class ProductProvider extends ChangeNotifier {
   // ── Getters ───────────────────────────────────────────────────────────────
 
   List<ProductModel> get products => List.unmodifiable(_filteredProducts);
+  List<ProductModel> get allActiveProducts =>
+      List.unmodifiable(_activeProducts);
   List<CategoryModel> get categories => List.unmodifiable(_categories);
   bool get isLoading => _isLoading;
   String get searchQuery => _searchQuery;
   String? get selectedCategoryId => _selectedCategoryId;
 
-  /// Produk unggulan (rating tertinggi) untuk ditampilkan di Home
+  /// Produk Home: produk yang baru ditambahkan admin tampil lebih dulu,
+  /// lalu produk seed tetap diurutkan dengan rating terbaik.
   List<ProductModel> get featuredProducts {
     final sorted = _activeProducts
-      ..sort((a, b) => b.rating.compareTo(a.rating));
+      ..sort((a, b) {
+        final recencyCompare = _productRecencyScore(
+          b,
+        ).compareTo(_productRecencyScore(a));
+        if (recencyCompare != 0) return recencyCompare;
+        return b.rating.compareTo(a.rating);
+      });
     return sorted.take(6).toList();
   }
 
@@ -66,10 +72,6 @@ class ProductProvider extends ChangeNotifier {
     try {
       _categories = await ProductDb.instance.getCategories();
       _allProducts = await ProductDb.instance.getProducts();
-      if (_categories.isEmpty || _allProducts.isEmpty) {
-        _categories = ProductDb.seedCategories;
-        _allProducts = ProductDb.seedProducts;
-      }
     } catch (_) {
       _categories = ProductDb.seedCategories;
       _allProducts = ProductDb.seedProducts;
@@ -97,9 +99,7 @@ class ProductProvider extends ChangeNotifier {
 
     // 1. Cari exact match pada ID
     try {
-      return _activeProducts.firstWhere(
-        (p) => p.id.toLowerCase() == query,
-      );
+      return _activeProducts.firstWhere((p) => p.id.toLowerCase() == query);
     } catch (_) {}
 
     // 2. Cari contains pada nama atau deskripsi atau ID
@@ -113,6 +113,20 @@ class ProductProvider extends ChangeNotifier {
     } catch (_) {
       return null;
     }
+  }
+
+  ProductModel? findActiveById(String id) {
+    try {
+      return _activeProducts.firstWhere((product) => product.id == id);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  int _productRecencyScore(ProductModel product) {
+    final parts = product.id.split('_');
+    if (parts.length < 2) return 0;
+    return int.tryParse(parts.last) ?? 0;
   }
 
   // ── Private ───────────────────────────────────────────────────────────────
