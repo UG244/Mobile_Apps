@@ -4,6 +4,7 @@ import '../../auth/providers/auth_provider.dart';
 import '../../core/theme/app_colors.dart';
 import '../../cart/providers/cart_provider.dart';
 import '../../checkout/screens/address_book_screen.dart';
+import '../../notification/providers/notification_provider.dart';
 
 /// ProfileScreen — User Dashboard VIP yang modern, elegan, dan fungsional.
 ///
@@ -26,10 +27,15 @@ class ProfileScreen extends StatelessWidget {
         elevation: 0,
         actions: [
           IconButton(
-            icon: const Icon(Icons.settings_outlined, color: AppColors.textPrimary),
+            icon: const Icon(
+              Icons.settings_outlined,
+              color: AppColors.textPrimary,
+            ),
             onPressed: () {
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Pengaturan akun akan segera hadir!')),
+                const SnackBar(
+                  content: Text('Pengaturan akun akan segera hadir!'),
+                ),
               );
             },
           ),
@@ -60,12 +66,19 @@ class ProfileScreen extends StatelessWidget {
                         padding: const EdgeInsets.all(3),
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          border: Border.all(color: const Color(0xFFFACC15), width: 2.5),
+                          border: Border.all(
+                            color: const Color(0xFFFACC15),
+                            width: 2.5,
+                          ),
                         ),
                         child: const CircleAvatar(
                           radius: 34,
                           backgroundColor: AppColors.surfaceVariant,
-                          child: Icon(Icons.person_rounded, size: 40, color: AppColors.primary),
+                          child: Icon(
+                            Icons.person_rounded,
+                            size: 40,
+                            color: AppColors.primary,
+                          ),
                         ),
                       ),
                       const SizedBox(width: 16),
@@ -105,14 +118,23 @@ class ProfileScreen extends StatelessWidget {
                             ),
                             const SizedBox(height: 10),
                             Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 10,
+                                vertical: 4,
+                              ),
                               decoration: BoxDecoration(
                                 color: auth.isAdmin
-                                    ? const Color(0xFF4ADE80).withValues(alpha: 0.2)
-                                    : const Color(0xFFFACC15).withValues(alpha: 0.2),
+                                    ? const Color(
+                                        0xFF4ADE80,
+                                      ).withValues(alpha: 0.2)
+                                    : const Color(
+                                        0xFFFACC15,
+                                      ).withValues(alpha: 0.2),
                                 borderRadius: BorderRadius.circular(20),
                                 border: Border.all(
-                                  color: auth.isAdmin ? const Color(0xFF4ADE80) : const Color(0xFFFACC15),
+                                  color: auth.isAdmin
+                                      ? const Color(0xFF4ADE80)
+                                      : const Color(0xFFFACC15),
                                   width: 1,
                                 ),
                               ),
@@ -120,15 +142,23 @@ class ProfileScreen extends StatelessWidget {
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
                                   Icon(
-                                    auth.isAdmin ? Icons.admin_panel_settings : Icons.workspace_premium_rounded,
-                                    color: auth.isAdmin ? const Color(0xFF4ADE80) : const Color(0xFFFACC15),
+                                    auth.isAdmin
+                                        ? Icons.admin_panel_settings
+                                        : Icons.workspace_premium_rounded,
+                                    color: auth.isAdmin
+                                        ? const Color(0xFF4ADE80)
+                                        : const Color(0xFFFACC15),
                                     size: 14,
                                   ),
                                   const SizedBox(width: 4),
                                   Text(
-                                    auth.isAdmin ? 'ADMINISTRATOR' : 'PENGGUNA BIASA',
+                                    auth.isAdmin
+                                        ? 'ADMINISTRATOR'
+                                        : 'PENGGUNA BIASA',
                                     style: TextStyle(
-                                      color: auth.isAdmin ? const Color(0xFF4ADE80) : const Color(0xFFFACC15),
+                                      color: auth.isAdmin
+                                          ? const Color(0xFF4ADE80)
+                                          : const Color(0xFFFACC15),
                                       fontSize: 11,
                                       fontWeight: FontWeight.w800,
                                     ),
@@ -178,7 +208,9 @@ class ProfileScreen extends StatelessWidget {
                     value: '3 Tersedia',
                     onTap: () {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Kupon dapat dipilih saat Checkout!')),
+                        const SnackBar(
+                          content: Text('Kupon dapat dipilih saat Checkout!'),
+                        ),
                       );
                     },
                   ),
@@ -207,7 +239,9 @@ class ProfileScreen extends StatelessWidget {
                   title: 'Buku Alamat Pengiriman',
                   subtitle: 'Atur alamat utama dan lokasi favorit',
                   onTap: () => Navigator.of(context).push(
-                    MaterialPageRoute(builder: (_) => const AddressBookScreen()),
+                    MaterialPageRoute(
+                      builder: (_) => const AddressBookScreen(),
+                    ),
                   ),
                 ),
                 const Divider(height: 1, color: AppColors.divider),
@@ -218,7 +252,11 @@ class ProfileScreen extends StatelessWidget {
                   subtitle: 'Pembayaran instan scan QR Code saat checkout',
                   onTap: () {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Pilih metode QRIS langsung di halaman Checkout!')),
+                      const SnackBar(
+                        content: Text(
+                          'Pilih metode QRIS langsung di halaman Checkout!',
+                        ),
+                      ),
                     );
                   },
                 ),
@@ -249,7 +287,9 @@ class ProfileScreen extends StatelessWidget {
                   subtitle: 'Hubungi layanan pelanggan 24/7',
                   onTap: () {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Layanan Pelanggan: cs@bluemart.id')),
+                      const SnackBar(
+                        content: Text('Layanan Pelanggan: cs@bluemart.id'),
+                      ),
                     );
                   },
                 ),
@@ -269,7 +309,10 @@ class ProfileScreen extends StatelessWidget {
               label: const Text('Keluar Akun'),
               onPressed: () {
                 context.read<AuthProvider>().logout();
-                Navigator.of(context).pushNamedAndRemoveUntil('/login', (route) => false);
+                context.read<NotificationProvider>().clearScope();
+                Navigator.of(
+                  context,
+                ).pushNamedAndRemoveUntil('/login', (route) => false);
               },
             ),
 
@@ -421,7 +464,11 @@ class _MenuItem extends StatelessWidget {
                 ],
               ),
             ),
-            const Icon(Icons.chevron_right_rounded, color: AppColors.textHint, size: 22),
+            const Icon(
+              Icons.chevron_right_rounded,
+              color: AppColors.textHint,
+              size: 22,
+            ),
           ],
         ),
       ),

@@ -145,6 +145,8 @@ class AdminProvider extends ChangeNotifier {
         title: 'Status ${order.invoice}: $status',
         description: _statusMessage(order, status),
         type: 'Pesanan',
+        userId: order.userId,
+        targetRole: 'user',
       );
     }
     await loadOrders();

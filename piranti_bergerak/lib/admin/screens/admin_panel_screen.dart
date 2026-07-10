@@ -7,6 +7,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 
+import '../../auth/providers/auth_provider.dart';
 import '../../cart/providers/cart_provider.dart';
 import '../../cart/utils/format_utils.dart';
 import '../../checkout/models/order_detail_model.dart';
@@ -74,6 +75,8 @@ class _AdminPanelViewState extends State<_AdminPanelView> {
           IconButton(
             tooltip: 'Keluar',
             onPressed: () {
+              context.read<AuthProvider>().logout();
+              context.read<NotificationProvider>().clearScope();
               Navigator.of(
                 context,
               ).pushNamedAndRemoveUntil('/login', (route) => false);

@@ -162,6 +162,8 @@ class CheckoutProvider extends ChangeNotifier {
     required String title,
     required String message,
     String type = 'Pesanan',
+    int? userId,
+    String targetRole = 'user',
   }) async {
     try {
       await OrderDb.instance.insertNotification(
@@ -169,6 +171,8 @@ class CheckoutProvider extends ChangeNotifier {
         message: message,
         type: type,
         date: DateTime.now(),
+        userId: userId,
+        targetRole: targetRole,
       );
       await NotificationService.instance.showInstantNotification(
         title: title,
@@ -202,7 +206,10 @@ class CheckoutProvider extends ChangeNotifier {
         address.trim().isNotEmpty;
   }
 
-  Future<int> placeOrder({ProductProvider? productProvider}) async {
+  Future<int> placeOrder({
+    ProductProvider? productProvider,
+    int? userId,
+  }) async {
     await _syncCartWithLatestStock();
     if (cart.items.isEmpty) {
       throw const CheckoutStockException(
@@ -213,6 +220,7 @@ class CheckoutProvider extends ChangeNotifier {
     final invoice = 'INV-${DateTime.now().millisecondsSinceEpoch}';
     final orderDate = DateTime.now();
     final order = OrderModel(
+      userId: userId,
       invoice: invoice,
       customerName: customerName,
       phone: phone,
@@ -263,6 +271,16 @@ class CheckoutProvider extends ChangeNotifier {
         message: message,
         type: 'Pesanan',
         date: orderDate,
+        userId: userId,
+        targetRole: 'user',
+      );
+      await OrderDb.instance.insertNotification(
+        title: 'Pesanan Baru $invoice',
+        message:
+            '${customerName.trim()} membuat pesanan $itemCount item senilai Rp ${grandTotal.toStringAsFixed(0)}.',
+        type: 'Pesanan',
+        date: orderDate,
+        targetRole: 'admin',
       );
       await NotificationService.instance.showInstantNotification(
         title: 'Pesanan $invoice Diproses',
