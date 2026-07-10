@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../checkout/db/order_db.dart';
 import '../models/app_notification_model.dart';
@@ -57,7 +58,9 @@ class NotificationProvider extends ChangeNotifier {
     notification.id = id;
     notifications = [notification, ...notifications];
 
-    if (showPush) {
+    final prefs = await SharedPreferences.getInstance();
+    final pushEnabled = prefs.getBool('app_notifications_enabled') ?? true;
+    if (showPush && pushEnabled) {
       await NotificationService.instance.showInstantNotification(
         title: title,
         body: description,

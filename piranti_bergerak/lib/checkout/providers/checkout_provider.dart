@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../cart/providers/cart_provider.dart';
 import '../models/checkout_address_model.dart';
 import '../models/order_model.dart';
@@ -170,10 +171,14 @@ class CheckoutProvider extends ChangeNotifier {
         type: type,
         date: DateTime.now(),
       );
-      await NotificationService.instance.showInstantNotification(
-        title: title,
-        body: message,
-      );
+      final prefs = await SharedPreferences.getInstance();
+      final pushEnabled = prefs.getBool('app_notifications_enabled') ?? true;
+      if (pushEnabled) {
+        await NotificationService.instance.showInstantNotification(
+          title: title,
+          body: message,
+        );
+      }
     } catch (_) {
       // Notification storage should not block the checkout UI.
     }

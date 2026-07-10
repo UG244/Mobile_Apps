@@ -9,6 +9,7 @@ import 'auth/screens/login_screen.dart';
 import 'auth/screens/register_screen.dart';
 import 'auth/widgets/admin_gate.dart';
 import 'core/theme/app_theme.dart';
+import 'core/providers/app_settings_provider.dart';
 import 'admin/screens/admin_panel_screen.dart';
 import 'cart/providers/cart_provider.dart';
 import 'cart/screens/cart_screen.dart';
@@ -52,27 +53,36 @@ class MyApp extends StatelessWidget {
 
         // Provider auth untuk login dan role
         ChangeNotifierProvider(create: (_) => AuthProvider()),
+        ChangeNotifierProvider(create: (_) => AppSettingsProvider()..load()),
       ],
-      child: MaterialApp(
-        title: 'BlueMart Retail',
-        debugShowCheckedModeBanner: false,
-        scrollBehavior: const NoOverscrollBehavior(),
-        theme: AppTheme.lightTheme,
-        home: const LoginScreen(),
-        routes: {
-          '/login': (context) => const LoginScreen(),
-          '/home': (context) => const ProductHomeScreen(),
-          '/cart': (context) => const CartScreen(),
-          '/checkout': (context) => const CheckoutScreen(),
-          '/order-success': (context) => const OrderSuccessScreen(),
-          '/orders': (context) => const OrderHistoryPage(),
-          '/notifications': (context) => const NotificationPage(),
-          '/admin': (context) => const AdminGate(child: AdminPanelScreen()),
-          '/register': (context) => const RegisterScreen(),
-          '/order-detail': (context) {
-            final arg = ModalRoute.of(context)?.settings.arguments;
-            return OrderDetailPage(orderId: arg is int ? arg : 0);
-          },
+      child: Consumer<AppSettingsProvider>(
+        builder: (context, settings, _) {
+          return MaterialApp(
+            title: 'BlueMart Retail',
+            debugShowCheckedModeBanner: false,
+            scrollBehavior: const NoOverscrollBehavior(),
+            theme: AppTheme.lightTheme,
+            darkTheme: AppTheme.darkTheme,
+            themeMode: settings.themeMode,
+            themeAnimationDuration: const Duration(milliseconds: 260),
+            themeAnimationCurve: Curves.easeOutCubic,
+            home: const LoginScreen(),
+            routes: {
+              '/login': (context) => const LoginScreen(),
+              '/home': (context) => const ProductHomeScreen(),
+              '/cart': (context) => const CartScreen(),
+              '/checkout': (context) => const CheckoutScreen(),
+              '/order-success': (context) => const OrderSuccessScreen(),
+              '/orders': (context) => const OrderHistoryPage(),
+              '/notifications': (context) => const NotificationPage(),
+              '/admin': (context) => const AdminGate(child: AdminPanelScreen()),
+              '/register': (context) => const RegisterScreen(),
+              '/order-detail': (context) {
+                final arg = ModalRoute.of(context)?.settings.arguments;
+                return OrderDetailPage(orderId: arg is int ? arg : 0);
+              },
+            },
+          );
         },
       ),
     );

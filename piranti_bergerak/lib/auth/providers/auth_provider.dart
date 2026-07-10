@@ -31,6 +31,65 @@ class AuthProvider extends ChangeNotifier {
     return null;
   }
 
+  Future<void> refreshCurrentUser() async {
+    final user = _currentUser;
+    if (user == null) return;
+    final fresh = await AuthDb.instance.getUserByCredentials(user.username, user.password);
+    if (fresh != null) {
+      _currentUser = fresh;
+      notifyListeners();
+    }
+  }
+
+  Future<String?> updateProfile({
+    required String displayName,
+    required String email,
+    required String phone,
+  }) async {
+    final user = _currentUser;
+    if (user == null) return 'Sesi login tidak ditemukan.';
+    await AuthDb.instance.updateUserProfile(
+      id: user.id,
+      displayName: displayName,
+      email: email,
+      phone: phone,
+    );
+    _currentUser = UserModel(
+      id: user.id,
+      username: user.username,
+      password: user.password,
+      role: user.role,
+      displayName: displayName,
+      email: email,
+      phone: phone,
+    );
+    notifyListeners();
+    return null;
+  }
+
+  Future<String?> changePassword({
+    required String currentPassword,
+    required String newPassword,
+  }) async {
+    final user = _currentUser;
+    if (user == null) return 'Sesi login tidak ditemukan.';
+    if (currentPassword != user.password) {
+      return 'Password lama tidak sesuai.';
+    }
+    await AuthDb.instance.updateUserPassword(id: user.id, password: newPassword);
+    _currentUser = UserModel(
+      id: user.id,
+      username: user.username,
+      password: newPassword,
+      role: user.role,
+      displayName: user.displayName,
+      email: user.email,
+      phone: user.phone,
+    );
+    notifyListeners();
+    return null;
+  }
+
   void logout() {
     _currentUser = null;
     notifyListeners();
