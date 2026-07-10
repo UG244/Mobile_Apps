@@ -113,7 +113,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
               color: AppColors.textPrimary,
             ),
             onPressed: () {
-              _showProfileSettings(context, auth);
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Pengaturan akun akan segera hadir!'),
+                ),
+              );
             },
           ),
         ],
@@ -200,18 +204,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 vertical: 4,
                               ),
                               decoration: BoxDecoration(
-                                color: auth.isAdmin
-                                    ? const Color(
-                                        0xFF4ADE80,
-                                      ).withValues(alpha: 0.2)
-                                    : const Color(
-                                        0xFFFACC15,
-                                      ).withValues(alpha: 0.2),
+                                color: const Color(
+                                  0xFFFACC15,
+                                ).withValues(alpha: 0.2),
                                 borderRadius: BorderRadius.circular(20),
                                 border: Border.all(
-                                  color: auth.isAdmin
-                                      ? const Color(0xFF4ADE80)
-                                      : const Color(0xFFFACC15),
+                                  color: const Color(0xFFFACC15),
                                   width: 1,
                                 ),
                               ),
@@ -219,15 +217,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
                                   Icon(
-                                    auth.isAdmin
-                                        ? Icons.admin_panel_settings
-                                        : Icons.workspace_premium_rounded,
-                                    color: auth.isAdmin
-                                        ? const Color(0xFF4ADE80)
-                                        : const Color(0xFFFACC15),
+                                    Icons.workspace_premium_rounded,
+                                    color: Color(0xFFFACC15),
                                     size: 14,
                                   ),
-                                  const SizedBox(width: 4),
+                                  SizedBox(width: 4),
                                   Text(
                                     auth.isAdmin
                                         ? 'ADMINISTRATOR'
@@ -383,12 +377,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 padding: const EdgeInsets.symmetric(vertical: 14),
               ),
               onPressed: () {
-                Navigator.of(dialogContext).pop();
-                context.read<AuthProvider>().logout();
-                context.read<NotificationProvider>().clearScope();
-                Navigator.of(
-                  context,
-                ).pushNamedAndRemoveUntil('/login', (route) => false);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Anda telah keluar dari sesi demo.'),
+                  ),
+                );
               },
             ),
 

@@ -167,11 +167,16 @@ class _ProductHomeScreenState extends State<ProductHomeScreen> {
                     color: AppColors.textPrimary,
                   ),
                   tooltip: 'Scan Barcode / QR',
-                  onPressed: () => Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (_) => const BarcodeScannerScreen(),
-                    ),
+                  onPressed: () =>
+                      Navigator.of(context).pushNamed('/barcode-scanner'),
+                ),
+                IconButton(
+                  icon: const Icon(
+                    Icons.admin_panel_settings_outlined,
+                    color: AppColors.textPrimary,
                   ),
+                  tooltip: 'Admin Panel',
+                  onPressed: () => Navigator.of(context).pushNamed('/admin'),
                 ),
                 // Notifikasi
                 NotificationBadge(

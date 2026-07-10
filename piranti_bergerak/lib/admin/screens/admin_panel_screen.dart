@@ -12,6 +12,7 @@ import '../../cart/providers/cart_provider.dart';
 import '../../cart/utils/format_utils.dart';
 import '../../checkout/models/order_detail_model.dart';
 import '../../checkout/models/order_model.dart';
+import '../../core/theme/app_colors.dart';
 import '../../notification/providers/notification_provider.dart';
 import '../../product/models/category_model.dart';
 import '../../product/models/product_model.dart';
@@ -45,6 +46,8 @@ class _AdminPanelViewState extends State<_AdminPanelView> {
   @override
   Widget build(BuildContext context) {
     final admin = context.watch<AdminProvider>();
+    final isDesktop = MediaQuery.sizeOf(context).width >= 900;
+    final selectedMenu = _adminMenuItems[_selectedIndex];
     final pages = [
       _DashboardSection(
         onSelectMenu: (index) => setState(() => _selectedIndex = index),
@@ -60,12 +63,15 @@ class _AdminPanelViewState extends State<_AdminPanelView> {
     ];
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F7FA),
+      backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: const Text('Admin Dashboard'),
+        title: Text(
+          selectedMenu.$1 == 'Dashboard' ? 'Admin Dashboard' : selectedMenu.$1,
+        ),
         centerTitle: false,
-        backgroundColor: Colors.white,
-        foregroundColor: const Color(0xFF1565C0),
+        elevation: 0,
+        backgroundColor: AppColors.surface,
+        foregroundColor: AppColors.primary,
         actions: [
           IconButton(
             tooltip: 'Notifikasi',
@@ -86,10 +92,10 @@ class _AdminPanelViewState extends State<_AdminPanelView> {
           const Padding(
             padding: EdgeInsets.only(right: 12),
             child: CircleAvatar(
-              backgroundColor: Color(0xFFE3F2FD),
+              backgroundColor: AppColors.surfaceVariant,
               child: Icon(
                 Icons.admin_panel_settings_outlined,
-                color: Color(0xFF1565C0),
+                color: AppColors.accent,
               ),
             ),
           ),
@@ -99,7 +105,7 @@ class _AdminPanelViewState extends State<_AdminPanelView> {
           ? const Center(child: CircularProgressIndicator())
           : Row(
               children: [
-                if (MediaQuery.sizeOf(context).width >= 900)
+                if (isDesktop)
                   _AdminSideNav(
                     selectedIndex: _selectedIndex,
                     onChanged: (index) =>
@@ -110,11 +116,38 @@ class _AdminPanelViewState extends State<_AdminPanelView> {
                     onRefresh: admin.loadAll,
                     child: SingleChildScrollView(
                       physics: const AlwaysScrollableScrollPhysics(),
-                      padding: const EdgeInsets.all(16),
+                      padding: EdgeInsets.fromLTRB(
+                        isDesktop ? 24 : 14,
+                        isDesktop ? 22 : 14,
+                        isDesktop ? 24 : 14,
+                        96,
+                      ),
                       child: Center(
                         child: ConstrainedBox(
-                          constraints: const BoxConstraints(maxWidth: 1180),
-                          child: pages[_selectedIndex],
+                          constraints: const BoxConstraints(maxWidth: 1120),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              _AdminHeader(
+                                title: selectedMenu.$1 == 'Dashboard'
+                                    ? 'Selamat Datang, Admin'
+                                    : selectedMenu.$1,
+                                subtitle:
+                                    'Kelola operasional BlueMart Retail dari satu panel.',
+                                icon: selectedMenu.$2,
+                              ),
+                              if (!isDesktop) ...[
+                                const SizedBox(height: 12),
+                                _AdminQuickTabs(
+                                  selectedIndex: _selectedIndex,
+                                  onChanged: (index) =>
+                                      setState(() => _selectedIndex = index),
+                                ),
+                              ],
+                              const SizedBox(height: 16),
+                              pages[_selectedIndex],
+                            ],
+                          ),
                         ),
                       ),
                     ),
@@ -122,7 +155,7 @@ class _AdminPanelViewState extends State<_AdminPanelView> {
                 ),
               ],
             ),
-      bottomNavigationBar: MediaQuery.sizeOf(context).width >= 900
+      bottomNavigationBar: isDesktop
           ? null
           : NavigationBar(
               selectedIndex: _mobileSelectedIndex,
@@ -249,6 +282,116 @@ const _adminMenuItems = [
   ('Toko', Icons.storefront_outlined),
 ];
 
+class _AdminHeader extends StatelessWidget {
+  const _AdminHeader({
+    required this.title,
+    required this.subtitle,
+    required this.icon,
+  });
+
+  final String title;
+  final String subtitle;
+  final IconData icon;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [AppColors.primaryDark, AppColors.primaryLight],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: AppColors.cardShadow,
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 52,
+            height: 52,
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.14),
+              borderRadius: BorderRadius.circular(14),
+            ),
+            child: Icon(icon, color: Colors.white, size: 28),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 20,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  subtitle,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: Colors.white.withValues(alpha: 0.78),
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _AdminQuickTabs extends StatelessWidget {
+  const _AdminQuickTabs({required this.selectedIndex, required this.onChanged});
+
+  final int selectedIndex;
+  final ValueChanged<int> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 48,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        itemCount: _adminMenuItems.length,
+        separatorBuilder: (_, _) => const SizedBox(width: 8),
+        itemBuilder: (context, index) {
+          final item = _adminMenuItems[index];
+          final selected = index == selectedIndex;
+          return ChoiceChip(
+            selected: selected,
+            avatar: Icon(
+              item.$2,
+              size: 18,
+              color: selected ? Colors.white : AppColors.accent,
+            ),
+            label: Text(item.$1),
+            labelStyle: TextStyle(
+              color: selected ? Colors.white : AppColors.textPrimary,
+              fontWeight: FontWeight.w800,
+            ),
+            selectedColor: AppColors.accent,
+            backgroundColor: AppColors.surface,
+            side: const BorderSide(color: AppColors.border),
+            onSelected: (_) => onChanged(index),
+          );
+        },
+      ),
+    );
+  }
+}
+
 class _DashboardSection extends StatelessWidget {
   const _DashboardSection({required this.onSelectMenu});
 
@@ -265,14 +408,14 @@ class _DashboardSection extends StatelessWidget {
           builder: (context, constraints) {
             final columns = constraints.maxWidth >= 980
                 ? 3
-                : constraints.maxWidth >= 640
+                : constraints.maxWidth >= 360
                 ? 2
                 : 1;
             return GridView.count(
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
               crossAxisCount: columns,
-              childAspectRatio: columns == 1 ? 3.4 : 2.3,
+              childAspectRatio: columns == 1 ? 3.2 : 1.28,
               crossAxisSpacing: 12,
               mainAxisSpacing: 12,
               children: [
@@ -331,7 +474,7 @@ class _DashboardSection extends StatelessWidget {
               crossAxisCount: columns,
               mainAxisSpacing: 12,
               crossAxisSpacing: 12,
-              childAspectRatio: 1.25,
+              childAspectRatio: constraints.maxWidth >= 640 ? 1.25 : 1.55,
               children: [
                 _AdminMenuCard(
                   title: 'Kelola Produk',
@@ -1479,55 +1622,105 @@ class _ProductAdminCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      elevation: 0,
-      color: Colors.white,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Row(
-          children: [
-            ClipRRect(
-              borderRadius: BorderRadius.circular(8),
-              child: ProductImage(
-                imageUrl: product.imageUrl,
-                width: 64,
-                height: 64,
-                placeholderSize: 28,
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    product.name,
-                    style: const TextStyle(fontWeight: FontWeight.w900),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final compact = constraints.maxWidth < 560;
+        return Card(
+          elevation: 0,
+          color: AppColors.surface,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(12),
+            child: Row(
+              children: [
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(10),
+                  child: Image.network(
+                    product.imageUrl,
+                    width: compact ? 58 : 70,
+                    height: compact ? 58 : 70,
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, _, _) => Container(
+                      width: compact ? 58 : 70,
+                      height: compact ? 58 : 70,
+                      color: AppColors.surfaceVariant,
+                      child: const Icon(Icons.image_not_supported_outlined),
+                    ),
                   ),
-                  const SizedBox(height: 4),
-                  Text(
-                    '${product.categoryName} • Stok ${product.stock} • ${product.isActive ? 'Aktif' : 'Tidak Aktif'}',
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        product.name,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(fontWeight: FontWeight.w900),
+                      ),
+                      const SizedBox(height: 5),
+                      Text(
+                        '${product.categoryName} • Stok ${product.stock}',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(color: AppColors.textSecondary),
+                      ),
+                      const SizedBox(height: 5),
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 4,
+                        children: [
+                          Text(
+                            'Rp ${formatNumber(product.price)}',
+                            style: const TextStyle(
+                              color: AppColors.accent,
+                              fontWeight: FontWeight.w900,
+                            ),
+                          ),
+                          Text(
+                            product.isActive ? 'Aktif' : 'Tidak Aktif',
+                            style: TextStyle(
+                              color: product.isActive
+                                  ? AppColors.success
+                                  : AppColors.error,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 4),
-                  Text(
-                    'Rp ${formatNumber(product.price)} • Rating ${product.rating.toStringAsFixed(1)}',
+                ),
+                if (compact)
+                  PopupMenuButton<String>(
+                    onSelected: (value) {
+                      if (value == 'edit') onEdit();
+                      if (value == 'delete') onDelete();
+                    },
+                    itemBuilder: (context) => const [
+                      PopupMenuItem(value: 'edit', child: Text('Edit')),
+                      PopupMenuItem(value: 'delete', child: Text('Hapus')),
+                    ],
+                  )
+                else ...[
+                  IconButton(
+                    onPressed: onEdit,
+                    icon: const Icon(Icons.edit_outlined),
+                  ),
+                  IconButton(
+                    onPressed: onDelete,
+                    icon: const Icon(Icons.delete_outline),
+                    color: Colors.red,
                   ),
                 ],
-              ),
+              ],
             ),
-            IconButton(
-              onPressed: onEdit,
-              icon: const Icon(Icons.edit_outlined),
-            ),
-            IconButton(
-              onPressed: onDelete,
-              icon: const Icon(Icons.delete_outline),
-              color: Colors.red,
-            ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 }

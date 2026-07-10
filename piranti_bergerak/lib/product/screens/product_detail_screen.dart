@@ -468,7 +468,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                   icon: const Icon(Icons.add_shopping_cart_rounded, size: 18),
                   label: Text(product.stock > 0 ? '+ Keranjang' : 'Stok Habis'),
                   onPressed: product.stock > 0
-                      ? () => _addToCart(context, product)
+                      ? () => _addToCart(context)
                       : null,
                 ),
               ),

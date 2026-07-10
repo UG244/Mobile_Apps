@@ -228,14 +228,10 @@ class _QrPaymentScreenState extends State<QrPaymentScreen> {
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(
-                          _isExpired
-                              ? Icons.error_outline_rounded
-                              : Icons.timer_outlined,
+                        const Icon(
+                          Icons.timer_outlined,
                           size: 16,
-                          color: _isExpired
-                              ? AppColors.error
-                              : AppColors.accentOrange,
+                          color: AppColors.accentOrange,
                         ),
                         const SizedBox(width: 6),
                         Text(
@@ -296,19 +292,6 @@ class _QrPaymentScreenState extends State<QrPaymentScreen> {
                       color: AppColors.textHint,
                     ),
                   ),
-                  TextButton.icon(
-                    onPressed: () async {
-                      await Clipboard.setData(
-                        ClipboardData(text: widget.invoiceNumber),
-                      );
-                      if (!context.mounted) return;
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Invoice disalin.')),
-                      );
-                    },
-                    icon: const Icon(Icons.copy_rounded, size: 16),
-                    label: const Text('Salin invoice'),
-                  ),
                   const SizedBox(height: 4),
                   const Text(
                     'Total Pembayaran',
@@ -358,16 +341,16 @@ class _QrPaymentScreenState extends State<QrPaymentScreen> {
                   const SizedBox(height: 12),
                   _buildStep(
                     1,
-                    'Buka aplikasi m-Banking atau e-Wallet yang mendukung QRIS.',
+                    'Buka aplikasi m-Banking atau e-Wallet (BCA, Mandiri, BRI, GoPay, OVO, Dana, ShopeePay, dll).',
                   ),
                   _buildStep(2, 'Pilih menu Scan / Bayar QRIS.'),
                   _buildStep(
                     3,
-                    'Scan QR di atas atau upload screenshot QR ini.',
+                    'Arahkan kamera ke QR Code di atas atau upload screenshot QR ini.',
                   ),
                   _buildStep(
                     4,
-                    'Pastikan merchant BlueMart Retail dan nominal benar, lalu bayar.',
+                    'Periksa nama merchant "BlueMart Retail" dan nominal pembayaran, lalu masukkan PIN Anda.',
                   ),
                 ],
               ),
@@ -399,9 +382,7 @@ class _QrPaymentScreenState extends State<QrPaymentScreen> {
               label: Text(
                 _isChecking
                     ? 'Mengecek Pembayaran...'
-                    : _isExpired
-                    ? 'QR Kedaluwarsa'
-                    : 'Saya Sudah Bayar',
+                    : 'Simulasi Pembayaran Berhasil (Demo)',
                 style: const TextStyle(
                   fontSize: 15,
                   fontWeight: FontWeight.w800,
@@ -485,72 +466,6 @@ class _QrPaymentScreenState extends State<QrPaymentScreen> {
                 color: AppColors.textSecondary,
                 height: 1.4,
               ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _PaymentStatusCard extends StatelessWidget {
-  const _PaymentStatusCard({required this.isExpired, required this.isChecking});
-
-  final bool isExpired;
-  final bool isChecking;
-
-  @override
-  Widget build(BuildContext context) {
-    final statusText = isExpired
-        ? 'Menunggu QR baru'
-        : isChecking
-        ? 'Mengecek pembayaran'
-        : 'Menunggu pembayaran';
-    final color = isExpired
-        ? AppColors.error
-        : isChecking
-        ? AppColors.warning
-        : AppColors.accent;
-
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.border),
-      ),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Icon(Icons.sync_rounded, color: color),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  statusText,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.w900,
-                    color: AppColors.textPrimary,
-                  ),
-                ),
-                const SizedBox(height: 3),
-                const Text(
-                  'Setelah pembayaran terkonfirmasi, pesanan akan dibuat dan stok produk dikurangi.',
-                  style: TextStyle(
-                    color: AppColors.textSecondary,
-                    fontSize: 12,
-                    height: 1.35,
-                  ),
-                ),
-              ],
             ),
           ),
         ],

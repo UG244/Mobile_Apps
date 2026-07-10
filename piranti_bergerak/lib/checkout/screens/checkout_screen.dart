@@ -306,6 +306,10 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                 );
               } catch (_) {
                 if (!context.mounted) return;
+                Navigator.of(
+                  context,
+                ).pushReplacementNamed('/order-success', arguments: id);
+              } else {
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
                     content: Text('Pesanan gagal dibuat. Silakan coba lagi.'),

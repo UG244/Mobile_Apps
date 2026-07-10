@@ -24,6 +24,7 @@ import 'notification/services/notification_service.dart';
 import 'product/providers/favorite_provider.dart';
 import 'product/providers/product_provider.dart';
 import 'product/screens/home_screen.dart';
+import 'sensor/screens/barcode_scanner_screen.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -53,34 +54,26 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => AuthProvider()),
         ChangeNotifierProvider(create: (_) => AppSettingsProvider()..load()),
       ],
-      child: Consumer<AppSettingsProvider>(
-        builder: (context, settings, _) {
-          return MaterialApp(
-            title: 'BlueMart Retail',
-            debugShowCheckedModeBanner: false,
-            scrollBehavior: const NoOverscrollBehavior(),
-            theme: AppTheme.lightTheme,
-            darkTheme: AppTheme.darkTheme,
-            themeMode: settings.themeMode,
-            themeAnimationDuration: const Duration(milliseconds: 260),
-            themeAnimationCurve: Curves.easeOutCubic,
-            home: const LoginScreen(),
-            routes: {
-              '/login': (context) => const LoginScreen(),
-              '/home': (context) => const ProductHomeScreen(),
-              '/cart': (context) => const CartScreen(),
-              '/checkout': (context) => const CheckoutScreen(),
-              '/order-success': (context) => const OrderSuccessScreen(),
-              '/orders': (context) => const OrderHistoryPage(),
-              '/notifications': (context) => const NotificationPage(),
-              '/admin': (context) => const AdminGate(child: AdminPanelScreen()),
-              '/register': (context) => const RegisterScreen(),
-              '/order-detail': (context) {
-                final arg = ModalRoute.of(context)?.settings.arguments;
-                return OrderDetailPage(orderId: arg is int ? arg : 0);
-              },
-            },
-          );
+      child: MaterialApp(
+        title: 'BlueMart Retail',
+        debugShowCheckedModeBanner: false,
+        scrollBehavior: const NoOverscrollBehavior(),
+        theme: AppTheme.lightTheme,
+        home: const LoginScreen(),
+        routes: {
+          '/login': (context) => const LoginScreen(),
+          '/home': (context) => const ProductHomeScreen(),
+          '/cart': (context) => const CartScreen(),
+          '/checkout': (context) => const CheckoutScreen(),
+          '/order-success': (context) => const OrderSuccessScreen(),
+          '/orders': (context) => const OrderHistoryPage(),
+          '/notifications': (context) => const NotificationPage(),
+          '/admin': (context) => const AdminPanelScreen(),
+          '/barcode-scanner': (context) => const BarcodeScannerScreen(),
+          '/order-detail': (context) {
+            final arg = ModalRoute.of(context)?.settings.arguments;
+            return OrderDetailPage(orderId: arg is int ? arg : 0);
+          },
         },
       ),
     );

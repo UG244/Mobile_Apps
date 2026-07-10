@@ -30,7 +30,11 @@ class OrderTrackingCard extends StatelessWidget {
         children: [
           const Row(
             children: [
-              Icon(Icons.local_shipping_rounded, color: AppColors.accent, size: 20),
+              Icon(
+                Icons.local_shipping_rounded,
+                color: AppColors.accent,
+                size: 20,
+              ),
               SizedBox(width: 8),
               Text(
                 'Status & Pelacakan Pesanan',
@@ -51,7 +55,11 @@ class OrderTrackingCard extends StatelessWidget {
             ),
             child: Row(
               children: [
-                const Icon(Icons.info_outline_rounded, size: 18, color: AppColors.accent),
+                const Icon(
+                  Icons.info_outline_rounded,
+                  size: 18,
+                  color: AppColors.accent,
+                ),
                 const SizedBox(width: 10),
                 Expanded(
                   child: Column(
@@ -68,7 +76,10 @@ class OrderTrackingCard extends StatelessWidget {
                       const SizedBox(height: 2),
                       Text(
                         'Perkiraan sampai: $estimatedArrival',
-                        style: const TextStyle(color: AppColors.textSecondary, fontSize: 11.5),
+                        style: const TextStyle(
+                          color: AppColors.textSecondary,
+                          fontSize: 11.5,
+                        ),
                       ),
                     ],
                   ),
@@ -93,20 +104,28 @@ class OrderTrackingCard extends StatelessWidget {
                         decoration: BoxDecoration(
                           color: step.isActive
                               ? AppColors.accent
-                              : (step.isDone ? AppColors.accent.withValues(alpha: 0.15) : AppColors.surfaceVariant),
+                              : (step.isDone
+                                    ? AppColors.accent.withValues(alpha: 0.15)
+                                    : AppColors.surfaceVariant),
                           shape: BoxShape.circle,
                         ),
                         child: Icon(
                           step.icon,
                           size: 16,
-                          color: step.isActive ? Colors.white : (step.isDone ? AppColors.accent : AppColors.textHint),
+                          color: step.isActive
+                              ? Colors.white
+                              : (step.isDone
+                                    ? AppColors.accent
+                                    : AppColors.textHint),
                         ),
                       ),
                       if (!isLast)
                         Expanded(
                           child: Container(
                             width: 2,
-                            color: step.isDone ? AppColors.accent : AppColors.border,
+                            color: step.isDone
+                                ? AppColors.accent
+                                : AppColors.border,
                           ),
                         ),
                     ],
@@ -121,15 +140,22 @@ class OrderTrackingCard extends StatelessWidget {
                           Text(
                             step.title,
                             style: TextStyle(
-                              color: step.isDone ? AppColors.textPrimary : AppColors.textSecondary,
-                              fontWeight: step.isActive || step.isDone ? FontWeight.w800 : FontWeight.w600,
+                              color: step.isDone
+                                  ? AppColors.textPrimary
+                                  : AppColors.textSecondary,
+                              fontWeight: step.isActive || step.isDone
+                                  ? FontWeight.w800
+                                  : FontWeight.w600,
                               fontSize: 14,
                             ),
                           ),
                           const SizedBox(height: 3),
                           Text(
                             step.description,
-                            style: const TextStyle(color: AppColors.textSecondary, fontSize: 12.5),
+                            style: const TextStyle(
+                              color: AppColors.textSecondary,
+                              fontSize: 12.5,
+                            ),
                           ),
                         ],
                       ),
