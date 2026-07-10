@@ -32,11 +32,7 @@ class ProfileScreen extends StatelessWidget {
               color: AppColors.textPrimary,
             ),
             onPressed: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Pengaturan akun akan segera hadir!'),
-                ),
-              );
+              _showProfileSettings(context, auth);
             },
           ),
         ],
@@ -330,6 +326,288 @@ class ProfileScreen extends StatelessWidget {
         fontSize: 16,
         fontWeight: FontWeight.w800,
         color: AppColors.textPrimary,
+      ),
+    );
+  }
+
+  void _showProfileSettings(BuildContext context, AuthProvider auth) {
+    var pushEnabled = true;
+    var orderUpdates = true;
+    var promoUpdates = false;
+    var biometricLock = false;
+    var compactMode = false;
+
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: AppColors.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (sheetContext) {
+        return StatefulBuilder(
+          builder: (context, setSheetState) {
+            return SafeArea(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.fromLTRB(16, 14, 16, 20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        const Expanded(
+                          child: Text(
+                            'Pengaturan Akun',
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.w900,
+                              color: AppColors.textPrimary,
+                            ),
+                          ),
+                        ),
+                        IconButton(
+                          onPressed: () => Navigator.of(sheetContext).pop(),
+                          icon: const Icon(Icons.close_rounded),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    _SettingsAccountCard(auth: auth),
+                    const SizedBox(height: 14),
+                    _SettingsPanel(
+                      title: 'Notifikasi',
+                      children: [
+                        _SettingsSwitch(
+                          icon: Icons.notifications_active_outlined,
+                          title: 'Push Notification',
+                          subtitle: 'Terima info pesanan dan promo penting',
+                          value: pushEnabled,
+                          onChanged: (value) =>
+                              setSheetState(() => pushEnabled = value),
+                        ),
+                        _SettingsSwitch(
+                          icon: Icons.local_shipping_outlined,
+                          title: 'Update Pesanan',
+                          subtitle: 'Status dikemas, dikirim, dan selesai',
+                          value: orderUpdates,
+                          onChanged: (value) =>
+                              setSheetState(() => orderUpdates = value),
+                        ),
+                        _SettingsSwitch(
+                          icon: Icons.local_offer_outlined,
+                          title: 'Promo & Voucher',
+                          subtitle: 'Diskon dan voucher personal',
+                          value: promoUpdates,
+                          onChanged: (value) =>
+                              setSheetState(() => promoUpdates = value),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 14),
+                    _SettingsPanel(
+                      title: 'Keamanan & Tampilan',
+                      children: [
+                        _SettingsSwitch(
+                          icon: Icons.fingerprint_rounded,
+                          title: 'Kunci Biometrik',
+                          subtitle: 'Simulasi proteksi akun saat app dibuka',
+                          value: biometricLock,
+                          onChanged: (value) =>
+                              setSheetState(() => biometricLock = value),
+                        ),
+                        _SettingsSwitch(
+                          icon: Icons.view_agenda_outlined,
+                          title: 'Mode Ringkas',
+                          subtitle: 'Tampilan daftar lebih padat',
+                          value: compactMode,
+                          onChanged: (value) =>
+                              setSheetState(() => compactMode = value),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 14),
+                    _SettingsPanel(
+                      title: 'Preferensi',
+                      children: const [
+                        _SettingsInfoTile(
+                          icon: Icons.language_outlined,
+                          title: 'Bahasa',
+                          value: 'Indonesia',
+                        ),
+                        _SettingsInfoTile(
+                          icon: Icons.payments_outlined,
+                          title: 'Mata Uang',
+                          value: 'Rupiah (IDR)',
+                        ),
+                        _SettingsInfoTile(
+                          icon: Icons.qr_code_2_outlined,
+                          title: 'QRIS Checkout',
+                          value: 'Aktif',
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    SizedBox(
+                      width: double.infinity,
+                      child: FilledButton.icon(
+                        onPressed: () {
+                          Navigator.of(sheetContext).pop();
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Pengaturan akun disimpan.'),
+                            ),
+                          );
+                        },
+                        icon: const Icon(Icons.check_rounded),
+                        label: const Text('Simpan Pengaturan'),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+}
+
+class _SettingsAccountCard extends StatelessWidget {
+  const _SettingsAccountCard({required this.auth});
+
+  final AuthProvider auth;
+
+  @override
+  Widget build(BuildContext context) {
+    final user = auth.currentUser;
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: AppColors.surfaceVariant,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Row(
+        children: [
+          CircleAvatar(
+            radius: 24,
+            backgroundColor: AppColors.accent.withValues(alpha: 0.12),
+            child: const Icon(Icons.person_rounded, color: AppColors.accent),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  user?.username ?? 'Pengguna',
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w900,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  'ID ${user?.id ?? '-'} • ${user?.role.toUpperCase() ?? 'USER'}',
+                  style: const TextStyle(
+                    color: AppColors.textSecondary,
+                    fontSize: 12,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const Icon(Icons.verified_rounded, color: AppColors.success),
+        ],
+      ),
+    );
+  }
+}
+
+class _SettingsPanel extends StatelessWidget {
+  const _SettingsPanel({required this.title, required this.children});
+
+  final String title;
+  final List<Widget> children;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 14, 16, 6),
+            child: Text(
+              title,
+              style: const TextStyle(
+                fontWeight: FontWeight.w900,
+                color: AppColors.textPrimary,
+              ),
+            ),
+          ),
+          ...children,
+        ],
+      ),
+    );
+  }
+}
+
+class _SettingsSwitch extends StatelessWidget {
+  const _SettingsSwitch({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    required this.value,
+    required this.onChanged,
+  });
+
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final bool value;
+  final ValueChanged<bool> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return SwitchListTile(
+      value: value,
+      onChanged: onChanged,
+      secondary: Icon(icon, color: AppColors.accent),
+      title: Text(title, style: const TextStyle(fontWeight: FontWeight.w800)),
+      subtitle: Text(subtitle),
+    );
+  }
+}
+
+class _SettingsInfoTile extends StatelessWidget {
+  const _SettingsInfoTile({
+    required this.icon,
+    required this.title,
+    required this.value,
+  });
+
+  final IconData icon;
+  final String title;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      leading: Icon(icon, color: AppColors.accent),
+      title: Text(title, style: const TextStyle(fontWeight: FontWeight.w800)),
+      trailing: Text(
+        value,
+        style: const TextStyle(
+          color: AppColors.textSecondary,
+          fontWeight: FontWeight.w700,
+        ),
       ),
     );
   }
